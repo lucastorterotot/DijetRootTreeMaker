@@ -6,12 +6,31 @@ process.load('PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
+qgDatabaseVersion = 'v1' # check https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
+
 
 ###################################### Run on AOD instead of MiniAOD? ########
 runOnAOD=False
 ###################################### Run on RECO instead of MiniAOD? ########
 runOnRECO=False
 if runOnRECO: runOnAOD=True
+
+
+
+from CondCore.DBCommon.CondDBSetup_cfi import *
+QGPoolDBESSource = cms.ESSource("PoolDBESSource",
+      CondDBSetup,
+      toGet = cms.VPSet(),
+      connect = cms.string('frontier://FrontierProd/CMS_COND_PAT_000'),
+)
+
+for type in ['AK4PFchs','AK4PFchs_antib']:
+  QGPoolDBESSource.toGet.extend(cms.VPSet(cms.PSet(
+    record = cms.string('QGLikelihoodRcd'),
+    tag    = cms.string('QGLikelihoodObject_'+qgDatabaseVersion+'_'+type),
+    label  = cms.untracked.string('QGL_'+type)
+  )))
+
 
 ## ----------------- Global Tag ------------------
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -23,7 +42,7 @@ process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_miniAODv2'
 
 #--------------------- Report and output ---------------------------
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25000))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -44,13 +63,7 @@ process.options = cms.untracked.PSet(
 ############## output  edm format ###############
 process.out = cms.OutputModule('PoolOutputModule',                                                                                                                  
                                fileName = cms.untracked.string('jettoolbox.root'),                                                                              
-                               outputCommands = cms.untracked.vstring([
-                                                                       # 'keep *_ak4PFJetsCHS_*_*',                                                                    
-                                                                       # 'keep *_patJetsAK4PFCHS_*_*',                                                                  
-                                                                       # 'keep *_ca8PFJetsCHS_*_*',                                                                     
-                                                                       # 'keep *_patJetsCA8PFCHS_*_*',                                                                  
-                                                                       # 'keep *_ak8PFJetsCHS_*_*',                                                                     
-                                                                       # 'keep *_patJetsAK8PFCHS_*_*',                                                                  
+                               outputCommands = cms.untracked.vstring([                                                                
                                                                       'keep *_slimmedJets_*_*',                                                           
                                                                       'keep *_slimmedJetsAK8_*_*',                                                                  
                                                                        ])                                                                                           
@@ -80,6 +93,10 @@ process.prunedGenParticlesDijet = cms.EDProducer('GenParticlePruner',
 )
 
 
+
+
+
+
 #------------- Recluster Gen Jets to access the constituents -------
 #already in toolbox, just add keep statements
 
@@ -93,14 +110,87 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 process.source = cms.Source("PoolSource",
     # 2016B data "file:/afs/cern.ch/user/j/juska/eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v1/000/272/771/00000/B4A77EBA-DB15-E611-A15E-02163E013590.root")
-	fileNames = cms.untracked.vstring("file:/afs/cern.ch/user/j/juska/eos/cms/store/mc/RunIISpring16MiniAODv2/QCD_Pt_800to1000_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/60000/ECC2E244-E41B-E611-AE5B-02163E01655E.root") # mAODv2 
+	fileNames = cms.untracked.vstring("/store/mc/RunIISpring16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/00000/1CE70D6E-334C-E611-8BB4-002590E50AF2.root") # mAODv2 
 	# mAODv1 "file:/afs/cern.ch/user/j/juska/eos/cms/store/mc/RunIISpring16MiniAODv1/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/4EC1A37D-840D-E611-957D-0025905C543A.root")
     )
 
 
 
 ##-------------------- User analyzer  --------------------------------
+##-------------------- MET --------------------------------
 
+## MET CHS (not available as slimmedMET collection)
+## copied from https://github.com/cms-jet/JMEValidator/blob/CMSSW_7_6_X/python/FrameworkConfiguration.py
+def clean_met_(met):
+     del met.t01Variation
+     del met.t1Uncertainties
+     del met.t1SmearedVarsAndUncs
+     del met.tXYUncForRaw
+     del met.tXYUncForT1
+     del met.tXYUncForT01
+     del met.tXYUncForT1Smear
+     del met.tXYUncForT01Smear
+
+from PhysicsTools.PatAlgos.tools.metTools import addMETCollection
+
+## Raw PF METs
+process.load('RecoMET.METProducers.PFMET_cfi')
+
+process.pfMet.src = cms.InputTag('packedPFCandidates')
+addMETCollection(process, labelName='patPFMet', metSource='pfMet') # RAW MET
+process.patPFMet.addGenMET = False
+
+process.pfMetCHS = process.pfMet.clone()
+process.pfMetCHS.src = cms.InputTag("chs")
+process.pfMetCHS.alias = cms.string('pfMetCHS')
+addMETCollection(process, labelName='patPFMetCHS', metSource='pfMetCHS')
+# RAW CHS MET
+process.patPFMetCHS.addGenMET = False
+
+
+## Slimmed METs
+from PhysicsTools.PatAlgos.slimming.slimmedMETs_cfi import slimmedMETs
+#### CaloMET is not available in MiniAOD
+del slimmedMETs.caloMET
+
+### CHS
+process.slimmedMETsCHS = slimmedMETs.clone()
+if hasattr(process, "patPFMetCHS"):
+     # Create MET from Type 1 PF collection
+     process.patPFMetCHS.addGenMET = False
+     process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
+     process.slimmedMETsCHS.rawUncertainties = cms.InputTag("patPFMetCHS") # only central value
+else:
+     # Create MET from RAW PF collection
+     process.patPFMetCHS.addGenMET = False
+     process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
+     del process.slimmedMETsCHS.rawUncertainties # not available
+
+clean_met_(process.slimmedMETsCHS)
+addMETCollection(process, labelName="slMETsCHS", metSource="slimmedMETsCHS")
+process.slMETsCHS.addGenMET = False
+#-----------------------------------------------------------
+
+process.load('Configuration.StandardSequences.Services_cff')
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                                                       
+                                                       calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                                                                                                                 engineName = cms.untracked.string('TRandom3'),
+                                                                                           ),
+                                                       )
+process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
+process.calibratedPatPhotons 
+
+##-------------Add quarkGluon tagging---------------------------
+
+
+
+process.load('RecoJets.JetProducers.QGTagger_cfi')
+process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
+process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
+
+#------------------------------------------------------------
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 
 calo_collection=''
 cluster_collection=''
@@ -116,10 +206,22 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   jetsAK4             = cms.InputTag('slimmedJets'), 
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
-  met              = cms.InputTag('slimmedMETs'),
+  met              = cms.InputTag('slMETsCHS'),
+  metTypeI         = cms.InputTag('slMETsCHS'),
+
   vtx              = cms.InputTag('offlineSlimmedPrimaryVertices'),
   ptMinAK4         = cms.double(10),
   ptMinAK8         = cms.double(10),
+  
+   ## PHOTONS ########################################
+  ptMinPhoton               = cms.double(10),
+  Photon                    = cms.InputTag('slimmedPhotons'),
+  Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
+ # GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
+  full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
+  phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
+  phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
+  phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
   
   ## MC ########################################
   pu               = cms.untracked.InputTag('slimmedAddPileupInfo'), # Updated from untracked to 80X by Juska
@@ -130,19 +232,17 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
 
   ## trigger ###################################
-  triggerAlias     = cms.vstring('PFHT900','PFHT650','PFHT600','PFHT350'
-                                 ,'PFHT650MJJ950','PFHT650MJJ900'
-                                 ,'PFJET500','PFJET450','PFJET200'),
+  triggerAlias     = cms.vstring('HLTPhoton30','HLTPhoton50','HLTPhoton75','HLTPhoton90','HLTPhoton120','HLTPhoton165'),                                
   triggerSelection = cms.vstring(
-     'HLT_PFHT900_v*',
-     'HLT_PFHT650_v*',
-     'HLT_PFHT600_v*',
-     'HLT_PFHT350_v*',
-     'HLT_PFHT650_WideJetMJJ950DEtaJJ1p5_v*',
-     'HLT_PFHT650_WideJetMJJ900DEtaJJ1p5_v*',
-     'HLT_PFJet500_v*',
-     'HLT_PFJet450_v*',
-     'HLT_PFJet200_v*',
+
+     
+     ###for SinglePhotons
+     'HLT_Photon30_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon50_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon75_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon90_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon120_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon165_R9Id90_HE10_IsoM_v*',
      
   ),
   triggerConfiguration = cms.PSet(
@@ -160,7 +260,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   noiseFilterSelection_hcalLaserEventFilter = cms.string('Flag_hcalLaserEventFilter'),
   noiseFilterSelection_EcalDeadCellTriggerPrimitiveFilter = cms.string('Flag_EcalDeadCellTriggerPrimitiveFilter'),
   noiseFilterSelection_goodVertices = cms.string('Flag_goodVertices'),
-  noiseFilterSelection_trackingFailureFilter = cms.string('Flag_trackingFailureFilter'),
+  noiseFilterSelection_trackingFailureFilter = cms.string('Flag_trackingFailureFilter'),#Flag_trackingFailureFilter
   noiseFilterSelection_eeBadScFilter = cms.string('Flag_eeBadScFilter'),
   noiseFilterSelection_ecalLaserCorrFilter = cms.string('Flag_ecalLaserCorrFilter'),
   noiseFilterSelection_trkPOGFilters = cms.string('Flag_trkPOGFilters'),
@@ -197,7 +297,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   L3corrAK4_MC = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer15_25nsV3_MC/Summer15_25nsV3_MC_L3Absolute_AK4PFchs.txt'),
   L1corrAK8_MC = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer15_25nsV3_MC/Summer15_25nsV3_MC_L1FastJet_AK8PFchs.txt'),
   L2corrAK8_MC = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer15_25nsV3_MC/Summer15_25nsV3_MC_L2Relative_AK8PFchs.txt'),
-  L3corrAK8_MC = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer15_25nsV3_MC/Summer15_25nsV3_MC_L3Absolute_AK8PFchs.txt')
+  L3corrAK8_MC = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer15_25nsV3_MC/Summer15_25nsV3_MC_L3Absolute_AK8PFchs.txt'),
+  L1RCcorr_DATA = cms.FileInPath('CMSDIJET/responsecomputing/DijetRootTreeAnalyzer/data/Spring16_25nsV6_DATA/Spring16_25nsV6_DATA_L1RC_AK4PFchs.txt')
+
 )
 
 

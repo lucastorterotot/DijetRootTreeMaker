@@ -20,7 +20,7 @@ output_file = patTuple_PF2PAT_MC.root
 [USER]
 
 #eMail = @email@
-eMail = giulia.dimperio@cern.ch
+eMail = lattaud@ipnl.in2p3.fr
 
 ui_working_dir = @uiworkingdir@
 
