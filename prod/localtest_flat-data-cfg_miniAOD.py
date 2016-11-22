@@ -246,8 +246,12 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
      'HLT_Photon165_R9Id90_HE10_IsoM_v*',
      
   ),
+  
+  prescalesTag          = cms.InputTag("patTrigger"),
+  triggerResultsTag = cms.InputTag("TriggerResults", "", "HLT"),
   triggerConfiguration = cms.PSet(
     hltResults            = cms.InputTag('TriggerResults','','HLT'),
+    
     l1tResults            = cms.InputTag(''),
     daqPartitions         = cms.uint32(1),
     l1tIgnoreMask         = cms.bool(False),

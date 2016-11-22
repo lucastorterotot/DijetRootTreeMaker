@@ -29,6 +29,8 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 enum JetAlgorithm {
   AK4,
   AK8,
@@ -52,7 +54,6 @@ class DijetTreeProducer : public edm::EDAnalyzer
     virtual bool isValidPhotonLoose(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
     virtual bool isValidPhotonMedium(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
     virtual bool isValidPhotonTight(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight); 
-    virtual void correctMETWithTypeI(pat::MET& rawMet, pat::MET& met, const pat::JetCollection& jets, edm::Event& event, pat::Photon& photon);
     virtual void endJob();
     virtual ~DijetTreeProducer();
     
@@ -125,6 +126,13 @@ class DijetTreeProducer : public edm::EDAnalyzer
     TTree *outTree_;
 
     //---- TRIGGER -------------------------
+    edm::EDGetTokenT<edm::TriggerResults> srcTriggerResults_;
+    edm::EDGetTokenT<pat::PackedTriggerPrescales> srcTriggerPrescale_;
+    std::vector<bool>  *triggerResultfromToken_;
+    std::vector<float> *triggerPrescale_; 
+    std::vector<std::string> *triggerName_;
+    
+    
     triggerExpression::Data triggerCache_;
     std::vector<triggerExpression::Evaluator*> vtriggerSelector_;
     std::vector<std::string> vtriggerAlias_,vtriggerSelection_;
@@ -139,7 +147,9 @@ class DijetTreeProducer : public edm::EDAnalyzer
     float htAK4_,mjjAK4_,dEtajjAK4_,dPhijjAK4_;
     float htAK8_,mjjAK8_,dEtajjAK8_,dPhijjAK8_;
 //  float htCA8_,mjjCA8_,dEtajjCA8_,dPhijjCA8_;
-    std::vector<bool> *triggerResult_;
+    std::vector<bool>  *triggerResult_;
+   
+   
 
     //---- NOISE FILTERS -------------------------
     triggerExpression::Data noiseFilterCache_;
@@ -175,9 +185,6 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<float> *ptsmearedphoton_,*etasmearedphoton_,*phismearedphoton_,*energysmearedphoton_,*full5x5SigmaIEtaIEtaMapTokensmearedphoton_,*phoChargedIsolationTokensmearedphoton_,*phoNeutralHadronIsolationTokensmearedphoton_,*phosmearedphotonIsolationTokensmearedphoton_;
     std::vector<bool>  *isPhotonLoose_,*isPhotonMedium_,*isPhotonTight_,  *HaspixelSeed_;
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
-
-    std::vector<float> *ptphotonMedium_,*etaphotonMedium_,*phiphotonMedium_,*energyphotonMedium_,*full5x5SigmaIEtaIEtaMapTokenphotonMedium_,*phoChargedIsolationTokenphotonMedium_,*phoNeutralHadronIsolationTokenphotonMedium_,*phoPhotonIsolationTokenphotonMedium_;
-    std::vector<float> *ptphotonTight_,*etaphotonTight_,*phiphotonTight_,*energyphotonTight_,*full5x5SigmaIEtaIEtaMapTokenphotonTight_,*phoChargedIsolationTokenphotonTight_,*phoNeutralHadronIsolationTokenphotonTight_,*phoPhotonIsolationTokenphotonTight_;
     std::vector<float> *ptGenphoton_,*etaGenphoton_,*phiGenphoton_,*energyGenphoton_;
     
     
