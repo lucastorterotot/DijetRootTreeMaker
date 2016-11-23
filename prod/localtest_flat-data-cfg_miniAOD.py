@@ -35,7 +35,7 @@ process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_miniAODv2'
 
 #--------------------- Report and output ---------------------------
 # Note: in grid runs this parameter is not used.
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(60000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(30000))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -252,31 +252,6 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   triggerConfiguration = cms.PSet(
     hltResults            = cms.InputTag('TriggerResults','','HLT'),
     
-    l1tResults            = cms.InputTag(''),
-    daqPartitions         = cms.uint32(1),
-    l1tIgnoreMask         = cms.bool(False),
-    l1techIgnorePrescales = cms.bool(False),
-    throw                 = cms.bool(False)
-  ),
-
-
-  ## Noise Filters ###################################
-  noiseFilterSelection_HBHENoiseFilter = cms.string('Flag_HBHENoiseFilter'),
-  noiseFilterSelection_CSCTightHaloFilter = cms.string('Flag_CSCTightHaloFilter'),
-  noiseFilterSelection_hcalLaserEventFilter = cms.string('Flag_hcalLaserEventFilter'),
-  noiseFilterSelection_EcalDeadCellTriggerPrimitiveFilter = cms.string('Flag_EcalDeadCellTriggerPrimitiveFilter'),
-  noiseFilterSelection_goodVertices = cms.string('Flag_goodVertices'),
-  noiseFilterSelection_trackingFailureFilter = cms.string('Flag_trkPOGFilters'),
-  noiseFilterSelection_eeBadScFilter = cms.string('Flag_eeBadScFilter'),
-  noiseFilterSelection_ecalLaserCorrFilter = cms.string('Flag_ecalLaserCorrFilter'),
-  noiseFilterSelection_trkPOGFilters = cms.string('Flag_trkPOGFilters'),
-  # and the sub-filters
-  noiseFilterSelection_trkPOG_manystripclus53X = cms.string('Flag_trkPOG_manystripclus53X'),
-  noiseFilterSelection_trkPOG_toomanystripclus53X = cms.string('Flag_trkPOG_toomanystripclus53X'),
-  noiseFilterSelection_trkPOG_logErrorTooManyClusters = cms.string('Flag_trkPOG_logErrorTooManyClusters'),
-
-  noiseFilterConfiguration = cms.PSet(
-    hltResults            = cms.InputTag('TriggerResults','','RECO'), #for prompt reco
     l1tResults            = cms.InputTag(''),
     daqPartitions         = cms.uint32(1),
     l1tIgnoreMask         = cms.bool(False),
