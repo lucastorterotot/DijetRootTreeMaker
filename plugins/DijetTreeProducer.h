@@ -63,19 +63,28 @@ class DijetTreeProducer : public edm::EDAnalyzer
     void initialize();
     // For JECs
     bool redoJECs_;
-    edm::FileInPath L1corrAK4_DATA_, L2corrAK4_DATA_, L3corrAK4_DATA_, ResCorrAK4_DATA_, L1corrAK8_DATA_, L2corrAK8_DATA_, L3corrAK8_DATA_, ResCorrAK8_DATA_,L1RCcorr_DATA_;
-    edm::FileInPath L1corrAK4_MC_, L2corrAK4_MC_, L3corrAK4_MC_, L1corrAK8_MC_, L2corrAK8_MC_, L3corrAK8_MC_;
+    edm::FileInPath L1corrAK4_DATA_, L2corrAK4_DATA_, L3corrAK4_DATA_, ResCorrAK4_DATA_,L1corrPUPPI_DATA_, L2corrPUPPI_DATA_, L3corrPUPPI_DATA_, ResCorrPUPPI_DATA_, L1corrAK8_DATA_, L2corrAK8_DATA_, L3corrAK8_DATA_, ResCorrAK8_DATA_,L1RCcorr_DATA_;
+    edm::FileInPath L1corrAK4_MC_, L2corrAK4_MC_, L3corrAK4_MC_,L1corrPUPPI_MC_, L2corrPUPPI_MC_, L3corrPUPPI_MC_, L1corrAK8_MC_, L2corrAK8_MC_, L3corrAK8_MC_;
     JetCorrectorParameters *L1ParAK4_DATA;
     JetCorrectorParameters *L2ParAK4_DATA;
     JetCorrectorParameters *L3ParAK4_DATA;
     JetCorrectorParameters *L2L3ResAK4_DATA;
     FactorizedJetCorrector *JetCorrectorAK4_DATA;
+    JetCorrectorParameters *L1ParPUPPI_DATA;
+    JetCorrectorParameters *L2ParPUPPI_DATA;
+    JetCorrectorParameters *L3ParPUPPI_DATA;
+    JetCorrectorParameters *L2L3ResPUPPI_DATA;
+    FactorizedJetCorrector *JetCorrectorPUPPI_DATA;
     JetCorrectorParameters *L1JetParForTypeI;
     FactorizedJetCorrector *jetCorrectorForTypeI;    
     JetCorrectorParameters *L1ParAK4_MC;
     JetCorrectorParameters *L2ParAK4_MC;
     JetCorrectorParameters *L3ParAK4_MC;
     FactorizedJetCorrector *JetCorrectorAK4_MC;
+    JetCorrectorParameters *L1ParPUPPI_MC;
+    JetCorrectorParameters *L2ParPUPPI_MC;
+    JetCorrectorParameters *L3ParPUPPI_MC;
+    FactorizedJetCorrector *JetCorrectorPUPPI_MC;
     JetCorrectorParameters *L1ParAK8_DATA;
     JetCorrectorParameters *L2ParAK8_DATA;
     JetCorrectorParameters *L3ParAK8_DATA;
@@ -107,9 +116,14 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<edm::View<pat::Jet>> srcJetsAK4View_;
     edm::EDGetTokenT<edm::ValueMap<float>> qgToken ;
     edm::EDGetTokenT<pat::JetCollection> srcJetsAK8_;
+    edm::EDGetTokenT<pat::JetCollection> srcJetsPUPPI_;
+    edm::EDGetTokenT<edm::View<pat::Jet>> srcJetsAK4puppiView_;
+    
 
     edm::EDGetTokenT<double> srcRho_;
     edm::EDGetTokenT<std::vector<pat::MET> > srcMET_;
+    edm::EDGetTokenT<std::vector<pat::MET> > srcMETpuppi_;
+
     edm::EDGetTokenT<pat::METCollection> metToken_;
     edm::EDGetTokenT<reco::VertexCollection> srcVrtx_;
 
@@ -138,10 +152,10 @@ class DijetTreeProducer : public edm::EDAnalyzer
     //---- output TREE variables ------
     //---- global event variables -----
     int   run_,evt_,nVtx_,lumi_,BXnumber_;
-    int   nJetsAK4_, nJetsAK8_, nGenJetsAK4_, nGenJetsAK8_;
+    int   nJetsAK4_,nJetsPUPPI_, nJetsAK8_, nGenJetsAK4_, nGenJetsAK8_;
     int   nPhotons_, nPhotonsLoose_,nPhotonsMedium_,nPhotonsTight_, nGenphotons_;
 
-    float rho_,metEnergy_,metPt_,metPhi_,metEta_,metSig_,metcorrected_;
+    float rho_,metEnergy_,metPt_,metPhi_,metEta_,metEnergypuppi_,metPtpuppi_,metPhipuppi_,metEtapuppi_,metSig_,metcorrected_;
     float htAK4_;
     float htAK8_;
     std::vector<bool>  *triggerResult_;
@@ -165,6 +179,13 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<int> *idLAK4_,*idTAK4_, *chHadMultAK4_, *chMultAK4_, *neHadMultAK4_, *neMultAK4_, *phoMultAK4_,*pdgIDGenAK4_;
     std::vector<float> *hf_hfAK4_, *hf_emfAK4_, *hofAK4_;
     std::vector<float> *ptGenAK4_,*etaGenAK4_,*phiGenAK4_,*massGenAK4_,*energyGenAK4_;
+    
+    std::vector<float> *ptPUPPI_,*jecPUPPI_,*etaPUPPI_,*phiPUPPI_,*massPUPPI_,*energyPUPPI_,*areaPUPPI_,*csvPUPPI_,*qgdPUPPI_,*chfPUPPI_,*nhfPUPPI_,*phfPUPPI_,*elfPUPPI_,*mufPUPPI_,*nemfPUPPI_,*cemfPUPPI_;
+    std::vector<float> *ptPUPPIraw_,*etaPUPPIraw_,*phiPUPPIraw_,*massPUPPIraw_,*energyPUPPIraw_;
+    
+    std::vector<int> *idLPUPPI_,*idTPUPPI_, *chHadMultPUPPI_, *chMultPUPPI_, *neHadMultPUPPI_, *neMultPUPPI_, *phoMultPUPPI_,*pdgIDGenPUPPI_;
+    std::vector<float> *hf_hfPUPPI_, *hf_emfPUPPI_, *hofPUPPI_;
+    std::vector<float> *ptGenPUPPI_,*etaGenPUPPI_,*phiGenPUPPI_,*massGenPUPPI_,*energyGenPUPPI_;
     
     std::vector<float>*ptAK8_,*jecAK8_,*etaAK8_,*phiAK8_,*massAK8_,*energyAK8_,*areaAK8_,*csvAK8_,*qgdAK8_,*chfAK8_,*nhfAK8_,*phfAK8_,*elfAK8_,*mufAK8_,*nemfAK8_,*cemfAK8_, *massPrunedAK8_, *massSoftDropAK8_, *dR_AK8_,*tau1AK8_,*tau2AK8_, *tau3AK8_ ;
     std::vector<int> *idLAK8_,*idTAK8_, *chHadMultAK8_, *chMultAK8_, *neHadMultAK8_, *neMultAK8_, *phoMultAK8_;

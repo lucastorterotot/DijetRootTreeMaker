@@ -45,7 +45,7 @@ using namespace pat;
 using namespace edm;
 
 
-DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const& cfg):srcJetsAK4View_(consumes<edm::View<pat::Jet>>(cfg.getParameter<edm::InputTag>("jetsAK4")))
+DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View_(consumes<edm::View<pat::Jet>>(cfg.getParameter<edm::InputTag>("jetsAK4")))
 {
   
   // Migrate to Consumes-system. Skip Calo-stuff
@@ -63,11 +63,15 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const& cfg):srcJetsAK4Vie
   srcJetsAK4_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsAK4")));
   qgToken     = (consumes<edm::ValueMap<float> >(edm::InputTag("QGTagger", "qgLikelihood")));
   srcJetsAK8_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsAK8")));
+  srcJetsPUPPI_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsPUPPI")));
   
   srcRho_             = (consumes<double>(cfg.getParameter<edm::InputTag>             ("rho")));
   srcMET_             = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("met")));
+  srcMETpuppi_             = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metpuppi")));
+
   metToken_           = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metTypeI")));
   srcVrtx_            = (consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>             ("vtx")));
+  srcJetsAK4puppiView_ =(consumes<edm::View<pat::Jet>>(cfg.getParameter<edm::InputTag>("jetsPUPPI")));
   
   ptMinAK4_           = cfg.getParameter<double>                    ("ptMinAK4");
   ptMinAK8_           = cfg.getParameter<double>                    ("ptMinAK8");
@@ -118,6 +122,18 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const& cfg):srcJetsAK4Vie
   
   L1RCcorr_DATA_ = cfg.getParameter<edm::FileInPath>("L1RCcorr_DATA");
   
+  // AK4PUPPI DATA
+  L1corrPUPPI_DATA_ = cfg.getParameter<edm::FileInPath>("L1corrAK4PUPPI_DATA");
+  L2corrPUPPI_DATA_ = cfg.getParameter<edm::FileInPath>("L2corrAK4PUPPI_DATA");
+  L3corrPUPPI_DATA_ = cfg.getParameter<edm::FileInPath>("L3corrAK4PUPPI_DATA");
+  ResCorrPUPPI_DATA_ = cfg.getParameter<edm::FileInPath>("ResCorrAK4PUPPI_DATA");
+  
+  // AK4PUPPI MC 
+  L1corrPUPPI_MC_ = cfg.getParameter<edm::FileInPath>("L1corrAK4PUPPI_MC");
+  L2corrPUPPI_MC_ = cfg.getParameter<edm::FileInPath>("L2corrAK4PUPPI_MC");
+  L3corrPUPPI_MC_ = cfg.getParameter<edm::FileInPath>("L3corrAK4PUPPI_MC");
+  
+  
   // AK8 DATA
   L1corrAK8_DATA_ = cfg.getParameter<edm::FileInPath>("L1corrAK8_DATA");
   L2corrAK8_DATA_ = cfg.getParameter<edm::FileInPath>("L2corrAK8_DATA");
@@ -157,6 +173,31 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const& cfg):srcJetsAK4Vie
     JetCorrectorAK4_DATA = new FactorizedJetCorrector(vParAK4_DATA);
     JetCorrectorAK4_MC = new FactorizedJetCorrector(vParAK4_MC);
     jetCorrectorForTypeI = new FactorizedJetCorrector(vParTypeI);
+    
+    // AK4PUPPI
+    L1ParPUPPI_DATA = new JetCorrectorParameters(L1corrPUPPI_DATA_.fullPath());
+    L2ParPUPPI_DATA = new JetCorrectorParameters(L2corrPUPPI_DATA_.fullPath());
+    L3ParPUPPI_DATA = new JetCorrectorParameters(L3corrPUPPI_DATA_.fullPath());
+    L2L3ResPUPPI_DATA = new JetCorrectorParameters(ResCorrPUPPI_DATA_.fullPath());
+    L1ParPUPPI_MC = new JetCorrectorParameters(L1corrPUPPI_MC_.fullPath());
+    L2ParPUPPI_MC = new JetCorrectorParameters(L2corrPUPPI_MC_.fullPath());
+    L3ParPUPPI_MC = new JetCorrectorParameters(L3corrPUPPI_MC_.fullPath());
+    L1JetParForTypeI = new JetCorrectorParameters(L1RCcorr_DATA_.fullPath());
+
+    std::vector<JetCorrectorParameters> vParPUPPI_DATA;
+    std::vector<JetCorrectorParameters> vParPUPPI_MC;
+    vParPUPPI_DATA.push_back(*L1ParPUPPI_DATA);
+    vParPUPPI_DATA.push_back(*L2ParPUPPI_DATA);
+    vParPUPPI_DATA.push_back(*L3ParPUPPI_DATA);
+    vParPUPPI_DATA.push_back(*L2L3ResPUPPI_DATA);
+    
+    
+    vParPUPPI_MC.push_back(*L1ParPUPPI_MC);
+    vParPUPPI_MC.push_back(*L2ParPUPPI_MC);
+    vParPUPPI_MC.push_back(*L3ParPUPPI_MC);
+
+    JetCorrectorPUPPI_DATA = new FactorizedJetCorrector(vParPUPPI_DATA);
+    JetCorrectorPUPPI_MC = new FactorizedJetCorrector(vParPUPPI_MC);
 
     // AK8
     L1ParAK8_DATA = new JetCorrectorParameters(L1corrAK8_DATA_.fullPath());
@@ -289,6 +330,10 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("metPt"                ,&metPt_             ,"metPt_/F");
   outTree_->Branch("metEta"               ,&metEta_            ,"metEta_/F");
   outTree_->Branch("metPhi"               ,&metPhi_            ,"metPhi_/F");
+  outTree_->Branch("metEnergyPUPPI"            ,&metEnergypuppi_         ,"metEnergypuppi_/F");
+  outTree_->Branch("metPtPUPPI"                ,&metPtpuppi_             ,"metPtpuppi_/F");
+  outTree_->Branch("metEtaPUPPI"               ,&metEtapuppi_            ,"metEtapuppi_/F");
+  outTree_->Branch("metPhiPUPPI"               ,&metPhipuppi_            ,"metPhipuppi_/F");
   outTree_->Branch("metSig"               ,&metSig_            ,"metSig_/F");
   outTree_->Branch("metTypeI"             ,&metcorrected_      ,"metcorrected_/F");
   
@@ -328,7 +373,9 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("gen_index"	    	,"vector<int>",  &gen_index      	);
   outTree_->Branch("gen_motherIndex"	,"vector<int>", &gen_motherIndex 	);
   outTree_->Branch("nJetsAK4"           ,&nJetsAK4_          ,"nJetsAK4_/I"		);
+  outTree_->Branch("nJetsPUPPI"           ,&nJetsPUPPI_          ,"nJetsPUPPI_/I"		);
   outTree_->Branch("htAK4"              ,&htAK4_             ,"htAK4_/F"		);
+  
   outTree_->Branch("nJetsAK8"           ,&nJetsAK8_          ,"nJetsAK8_/I"		);
   outTree_->Branch("htAK8"              ,&htAK8_             ,"htAK8_/F"		);   
   outTree_->Branch("nPhoton"                  ,&nPhotons_                ,"nPhotons_/I");
@@ -450,6 +497,76 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("neMultAK4"              ,"vector<int>"      ,&neMultAK4_);   
   outTree_->Branch("phoMultAK4"             ,"vector<int>"      ,&phoMultAK4_);   
   
+  //-------Jet PUPPI-----------------
+  ptPUPPI_             = new std::vector<float>;
+  jecPUPPI_            = new std::vector<float>;
+  etaPUPPI_            = new std::vector<float>;
+  phiPUPPI_            = new std::vector<float>;
+  massPUPPI_           = new std::vector<float>;
+  energyPUPPI_         = new std::vector<float>;  
+  ptPUPPIraw_             = new std::vector<float>;
+  etaPUPPIraw_            = new std::vector<float>;
+  phiPUPPIraw_            = new std::vector<float>;
+  massPUPPIraw_           = new std::vector<float>;
+  energyPUPPIraw_         = new std::vector<float>;  
+  areaPUPPI_           = new std::vector<float>;
+  csvPUPPI_            = new std::vector<float>;
+  qgdPUPPI_            = new std::vector<float>; 
+  chfPUPPI_            = new std::vector<float>;
+  nhfPUPPI_            = new std::vector<float>;
+  phfPUPPI_            = new std::vector<float>;
+  mufPUPPI_            = new std::vector<float>;
+  elfPUPPI_            = new std::vector<float>;
+  nemfPUPPI_           = new std::vector<float>;
+  cemfPUPPI_           = new std::vector<float>;
+  // Hadronic forward hadrons
+  hf_hfPUPPI_          = new std::vector<float>;
+  // Hadronic forward electromagnetic fraction
+  hf_emfPUPPI_         = new std::vector<float>;
+  hofPUPPI_            = new std::vector<float>;
+  idLPUPPI_            = new std::vector<int>;
+  idTPUPPI_            = new std::vector<int>;
+  chHadMultPUPPI_     = new std::vector<int>;
+  chMultPUPPI_         = new std::vector<int>;
+  neHadMultPUPPI_      = new std::vector<int>;
+  neMultPUPPI_         = new std::vector<int>;
+  phoMultPUPPI_        = new std::vector<int>;
+  
+  outTree_->Branch("jetPtPUPPI"                ,"vector<float>"     ,&ptPUPPI_);  
+  outTree_->Branch("jetJecPUPPI"               ,"vector<float>"     ,&jecPUPPI_);
+  outTree_->Branch("jetEtaPUPPI"               ,"vector<float>"     ,&etaPUPPI_);
+  outTree_->Branch("jetPhiPUPPI"               ,"vector<float>"     ,&phiPUPPI_);
+  outTree_->Branch("jetMassPUPPI"              ,"vector<float>"     ,&massPUPPI_);
+  outTree_->Branch("jetEnergyPUPPI"            ,"vector<float>"     ,&energyPUPPI_);  
+  outTree_->Branch("jetPtPUPPIRC"                ,"vector<float>"     ,&ptPUPPIraw_);
+  outTree_->Branch("jetEtaPUPPIRC"               ,"vector<float>"     ,&etaPUPPIraw_);
+  outTree_->Branch("jetPhiPUPPIRC"               ,"vector<float>"     ,&phiPUPPIraw_);
+  outTree_->Branch("jetMassPUPPIRC"              ,"vector<float>"     ,&massPUPPIraw_);
+  outTree_->Branch("jetEnergyPUPPIRC"            ,"vector<float>"     ,&energyPUPPIraw_);  
+  outTree_->Branch("jetAreaPUPPI"              ,"vector<float>"     ,&areaPUPPI_);
+  outTree_->Branch("jetCSVPUPPI"               ,"vector<float>"     ,&csvPUPPI_);  
+  outTree_->Branch("jetQGDPUPPI"               ,"vector<float>"     ,&qgdPUPPI_);  
+  outTree_->Branch("jetChfPUPPI"               ,"vector<float>"     ,&chfPUPPI_);
+  outTree_->Branch("jetNhfPUPPI"               ,"vector<float>"     ,&nhfPUPPI_);
+  outTree_->Branch("jetPhfPUPPI"               ,"vector<float>"     ,&phfPUPPI_);
+  outTree_->Branch("jetMufPUPPI"               ,"vector<float>"     ,&mufPUPPI_);
+  outTree_->Branch("jetElfPUPPI"               ,"vector<float>"     ,&elfPUPPI_);
+  outTree_->Branch("jetNemfPUPPI"              ,"vector<float>"     ,&nemfPUPPI_);
+  outTree_->Branch("jetCemfPUPPI"              ,"vector<float>"     ,&cemfPUPPI_);
+  outTree_->Branch("jetHf_hfPUPPI"             ,"vector<float>"     ,&hf_hfPUPPI_);
+  outTree_->Branch("jetHf_emfPUPPI"            ,"vector<float>"    ,&hf_emfPUPPI_);
+  outTree_->Branch("jetHofPUPPI"               ,"vector<float>"    ,&hofPUPPI_);
+  outTree_->Branch("idLPUPPI"                  ,"vector<int>"      ,&idLPUPPI_);   
+  outTree_->Branch("idTPUPPI"                  ,"vector<int>"      ,&idTPUPPI_);   
+  outTree_->Branch("chHadMultPUPPI"          ,"vector<int>"      ,&chHadMultPUPPI_);   
+  outTree_->Branch("chMultPUPPI"              ,"vector<int>"      ,&chMultPUPPI_);   
+  outTree_->Branch("neHadMultPUPPI"           ,"vector<int>"      ,&neHadMultPUPPI_);   
+  outTree_->Branch("neMultPUPPI"              ,"vector<int>"      ,&neMultPUPPI_);   
+  outTree_->Branch("phoMultPUPPI"             ,"vector<int>"      ,&phoMultPUPPI_); 
+  
+  
+  
+  //----------end PUPPI----------------
 
   ptAK8_             = new std::vector<float>;
   jecAK8_            = new std::vector<float>;
@@ -588,9 +705,19 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("jetMassGenAK8"              ,"vector<float>"     ,&massGenAK8_);
   outTree_->Branch("jetEnergyGenAK8"            ,"vector<float>"     ,&energyGenAK8_);
   
+  ptGenPUPPI_             = new std::vector<float>;
+  etaGenPUPPI_            = new std::vector<float>;
+  phiGenPUPPI_            = new std::vector<float>;
+  massGenPUPPI_           = new std::vector<float>;
+  pdgIDGenPUPPI_          = new std::vector<int>;
+  energyGenPUPPI_         = new std::vector<float>;
 
-
-
+  outTree_->Branch("jetPtGenPUPPI"                ,"vector<float>"     ,&ptGenPUPPI_);
+  outTree_->Branch("jetEtaGenPUPPI"               ,"vector<float>"     ,&etaGenPUPPI_);
+  outTree_->Branch("jetPhiGenPUPPI"               ,"vector<float>"     ,&phiGenPUPPI_);
+  outTree_->Branch("jetMassGenPUPPI"              ,"vector<float>"     ,&massGenPUPPI_);
+  outTree_->Branch("jetEnergyGenPUPPI"            ,"vector<float>"     ,&energyGenPUPPI_);
+  outTree_->Branch("jetpdgIDGenPUPPI"             ,"vector<int>"     ,&pdgIDGenPUPPI_);
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -652,6 +779,40 @@ void DijetTreeProducer::endJob()
   delete neMultAK4_    ;
   delete phoMultAK4_   ;
 
+
+ delete ptPUPPI_;
+ delete jecPUPPI_;
+  delete etaPUPPI_;
+  delete phiPUPPI_;
+  delete massPUPPI_;
+  delete energyPUPPI_;
+  
+  delete ptPUPPIraw_;
+  delete etaPUPPIraw_;
+  delete phiPUPPIraw_;
+  delete massPUPPIraw_;
+  delete energyPUPPIraw_;
+  
+  delete areaPUPPI_;
+  delete csvPUPPI_;
+  delete qgdPUPPI_;
+  delete chfPUPPI_;
+  delete nhfPUPPI_;
+  delete phfPUPPI_;
+  delete mufPUPPI_;
+  delete elfPUPPI_;
+  delete nemfPUPPI_;
+  delete cemfPUPPI_;
+  delete hf_hfPUPPI_;
+  delete hf_emfPUPPI_;
+  delete hofPUPPI_;
+  delete idLPUPPI_;
+  delete idTPUPPI_;
+  delete chHadMultPUPPI_ ;
+  delete chMultPUPPI_    ;
+  delete neHadMultPUPPI_ ;
+  delete neMultPUPPI_    ;
+  delete phoMultPUPPI_   ;
 
   delete ptAK8_;
   delete jecAK8_;
@@ -715,6 +876,7 @@ void DijetTreeProducer::endJob()
   delete HaspixelSeed_                          ;
   delete hadTowOverEm_                          ;
   delete pdgIDGenAK4_                           ;
+  delete pdgIDGenPUPPI_                           ;
 
 
   
@@ -738,8 +900,18 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   iEvent.getByToken(srcJetsAK4_,jetsAK4);
   pat::JetCollection jetrawRC = *jetsAK4;
   
+  Handle<pat::JetCollection> jetsPUPPI;
+  iEvent.getByToken(srcJetsPUPPI_,jetsPUPPI);
+  pat::JetCollection jetrawRCpuppi = *jetsPUPPI;
+  
   edm::Handle<edm::View<pat::Jet>> jetsview;     
   iEvent.getByToken(srcJetsAK4View_,jetsview);
+  
+
+  edm::Handle<edm::View<pat::Jet>> jetsviewpuppi;     
+  iEvent.getByToken(srcJetsAK4puppiView_,jetsviewpuppi);
+  
+  
   
   edm::Handle<edm::ValueMap<float>> qgHandle;
   iEvent.getByToken(qgToken, qgHandle);
@@ -770,6 +942,9 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
   Handle<vector<pat::MET> > met;
   iEvent.getByToken(srcMET_,met);
+  
+  Handle<vector<pat::MET> > metpuppi;
+  iEvent.getByToken(srcMETpuppi_,metpuppi);
 
   Handle<reco::VertexCollection> recVtxs;
   iEvent.getByToken(srcVrtx_,recVtxs);
@@ -779,7 +954,12 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   metEnergy_    = (*met)[0].energy();
   metEta_       = (*met)[0].eta();      
   metPhi_       = (*met)[0].phi();
-  metPt_        = (*met)[0].pt(); 
+  metPt_        = (*met)[0].pt();
+  
+  metEnergypuppi_    = (*metpuppi)[0].energy();
+  metEtapuppi_       = (*metpuppi)[0].eta();      
+  metPhipuppi_       = (*metpuppi)[0].phi();
+  metPtpuppi_        = (*metpuppi)[0].pt(); 
   if ((*met)[0].sumEt() > 0) {
     metSig_ = (*met)[0].et()/(*met)[0].sumEt();
   }
@@ -1216,6 +1396,169 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   htAK4_     = htAK4;
  
 
+// PUPPI
+
+
+
+  std::vector<double> jecFactorsPUPPI;
+  std::vector<unsigned> sortedPUPPIJetIdx;
+
+
+  uint32_t indexjetpuppi = 0;
+  if(redoJECs_)
+    {
+      // sort PUPPI jets by increasing pT
+      std::multimap<double, unsigned> sortedPUPPIJets;
+     
+    
+
+      for(pat::JetCollection::const_iterator ijet = jetsPUPPI->begin();ijet != jetsPUPPI->end(); ++ijet)
+	{
+	  double correction = 1.;
+	  JetCorrectorPUPPI_DATA->setJetEta(ijet->eta());
+	  JetCorrectorPUPPI_DATA->setJetPt(ijet->correctedJet(0).pt());
+	  JetCorrectorPUPPI_DATA->setJetA(ijet->jetArea());
+	  JetCorrectorPUPPI_DATA->setRho(rho_);
+	  JetCorrectorPUPPI_MC->setJetEta(ijet->eta());
+	  JetCorrectorPUPPI_MC->setJetPt(ijet->correctedJet(0).pt());
+	  JetCorrectorPUPPI_MC->setJetA(ijet->jetArea());
+	  JetCorrectorPUPPI_MC->setRho(rho_);
+	  if (iEvent.isRealData()) 
+	    correction = JetCorrectorPUPPI_DATA->getCorrection();
+	  else
+	    correction = JetCorrectorPUPPI_MC->getCorrection();
+	    
+           
+	  jecFactorsPUPPI.push_back(correction);
+	  sortedPUPPIJets.insert(std::make_pair(ijet->correctedJet(0).pt()*correction, ijet - jetsPUPPI->begin()));
+	
+	}
+      // get jet indices in decreasing pT order
+
+      for(std::multimap<double, unsigned>::const_reverse_iterator it = sortedPUPPIJets.rbegin(); it != sortedPUPPIJets.rend(); ++it)
+        sortedPUPPIJetIdx.push_back(it->second);
+
+    }
+  else
+    {
+      for(pat::JetCollection::const_iterator ijet = jetsPUPPI->begin();ijet != jetsPUPPI->end(); ++ijet)
+	{
+	  jecFactorsPUPPI.push_back(1./ijet->jecFactor(0));
+	}
+    }
+    
+
+  nJetsPUPPI_ = 0;
+  vector<TLorentzVector> vP4PUPPI;
+  for(std::vector<unsigned>::const_iterator i = sortedPUPPIJetIdx.begin(); i != sortedPUPPIJetIdx.end(); ++i, indexjetpuppi++) {
+
+    pat::JetCollection::const_iterator ijet = (jetsPUPPI->begin() + *i);
+    pat::JetCollection::const_iterator ijetrawRCstore = (jetrawRCpuppi.begin()+ *i);
+    
+    edm::View<pat::Jet>::const_iterator ijetview = (jetsviewpuppi->begin() + *i);
+    double chf = ijet->chargedHadronEnergyFraction();
+    double nhf = ijet->neutralHadronEnergyFraction(); // + ijet->HFHadronEnergyFraction();
+    double phf = ijet->photonEnergy()/(ijet->jecFactor(0) * ijet->energy());
+    double elf = ijet->electronEnergy()/(ijet->jecFactor(0) * ijet->energy());
+    //double muf = ijet->muonEnergy()/(ijet->jecFactor(0) * ijet->energy());
+    double muf = ijet->muonEnergyFraction();
+
+    double hf_hf = ijet->HFHadronEnergyFraction();
+    double hf_emf= ijet->HFEMEnergyFraction();
+    double hof   = ijet->hoEnergyFraction();
+
+    int chm    = ijet->chargedHadronMultiplicity();
+      
+    int chMult = ijet->chargedMultiplicity();
+    int neMult = ijet->neutralMultiplicity();
+    int npr    = chMult + neMult;
+
+    int chHadMult = chm; //ijet->chargedHadronMultiplicity();
+    int neHadMult = ijet->neutralHadronMultiplicity();
+    int phoMult = ijet->photonMultiplicity();
+      
+    // Juska's added fractions for identical JetID with recommendations
+    double nemf = ijet->neutralEmEnergyFraction();
+    double cemf = ijet->chargedEmEnergyFraction();
+    int NumConst = npr;
+
+    float eta  = ijet->eta(); // removed fabs() -Juska
+    float pt   = ijet->correctedJet(0).pt()*jecFactorsPUPPI.at(*i); // Is this OK? Correct corrected? -Juska
+
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
+    int idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4);
+    int idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4);
+
+    edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsviewpuppi, ijetview - jetsviewpuppi->begin()));
+
+       
+      
+    if (pt > ptMinAK4_) {
+      nJetsPUPPI_++;
+      vP4PUPPI.push_back(TLorentzVector(ijet->correctedJet(0).px()*jecFactorsPUPPI.at(*i),ijet->correctedJet(0).py()*jecFactorsPUPPI.at(*i),ijet->correctedJet(0).pz()*jecFactorsPUPPI.at(*i),ijet->correctedJet(0).energy()*jecFactorsPUPPI.at(*i)));
+      chfPUPPI_           ->push_back(chf);
+      nhfPUPPI_           ->push_back(nhf);
+      phfPUPPI_           ->push_back(phf);
+      elfPUPPI_           ->push_back(elf);
+      mufPUPPI_           ->push_back(muf);
+      nemfPUPPI_          ->push_back(nemf);
+      cemfPUPPI_          ->push_back(cemf);
+      hf_hfPUPPI_         ->push_back(hf_hf);
+      hf_emfPUPPI_        ->push_back(hf_emf);
+      hofPUPPI_           ->push_back(hof);
+      jecPUPPI_           ->push_back(jecFactorsPUPPI.at(*i));
+      ptPUPPI_            ->push_back(pt);
+      phiPUPPI_           ->push_back(ijet->phi());
+      etaPUPPI_           ->push_back(ijet->eta());
+      massPUPPI_          ->push_back(ijet->correctedJet(0).mass()*jecFactorsPUPPI.at(*i));
+      energyPUPPI_        ->push_back(ijet->correctedJet(0).energy()*jecFactorsPUPPI.at(*i));
+
+      
+      if (!iEvent.isRealData() && ijet->genJet()) {
+        ptGenPUPPI_            ->push_back(ijet->genJet()->pt());
+ 	phiGenPUPPI_           ->push_back(ijet->genJet()->phi());
+ 	etaGenPUPPI_           ->push_back(ijet->genJet()->eta());
+ 	massGenPUPPI_          ->push_back(ijet->genJet()->mass());
+ 	energyGenPUPPI_        ->push_back(ijet->genJet()->energy());
+	if(ijet->genParton())
+	{
+ 	  pdgIDGenPUPPI_         ->push_back(ijet->genParton()->pdgId());
+	}else{pdgIDGenPUPPI_         ->push_back(-999.);}
+      }else
+      {
+        
+        ptGenPUPPI_            ->push_back(-999.);
+ 	phiGenPUPPI_           ->push_back(-999.);
+ 	etaGenPUPPI_           ->push_back(-999.);
+ 	massGenPUPPI_          ->push_back(-999.);
+ 	energyGenPUPPI_        ->push_back(-999.);
+	pdgIDGenPUPPI_         ->push_back(-999.);
+ 	
+      }
+
+      
+      ptPUPPIraw_            ->push_back(ijetrawRCstore->pt());
+      phiPUPPIraw_           ->push_back(ijetrawRCstore->phi());
+      etaPUPPIraw_           ->push_back(ijetrawRCstore->eta());
+      massPUPPIraw_          ->push_back(ijetrawRCstore->mass());
+      energyPUPPIraw_        ->push_back(ijetrawRCstore->energy());
+      
+      areaPUPPI_          ->push_back(ijet->jetArea());
+      //csvPUPPI_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+      //qgdPUPPI_           ->push_back((*qgHandle)[jetReftmp]);
+
+
+      idLPUPPI_           ->push_back(idL);
+      idTPUPPI_           ->push_back(idT);
+      chHadMultPUPPI_     ->push_back(chHadMult);
+      chMultPUPPI_        ->push_back(chMult);
+      neHadMultPUPPI_     ->push_back(neHadMult);  
+      neMultPUPPI_        ->push_back(neMult);
+      phoMultPUPPI_       ->push_back(phoMult); 
+      
+    }
+
+  }// jet loop  
 
   // AK8
   std::vector<double> jecFactorsAK8;
@@ -1506,6 +1849,11 @@ void DijetTreeProducer::initialize()
   metPt_          = -999;
   metPhi_         = -999;
   
+  metEnergypuppi_      = -999;
+  metEtapuppi_         = -999;
+  metPtpuppi_          = -999;
+  metPhipuppi_         = -999;
+  
   metSig_         = -999;
   metcorrected_   = -999;
   nJetsAK4_          = -999;
@@ -1546,6 +1894,44 @@ void DijetTreeProducer::initialize()
   neMultAK4_        ->clear();
   phoMultAK4_        ->clear();
  
+ 
+  nJetsPUPPI_ = -999;
+ 
+  ptPUPPI_             ->clear();
+  etaPUPPI_            ->clear();
+  phiPUPPI_            ->clear();
+  massPUPPI_           ->clear();
+  energyPUPPI_         ->clear();
+  
+  ptPUPPIraw_             ->clear();
+  etaPUPPIraw_            ->clear();
+  phiPUPPIraw_            ->clear();
+  massPUPPIraw_           ->clear();
+  energyPUPPIraw_         ->clear();
+  
+  areaPUPPI_           ->clear();
+  csvPUPPI_            ->clear();
+  qgdPUPPI_            ->clear();
+  chfPUPPI_            ->clear();
+  nhfPUPPI_            ->clear();
+  phfPUPPI_            ->clear();
+  elfPUPPI_            ->clear();
+  mufPUPPI_            ->clear();
+  nemfPUPPI_           ->clear();
+  cemfPUPPI_           ->clear();
+  hf_hfPUPPI_             ->clear();
+  hf_emfPUPPI_            ->clear();
+  hofPUPPI_            ->clear();
+  jecPUPPI_            ->clear();
+  jecPUPPI_            ->clear();
+  idLPUPPI_            ->clear();
+  idTPUPPI_            ->clear();
+  // Juska's fix
+  chHadMultPUPPI_     ->clear();
+  chMultPUPPI_        ->clear();
+  neHadMultPUPPI_     ->clear();
+  neMultPUPPI_        ->clear();
+  phoMultPUPPI_        ->clear();
   
   nJetsAK8_          = -999;
   htAK8_             = -999;
@@ -1555,7 +1941,7 @@ void DijetTreeProducer::initialize()
   massAK8_           ->clear();
   energyAK8_         ->clear();
   areaAK8_           ->clear();
- // csvAK8_            ->clear();
+  csvAK8_            ->clear();
   chfAK8_            ->clear();
   nhfAK8_            ->clear();
   phfAK8_            ->clear();
@@ -1606,6 +1992,12 @@ void DijetTreeProducer::initialize()
   massGenAK4_  ->clear();
   energyGenAK4_->clear();
   pdgIDGenAK4_ ->clear();
+  ptGenPUPPI_    ->clear();
+  phiGenPUPPI_   ->clear();
+  etaGenPUPPI_   ->clear();
+  massGenPUPPI_  ->clear();
+  energyGenPUPPI_->clear();
+  pdgIDGenPUPPI_ ->clear();
   ptGenAK8_    ->clear();
   phiGenAK8_   ->clear();
   etaGenAK8_   ->clear();
