@@ -163,7 +163,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     //---- photon variables --------------
     std::vector<float> *ptphoton_,*etaphoton_,*phiphoton_,*energyphoton_,*full5x5SigmaIEtaIEtaMapTokenphoton_,*phoChargedIsolationTokenphoton_,*phoNeutralHadronIsolationTokenphoton_,*phoPhotonIsolationTokenphoton_,*hadTowOverEm_;
     std::vector<float> *ptsmearedphoton_,*etasmearedphoton_,*phismearedphoton_,*energysmearedphoton_,*full5x5SigmaIEtaIEtaMapTokensmearedphoton_,*phoChargedIsolationTokensmearedphoton_,*phoNeutralHadronIsolationTokensmearedphoton_,*phosmearedphotonIsolationTokensmearedphoton_;
-    std::vector<bool>  *isPhotonLoose_,*isPhotonMedium_,*isPhotonTight_,  *HaspixelSeed_;
+    std::vector<bool>  *isPhotonLoose_,*isPhotonMedium_,*isPhotonTight_,  *HaspixelSeed_ , *electronconvVeto_;
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
     std::vector<float> *ptGenphoton_,*etaGenphoton_,*phiGenphoton_,*energyGenphoton_;
     

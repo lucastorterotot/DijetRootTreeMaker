@@ -396,6 +396,7 @@ void DijetTreeProducer::beginJob()
   energysmearedphoton_ = new std::vector<float>;
   energyphotonSC_       = new std::vector<float>; 
   HaspixelSeed_      = new std::vector<bool>;
+  electronconvVeto_  = new std::vector<bool>;
   hadTowOverEm_      = new std::vector<float>;  
   isPhotonLoose_       = new std::vector<bool>;
   isPhotonMedium_      = new std::vector<bool>;
@@ -423,6 +424,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("PhotonphoNeutralHadronIsolationToken"         ,"vector<float>"   ,&phoNeutralHadronIsolationTokenphoton_);
   outTree_->Branch("PhotonphoPhotonIsolationToken"                ,"vector<float>"   ,&phoPhotonIsolationTokenphoton_);
   outTree_->Branch("HaspixelSeed"                                 ,"vector<bool>"   ,&HaspixelSeed_);
+  outTree_->Branch("ElectronVeto"                                 ,"vector<bool>"   ,&electronconvVeto_);
   outTree_->Branch("hadTowOverEm"                                 ,"vector<float>"   ,&hadTowOverEm_);
   outTree_->Branch("isPhotonLoose"                                 ,"vector<bool>"   ,&isPhotonLoose_);
   outTree_->Branch("isPhotonMedium"                                ,"vector<bool>"   ,&isPhotonMedium_);
@@ -876,7 +878,8 @@ void DijetTreeProducer::endJob()
   delete HaspixelSeed_                          ;
   delete hadTowOverEm_                          ;
   delete pdgIDGenAK4_                           ;
-  delete pdgIDGenPUPPI_                           ;
+  delete pdgIDGenPUPPI_                         ;
+  delete electronconvVeto_                      ; 
 
 
   
@@ -1190,6 +1193,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  isPhotonLoose_        ->push_back( true) ;
 		  HaspixelSeed_         ->push_back(iphoton->hasPixelSeed());
 		  hadTowOverEm_         ->push_back(iphoton->hadTowOverEm());
+		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());
 		  
 		  
 		  if (!iEvent.isRealData()) {
@@ -2054,6 +2058,7 @@ void DijetTreeProducer::initialize()
   isPhotonTight_                           ->clear();
   HaspixelSeed_                            ->clear();
   hadTowOverEm_                            ->clear();
+  electronconvVeto_                        ->clear();
   
   ptGenphoton_            ->clear();
   etaGenphoton_           ->clear();

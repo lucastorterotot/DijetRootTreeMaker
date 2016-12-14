@@ -1,0 +1,71 @@
+Instructions for producing Gamma + jet step 1 root file 
+-----------------------------------
+
+##########################################################
+# *Target: CMS Gamma + Jet  - JEC calculation            #
+# *Author: Hugues                                        #
+# *Last update: 07 Dec 2016                              #
+#                                                        #
+# Lines starting with '$' are commands to be executed    #
+# (after necessary changes when needed), all other text  #
+# is just instructions or program output.                #
+########################################################## 
+
+Set up a working directory and do a local test run 
+
+$ ssh -X hlattaud@lxplus.cern.ch
+$ mkdir myworkdir
+$ cd myworkdir
+$ echo $SCRAM_ARCH # Let's check if we have a good compiler version in use
+slc6_amd64_gcc491 # <- seems to be incompatible with CMSSW 8.0.6, let's update
+$ export SCRAM_ARCH=slc6_amd64_gcc530
+
+
+
+first follow this twiki to install the Photon energy smearer that we will use later in the code.
+
+https://twiki.cern.ch/twiki/bin/view/CMS/EGMSmearer
+
+following this twiki you should have a CMSSW environment :  
+
+$ cd CMSSW/src
+$git clone https://github.com/lattaud/DijetRootTreeMaker.git CMSDIJET/DijetRootTreeMaker/
+
+compile everything
+
+$ scram b -j 8
+
+## Test run ##
+
+Find a suitable miniAOD sample file for the test run. I found one here: 
+
+"/store/data/Run2016G/SinglePhoton/MINIAOD/PromptReco-v1/000/278/817/00000/B407B17A-9F63-E611-9581-02163E01369A.root"
+
+you can now modifify the CMSSW run file mylocaltest_flat-data-cfg_miniAOD.py, 
+
+Modify the number event to process here : 
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+
+Modify the input rootfile to process here :
+
+process.source = cms.Source("PoolSource",
+    fileNames = cms.untracked.vstring("file:myfile.root").
+    
+    
+You can now launch a local test : 
+
+$ cmsRun localtest_flat-data-cfg_miniAOD.py
+
+ Successful run looks something like this:
+
+[long list of warnings about triggers here]
+Begin processing the 8th record. Run 273730, Event 3146673520, LumiSection 2623 at 13-Jun-2016 10:49:45.182 CEST
+Begin processing the 9th record. Run 273730, Event 3146111224, LumiSection 2623 at 13-Jun-2016 10:49:45.187 CEST
+Begin processing the 10th record. Run 273730, Event 3146571947, LumiSection 2623 at 13-Jun-2016 10:49:45.189 CEST
+13-Jun-2016 10:49:45 CEST  Closed file file:/afs/cern.ch/user/j/juska/eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/730/00000/EA345ED4-B821-E611-BEA5-02163E0138E2.root
+
+
+
+
+                              
+

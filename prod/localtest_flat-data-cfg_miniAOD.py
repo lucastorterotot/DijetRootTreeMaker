@@ -220,6 +220,12 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
   phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
   
+  ##ELECTRONS#######################################
+  Electron                  = cms.InputTag('slimmedElectrons'),
+  
+  ##Muons#######################################
+  Muons                     = cms.InputTag("slimmedMuons"),
+  
   ## MC ########################################
   pu                        = cms.untracked.InputTag('slimmedAddPileupInfo'), # Updated from untracked to 80X by Juska
   ptHat                     = cms.untracked.InputTag('generator'), # Why do these need to be 'untracked' anyway?
