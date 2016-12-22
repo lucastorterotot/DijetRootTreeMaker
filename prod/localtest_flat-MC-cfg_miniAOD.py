@@ -133,19 +133,39 @@ def clean_met_(met):
 
 from PhysicsTools.PatAlgos.tools.metTools import addMETCollection
 
+process.genParticlesForMETAllVisible = cms.EDProducer(
+            "InputGenJetsParticleSelector",
+            src = cms.InputTag("prunedGenParticles"),
+            partonicFinalState = cms.bool(False),
+            excludeResonances = cms.bool(False),
+            excludeFromResonancePids = cms.vuint32(),
+            tausAsJets = cms.bool(False),
+
+            ignoreParticleIDs = cms.vuint32(
+                1000022,
+                1000012, 1000014, 1000016,
+                2000012, 2000014, 2000016,
+                1000039, 5100039,
+                4000012, 4000014, 4000016,
+                9900012, 9900014, 9900016,
+                39, 12, 14, 16
+                )
+)
+
+process.load('RecoMET.METProducers.genMetTrue_cfi')
 ## Raw PF METs
 process.load('RecoMET.METProducers.PFMET_cfi')
 
 process.pfMet.src = cms.InputTag('packedPFCandidates')
 addMETCollection(process, labelName='patPFMet', metSource='pfMet') # RAW MET
-process.patPFMet.addGenMET = False
+process.patPFMet.addGenMET = True
 
 process.pfMetCHS = process.pfMet.clone()
 process.pfMetCHS.src = cms.InputTag("chs")
 process.pfMetCHS.alias = cms.string('pfMetCHS')
 addMETCollection(process, labelName='patPFMetCHS', metSource='pfMetCHS')
 # RAW CHS MET
-process.patPFMetCHS.addGenMET = False
+process.patPFMetCHS.addGenMET = True
 
 
 ## Slimmed METs
@@ -157,30 +177,37 @@ del slimmedMETs.caloMET
 process.slimmedMETsCHS = slimmedMETs.clone()
 if hasattr(process, "patPFMetCHS"):
      # Create MET from Type 1 PF collection
-     process.patPFMetCHS.addGenMET = False
+     process.patPFMetCHS.addGenMET = True
      process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
      process.slimmedMETsCHS.rawUncertainties = cms.InputTag("patPFMetCHS") # only central value
 else:
      # Create MET from RAW PF collection
-     process.patPFMetCHS.addGenMET = False
+     process.patPFMetCHS.addGenMET = True
      process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
      del process.slimmedMETsCHS.rawUncertainties # not available
 
 clean_met_(process.slimmedMETsCHS)
 addMETCollection(process, labelName="slMETsCHS", metSource="slimmedMETsCHS")
-process.slMETsCHS.addGenMET = False
+process.slMETsCHS.addGenMET = True
 #-----------------------------------------------------------
-
+##Photon Energy smearer------------------------------------------
 process.load('Configuration.StandardSequences.Services_cff')
 process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+
+                                                       calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                                                                                                                 engineName = cms.untracked.string('TRandom3'),
+                                                                                           ),
                                                        
                                                        calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
                                                                                                                  engineName = cms.untracked.string('TRandom3'),
                                                                                            ),
                                                        )
 process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
-process.calibratedPatPhotons 
-
+process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
+process.calibratedPatPhotons.isMC=cms.bool(True)
+process.calibratedPatElectrons.isMC=cms.bool(True)
+#process.calibratedPatPhotons 
+#process.calibratedPatElectrons 
 ##-------------Add quarkGluon tagging---------------------------
 
 
@@ -208,8 +235,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
   met              = cms.InputTag('slMETsCHS'),
-  metpuppi              = cms.InputTag('slimmedMETsPuppi'),
-
+  metpuppi         = cms.InputTag('slimmedMETsPuppi'),
+  eb               = cms.InputTag('reducedEBRecHits'),
+  ee               = cms.InputTag('reducedEERecHits'),
   metTypeI         = cms.InputTag('slMETsCHS'),
 
   vtx              = cms.InputTag('offlineSlimmedPrimaryVertices'),
@@ -220,6 +248,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ptMinPhoton               = cms.double(10),
   Photon                    = cms.InputTag('slimmedPhotons'),
   Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
+  
  # GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
   phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
@@ -256,10 +285,17 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
     daqPartitions         = cms.uint32(1),
     l1tIgnoreMask         = cms.bool(False),
     l1techIgnorePrescales = cms.bool(False),
+    l1tIgnoreMaskAndPrescale = cms.bool(False),
     throw                 = cms.bool(False)
   ),
 
+  ## electrons ######################################## 
 
+  Electrons                 = cms.InputTag('slimmedElectrons'),
+  Electronssmeared          = cms.InputTag('calibratedPatElectrons'),
+  ## muons ########################################
+
+  Muons                     = cms.InputTag('slimmedMuons'),
 
   ## JECs ################
   redoJECs  = cms.bool(True),

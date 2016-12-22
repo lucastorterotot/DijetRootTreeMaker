@@ -108,9 +108,9 @@ process.source = cms.Source("PoolSource",
 #-------------------photon energy smearer-------------------------
 #correctionType = "80Xapproval"
 process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
-
+process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
 process.calibratedPatPhotons 
-
+process.calibratedPatElectrons 
 
 
 
@@ -186,6 +186,8 @@ process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other op
 
 
 
+
+
 process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 
 # Residue from AOD and RECO running
@@ -222,14 +224,25 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
   phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
   
+  eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
+  ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
+  
   ## MC ########################################
   pu                        = cms.untracked.InputTag('slimmedAddPileupInfo'), # Updated from untracked to 80X by Juska
   ptHat                     = cms.untracked.InputTag('generator'), # Why do these need to be 'untracked' anyway?
   genParticles              = cms.InputTag('prunedGenParticlesDijet'),
   genJetsAK4                = cms.InputTag('slimmedGenJets'), 
   genJetsAK8                = cms.InputTag('slimmedGenJetsAK8'),  
-  
+ 
+ 
+   ## electrons ######################################## 
 
+  Electrons                 = cms.InputTag('slimmedElectrons'),
+  Electronssmeared          = cms.InputTag('calibratedPatElectrons'),
+  ## muons ########################################
+
+  Muons                     = cms.InputTag('slimmedMuons'),
+  
   ## trigger ###################################
   #triggerAlias     = cms.vstring('Fat','PFHT650','PFNoPUHT650','HT750','HT550'),
   ##### For 0T data  #####
@@ -258,6 +271,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
     daqPartitions         = cms.uint32(1),
     l1tIgnoreMask         = cms.bool(False),
     l1techIgnorePrescales = cms.bool(False),
+    l1tIgnoreMaskAndPrescale = cms.bool(False),
     throw                 = cms.bool(False)
   ),
 

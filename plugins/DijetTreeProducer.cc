@@ -32,6 +32,11 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+// EGM smearer package
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
 
 //#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 //#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -51,14 +56,24 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   // Migrate to Consumes-system. Skip Calo-stuff
 
   //ADD photons 
-  srcPhoton_    = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photon")));
+  srcPhoton_         = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photon")));
   srcPhotonsmeared_  = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photonsmeared")));
-  ptMinPhoton_  = cfg.getParameter<double>                    ("ptMinPhoton");
+  ptMinPhoton_       = cfg.getParameter<double>                    ("ptMinPhoton");
   full5x5SigmaIEtaIEtaMapToken_    =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5SigmaIEtaIEtaMap")));
   phoChargedIsolationToken_        =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoChargedIsolation")));
   phoNeutralHadronIsolationToken_  =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoNeutralHadronIsolation")));
   phoPhotonIsolationToken_         =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoPhotonIsolation")));
-
+  
+ // srcebrechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("eb")));  
+ // srceerechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("ee")));
+  
+  barrelRecHitCollection_ = cfg.getParameter<InputTag>("eb");
+  srcebrechit_ = consumes<EcalRecHitCollection>(barrelRecHitCollection_);
+  
+  endcapRecHitCollection_ = cfg.getParameter<InputTag>("ee");
+  srceerechit_ = consumes<EcalRecHitCollection>(endcapRecHitCollection_);
+ 
+ 
   
   srcJetsAK4_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsAK4")));
   qgToken     = (consumes<edm::ValueMap<float> >(edm::InputTag("QGTagger", "qgLikelihood")));
@@ -75,6 +90,10 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   
   ptMinAK4_           = cfg.getParameter<double>                    ("ptMinAK4");
   ptMinAK8_           = cfg.getParameter<double>                    ("ptMinAK8");
+  
+  srcElectron_         = (consumes<pat::ElectronCollection>(cfg.getParameter<InputTag>("Electrons")));
+  srcElectronsmeared_  = (consumes<pat::ElectronCollection>(cfg.getParameter<InputTag>("Electronssmeared")));
+  srcMuon_             = (consumes<pat::MuonCollection>(cfg.getParameter<InputTag>("Muons")));
   
   srcPU_              = consumes<std::vector<PileupSummaryInfo> >(cfg.getUntrackedParameter<edm::InputTag>    ("pu"));
   //PUInfoToken = consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("PUInfoInputTag"));
@@ -338,6 +357,15 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("metTypeI"             ,&metcorrected_      ,"metcorrected_/F");
   
   
+  outTree_->Branch("metEnergyGen"            ,&metEnergyGen_         ,"metEnergyGen_/F");
+  outTree_->Branch("metPtGen"                ,&metPtGen_             ,"metPtGen_/F");
+  outTree_->Branch("metEtaGen"               ,&metEtaGen_            ,"metEtaGen_/F");
+  outTree_->Branch("metPhiGen"               ,&metPhiGen_            ,"metPhiGen_/F");
+  outTree_->Branch("metEnergyPUPPIGen"            ,&metEnergypuppiGen_         ,"metEnergypuppiGen_/F");
+  outTree_->Branch("metPtPUPPIGen"                ,&metPtpuppiGen_             ,"metPtpuppiGen_/F");
+  outTree_->Branch("metEtaPUPPIGen"               ,&metEtapuppiGen_            ,"metEtapuppiGen_/F");
+  outTree_->Branch("metPhiPUPPIGen"               ,&metPhipuppiGen_            ,"metPhipuppiGen_/F");
+  
   
   gen_eta          = new std::vector<float>;
   gen_phi          = new std::vector<float>;
@@ -401,6 +429,7 @@ void DijetTreeProducer::beginJob()
   isPhotonLoose_       = new std::vector<bool>;
   isPhotonMedium_      = new std::vector<bool>;
   isPhotonTight_       = new std::vector<bool>;
+  Ecorrbump_           = new std::vector<double>;
  
   full5x5SigmaIEtaIEtaMapTokenphoton_   = new std::vector<float>;
   phoChargedIsolationTokenphoton_       = new std::vector<float>;
@@ -418,7 +447,8 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("PhotonSCPhi"           ,"vector<float>"   ,&phiphotonSC_); 
   outTree_->Branch("PhotonLooseEnergy"     ,"vector<float>"   ,&energyphoton_);
   outTree_->Branch("PhotonsmearEnergy"     ,"vector<float>"   ,&energysmearedphoton_);
-  outTree_->Branch("PhotonSCEnergy"        ,"vector<float>"   ,&energyphotonSC_);  
+  outTree_->Branch("PhotonSCEnergy"        ,"vector<float>"   ,&energyphotonSC_);
+  outTree_->Branch("PhotonEcorrBump"        ,"vector<double>" ,&Ecorrbump_); 
   outTree_->Branch("Photonfull5x5SigmaIEtaIEtaMapToken"           ,"vector<float>"   ,&full5x5SigmaIEtaIEtaMapTokenphoton_);
   outTree_->Branch("PhotonphoChargedIsolationToken"               ,"vector<float>"   ,&phoChargedIsolationTokenphoton_);
   outTree_->Branch("PhotonphoNeutralHadronIsolationToken"         ,"vector<float>"   ,&phoNeutralHadronIsolationTokenphoton_);
@@ -429,7 +459,55 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("isPhotonLoose"                                 ,"vector<bool>"   ,&isPhotonLoose_);
   outTree_->Branch("isPhotonMedium"                                ,"vector<bool>"   ,&isPhotonMedium_);
   outTree_->Branch("isPhotonTight"                                 ,"vector<bool>"   ,&isPhotonTight_);
- 
+  
+  
+  //---------------Electrons----------------------------------
+  
+  
+  elecPt_        = new std::vector<float>;
+  elecEta_       = new std::vector<float>;
+  elecPhi_      = new std::vector<float>;
+  elecEnergy_    = new std::vector<float>;
+  elecID_        = new std::vector<float>;
+  elecISO_        = new std::vector<float>;
+  
+  elecPtsmeared_        = new std::vector<float>;
+  elecEtasmeared_       = new std::vector<float>;
+  elecPhismeared_      = new std::vector<float>;
+  elecEnergysmeared_    = new std::vector<float>;
+  elecIDsmeared_        = new std::vector<float>;
+  elecISOsmeared_        = new std::vector<float>;
+  
+  
+  outTree_->Branch("electronPt"         ,"vector<float>"   ,&elecPt_);
+  outTree_->Branch("electronEta"        ,"vector<float>"   ,&elecEta_);
+  outTree_->Branch("electronPhi"        ,"vector<float>"   ,&elecPhi_);
+  outTree_->Branch("electronEnergy"     ,"vector<float>"   ,&elecEnergy_);
+  outTree_->Branch("electronID"         ,"vector<float>"   ,&elecID_);
+  outTree_->Branch("electronISO"        ,"vector<float>"   ,&elecISO_);
+  
+  outTree_->Branch("electronPtsmeared"         ,"vector<float>"   ,&elecPtsmeared_);
+  outTree_->Branch("electronEtasmeared"        ,"vector<float>"   ,&elecEtasmeared_);
+  outTree_->Branch("electronPhismeared"        ,"vector<float>"   ,&elecPhismeared_);
+  outTree_->Branch("electronEnergysmeared"     ,"vector<float>"   ,&elecEnergysmeared_);
+  outTree_->Branch("electronIDsmeared"         ,"vector<float>"   ,&elecIDsmeared_);
+  outTree_->Branch("electronISOsmeared"        ,"vector<float>"   ,&elecISOsmeared_);
+  
+  
+  
+  //-------------Muons-------------------------------
+  
+  
+  muPt_       = new std::vector<float>;
+  muEta_      = new std::vector<float>;
+  muPhi_      = new std::vector<float>;
+  muEnergy_   = new std::vector<float>;
+  
+  outTree_->Branch("muonPt"         ,"vector<float>"   ,&muPt_);
+  outTree_->Branch("muonEta"        ,"vector<float>"   ,&muEta_);
+  outTree_->Branch("muonPhi"        ,"vector<float>"   ,&muPhi_);
+  outTree_->Branch("muonEnergy"     ,"vector<float>"   ,&muEnergy_);
+  outTree_->Branch("nMuonsLoose"             ,&nMuonsLoose_          ,"nMuonsLoose_/I");
   //------------------------------------------------------------------
   ptAK4_             = new std::vector<float>;
   jecAK4_            = new std::vector<float>;
@@ -643,10 +721,10 @@ void DijetTreeProducer::beginJob()
 
   //------------------------------------------------------------------
   triggerResult_  = new std::vector<bool>;
-  triggerPrescale_ = new std::vector<float>;
+  triggerPrescale_ = new std::vector<double>;
   triggerName_     = new std::vector<std::string>;
   outTree_->Branch("triggerResult","vector<bool>",&triggerResult_);
-  outTree_->Branch("triggerPrescale","vector<float>",&triggerPrescale_);
+  outTree_->Branch("triggerPrescale","vector<double>",&triggerPrescale_);
   outTree_->Branch("triggerName","vector<string>",&triggerName_);
 
 
@@ -720,6 +798,9 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("jetMassGenPUPPI"              ,"vector<float>"     ,&massGenPUPPI_);
   outTree_->Branch("jetEnergyGenPUPPI"            ,"vector<float>"     ,&energyGenPUPPI_);
   outTree_->Branch("jetpdgIDGenPUPPI"             ,"vector<int>"     ,&pdgIDGenPUPPI_);
+  
+  
+     
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -880,7 +961,27 @@ void DijetTreeProducer::endJob()
   delete pdgIDGenAK4_                           ;
   delete pdgIDGenPUPPI_                         ;
   delete electronconvVeto_                      ; 
-
+  
+ delete elecPt_ ;       
+ delete elecEta_  ;     
+ delete elecPhi_;     
+ delete elecEnergy_ ;
+ delete elecID_;
+ delete elecISO_;   
+  
+ delete elecPtsmeared_ ;       
+ delete elecEtasmeared_  ;     
+ delete elecPhismeared_  ;    
+ delete elecEnergysmeared_ ;
+ delete elecIDsmeared_;
+ delete elecISOsmeared_;  
+  
+  
+ delete muPt_   ;    
+ delete muEta_  ;    
+ delete muPhi_  ;    
+ delete muEnergy_;
+ delete Ecorrbump_;
 
   
   for(unsigned i=0;i<vtriggerSelector_.size();i++) {
@@ -951,6 +1052,17 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 
   Handle<reco::VertexCollection> recVtxs;
   iEvent.getByToken(srcVrtx_,recVtxs);
+  
+  const reco::Vertex& primaryVertex = recVtxs->at(0);
+  
+  edm::Handle<EcalRecHitCollection> _ebrechits;
+  iEvent.getByToken(srcebrechit_,_ebrechits);
+  
+ // const EcalRecHitCollection *ebrechits = _ebrechits.product();
+  
+  edm::Handle< EcalRecHitCollection> _eerechits;
+  iEvent.getByToken(srceerechit_,_eerechits);
+//  const EcalRecHitCollection *eerechits = _eerechits.product();
 
   //-------------- Event Info -----------------------------------
   rho_    = *rho;
@@ -959,10 +1071,26 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   metPhi_       = (*met)[0].phi();
   metPt_        = (*met)[0].pt();
   
+  if(!iEvent.isRealData() &&(*met)[0].genMET ())
+  {
+      metEnergyGen_    = (*met)[0].genMET ()->energy();
+      metEtaGen_       = (*met)[0].genMET ()->eta();      
+      metPhiGen_       = (*met)[0].genMET ()->phi();
+      metPtGen_        = (*met)[0].genMET ()->pt();
+  }
+  
   metEnergypuppi_    = (*metpuppi)[0].energy();
   metEtapuppi_       = (*metpuppi)[0].eta();      
   metPhipuppi_       = (*metpuppi)[0].phi();
   metPtpuppi_        = (*metpuppi)[0].pt(); 
+  if(!iEvent.isRealData() &&(*metpuppi)[0].genMET ())
+  {
+     metEnergypuppiGen_    = (*metpuppi)[0].genMET ()->energy();
+     metEtapuppiGen_       = (*metpuppi)[0].genMET ()->eta();      
+     metPhipuppiGen_       = (*metpuppi)[0].genMET ()->phi();
+     metPtpuppiGen_        = (*metpuppi)[0].genMET ()->pt();
+  }
+  
   if ((*met)[0].sumEt() > 0) {
     metSig_ = (*met)[0].et()/(*met)[0].sumEt();
   }
@@ -1091,7 +1219,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
   size_t sizetrigger = Trigger_result->size();
   const edm::TriggerNames& triggerNames = iEvent.triggerNames(*Trigger_result);
-  float prescalefactor = 1. ;
+  double prescalefactor = 1. ;
   std::string triggerName ;
   std::string ValidTriggerregex;
   std::vector<std::string> ValidTrigger ;
@@ -1113,6 +1241,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
         if (triggerCache_.configurationUpdated()) {
           vtriggerSelector_[itrig]->init(triggerCache_);
         }
+        std::cout<<"which trigger : "<<vtriggerSelection_[itrig]<<std::endl;
         result = (*(vtriggerSelector_[itrig]))(triggerCache_);
 
         for(unsigned int i = 0 ; i<sizetrigger; i++){
@@ -1136,13 +1265,67 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       triggerName_->push_back(vtriggerSelection_[itrig].c_str());
     }
   }
-      //    }
+      
+  //----------------------electron-----------------------
   
-  //----- at least one good vertex -----------
-  //bool cut_vtx = (recVtxs->size() > 0);
+    Handle<pat::ElectronCollection> electron;
+    iEvent.getByToken(srcElectron_,electron);
+    
+    Handle<pat::ElectronCollection> electronsmeared;
+    iEvent.getByToken(srcElectronsmeared_,electronsmeared);
   
-  //if (cut_vtx) {
+   pat::ElectronCollection::const_iterator ielectron = electron->begin();
+   pat::ElectronCollection::const_iterator ielectronsmeared = electronsmeared->begin();
+  int ie = 0;
+  for(; ielectron != electron->end() ;++ielectron,++ielectronsmeared, ie++){
   
+  // const pat::Electron& elec = *ielectron;
+   if (ie >= 30)
+   break;
+   bool elecID = fabs(primaryVertex.z() - ielectron->vertex().z()) < 1.;
+    elecID     &= ielectron->et() > 30.;
+    elecID     &= fabs(ielectron->eta()) < 2.5 && (ielectron->superCluster()->eta() > 1.4442 && ielectron->superCluster()->eta() < 1.5660);
+    elecID     &= ielectron->dB() < 0.02;
+    elecID     &= ((int) ielectron->electronID("eidLoose") & 0x1);
+    
+    elecID_           ->push_back(elecID);
+    elecIDsmeared_    ->push_back(elecID);
+    
+    float iso = (ielectron->dr03TkSumPt() + ielectron->dr03EcalRecHitSumEt() + ielectron->dr03HcalTowerSumEt()) / ielectron->et();
+    
+    elecISO_   ->push_back(iso);
+    elecISOsmeared_   ->push_back(iso);
+    
+    elecPt_      ->push_back(ielectron->pt());
+    elecEta_     ->push_back(ielectron->eta());
+    elecPhi_     ->push_back(ielectron->phi());
+    elecEnergy_  ->push_back(ielectron->energy());
+    
+    elecPtsmeared_      ->push_back(ielectronsmeared->pt());
+    elecEtasmeared_     ->push_back(ielectronsmeared->eta());
+    elecPhismeared_     ->push_back(ielectronsmeared->phi());
+    elecEnergysmeared_  ->push_back(ielectronsmeared->energy());
+    
+  }
+  
+  //---------------------------muons
+  
+   Handle<pat::MuonCollection> muon;
+   iEvent.getByToken(srcMuon_,muon);
+   pat::MuonCollection::const_iterator imuon= muon->begin();
+   for(; imuon != muon->end() ;++imuon){
+  
+     if(imuon->isLooseMuon())
+     {
+       nMuonsLoose_++;
+       muPt_            ->push_back(imuon->pt());
+       muEta_           ->push_back(imuon->eta());
+       muPhi_           ->push_back(imuon->phi());
+       muEnergy_        ->push_back(imuon->energy());
+     }
+  
+  
+    }
   //------------------------photons---------------
       uint32_t index = 0;
       pat::PhotonCollection::const_iterator iphoton = photons->begin();
@@ -1171,20 +1354,22 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 	   {               
 	       pat::PhotonRef PhotonReftmp(photons, index);	      
 	        if (isValidPhotonLoose(PhotonReftmp, iEvent, generatorWeight)) 
-		{	         
+		{			
+		  
+		         
 		  nPhotonsLoose_++;                           
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
 		  phiphotonSC_          ->push_back( iphoton->superCluster()->eta());
-		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );
-		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );
+
+
                   etaphoton_            ->push_back( iphoton->eta()        );
 		  etaphotonSC_          ->push_back( iphoton->superCluster()->phi());
-		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );
+
                   energyphoton_         ->push_back( iphoton->energy() );
 		  energyphotonSC_       ->push_back( iphoton->superCluster()->rawEnergy() );
-		  energysmearedphoton_  ->push_back( iphotonsmear->energy());
+
 		  full5x5SigmaIEtaIEtaMapTokenphoton_   ->push_back((*full5x5SigmaIEtaIEtaMap)[PhotonReftmp]);
 		  phoChargedIsolationTokenphoton_       ->push_back(getCorrectedPFIsolation((*phoChargedIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::CHARGED_HADRONS));
 		  phoNeutralHadronIsolationTokenphoton_ ->push_back(getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::NEUTRAL_HADRONS));
@@ -1193,9 +1378,34 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  isPhotonLoose_        ->push_back( true) ;
 		  HaspixelSeed_         ->push_back(iphoton->hasPixelSeed());
 		  hadTowOverEm_         ->push_back(iphoton->hadTowOverEm());
-		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());
-		  
-		  
+		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());		  				  
+		  double Ecorr=1;
+		  if(iEvent.isRealData()){
+		  DetId detid = iphoton->superCluster()->seed()->seed();
+                  const EcalRecHit * rh = NULL;
+                  
+                  if (detid.subdetId() == EcalBarrel  ) {
+                  
+                                  auto rh_i =  _ebrechits->find(detid);
+                                  if( rh_i != _ebrechits->end()) rh =  &(*rh_i);
+                                  else rh = NULL;
+                          } else {
+                                 
+                                  auto rh_i =  _eerechits->find(detid);
+                                  if( rh_i != _eerechits->end()) rh =  &(*rh_i);
+                                  else rh = NULL;
+                          }
+                  if(rh==NULL) Ecorr=1;
+                  else{
+                    if(rh->energy() > 200 && rh->energy()<300)  Ecorr=1.0199;
+                    else if(rh->energy()>300 && rh->energy()<400) Ecorr=  1.052;
+                    else if(rh->energy()>400 && rh->energy()<500) Ecorr = 1.015;
+                  }}
+		  Ecorrbump_            ->push_back( Ecorr                 );
+		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
+		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
+		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
+		  energysmearedphoton_  ->push_back( iphotonsmear->energy());		  
 		  if (!iEvent.isRealData()) {
 		  ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
                   phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
@@ -1858,6 +2068,16 @@ void DijetTreeProducer::initialize()
   metPtpuppi_          = -999;
   metPhipuppi_         = -999;
   
+  metEnergyGen_      = -999;
+  metEtaGen_         = -999;
+  metPtGen_          = -999;
+  metPhiGen_         = -999;
+  
+  metEnergypuppiGen_      = -999;
+  metEtapuppiGen_         = -999;
+  metPtpuppiGen_          = -999;
+  metPhipuppiGen_         = -999;
+  
   metSig_         = -999;
   metcorrected_   = -999;
   nJetsAK4_          = -999;
@@ -2032,6 +2252,7 @@ void DijetTreeProducer::initialize()
   nPhotonsLoose_  =-999;
   nPhotonsMedium_ =-999;
   nPhotonsTight_  =-999;
+  nMuonsLoose_     =-999; 
   
   ptphoton_              ->clear();
   ptphotonSC_            ->clear();
@@ -2064,8 +2285,28 @@ void DijetTreeProducer::initialize()
   etaGenphoton_           ->clear();
   phiGenphoton_           ->clear();
   energyGenphoton_        ->clear();
-      
   
+  
+  
+   elecPt_          ->clear();       
+  elecEta_          ->clear();     
+  elecPhi_          ->clear();     
+  elecEnergy_       ->clear();
+  elecID_           ->clear();   
+  elecISO_          ->clear();
+  elecPtsmeared_           ->clear();       
+  elecEtasmeared_          ->clear();     
+  elecPhismeared_          ->clear();    
+  elecEnergysmeared_       ->clear();
+  elecIDsmeared_           ->clear();
+  elecISOsmeared_          ->clear();
+  
+  muPt_        ->clear();    
+  muEta_       ->clear();    
+  muPhi_       ->clear();    
+  muEnergy_    ->clear();
+      
+  Ecorrbump_   ->clear();
   
 }
 //////////////////////////////////////////////////////////////////////////////////////////

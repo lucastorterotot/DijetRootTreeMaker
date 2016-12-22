@@ -31,6 +31,16 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+
+// EGM smearer package
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/EcalDetId/interface/EBDetId.h"
+#include "DataFormats/EcalDetId/interface/EEDetId.h"
+
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+
 enum JetAlgorithm {
   AK4,
   AK8,
@@ -105,11 +115,19 @@ class DijetTreeProducer : public edm::EDAnalyzer
 
     edm::EDGetTokenT<pat::PhotonCollection> srcPhoton_;
     edm::EDGetTokenT<pat::PhotonCollection> srcPhotonsmeared_;
+    edm::EDGetTokenT<pat::ElectronCollection> srcElectron_;
+    edm::EDGetTokenT<pat::ElectronCollection> srcElectronsmeared_;
+    edm::EDGetTokenT<pat::MuonCollection> srcMuon_;
     edm::EDGetTokenT<edm::ValueMap<float>> full5x5SigmaIEtaIEtaMapToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoChargedIsolationToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoNeutralHadronIsolationToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoPhotonIsolationToken_;
-
+    
+    edm::InputTag barrelRecHitCollection_;
+    edm::InputTag endcapRecHitCollection_;
+    
+    edm::EDGetTokenT<EcalRecHitCollection> srcebrechit_;
+    edm::EDGetTokenT<EcalRecHitCollection> srceerechit_;
 
     
     edm::EDGetTokenT<pat::JetCollection> srcJetsAK4_;
@@ -141,7 +159,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<edm::TriggerResults> srcTriggerResults_;
     edm::EDGetTokenT<pat::PackedTriggerPrescales> srcTriggerPrescale_;
     std::vector<bool>  *triggerResultfromToken_;
-    std::vector<float> *triggerPrescale_; 
+    std::vector<double> *triggerPrescale_; 
     std::vector<std::string> *triggerName_;
     
     
@@ -154,8 +172,10 @@ class DijetTreeProducer : public edm::EDAnalyzer
     int   run_,evt_,nVtx_,lumi_,BXnumber_;
     int   nJetsAK4_,nJetsPUPPI_, nJetsAK8_, nGenJetsAK4_, nGenJetsAK8_;
     int   nPhotons_, nPhotonsLoose_,nPhotonsMedium_,nPhotonsTight_, nGenphotons_;
+    int   nMuonsLoose_;
 
     float rho_,metEnergy_,metPt_,metPhi_,metEta_,metEnergypuppi_,metPtpuppi_,metPhipuppi_,metEtapuppi_,metSig_,metcorrected_;
+    float metEnergyGen_,metPtGen_,metPhiGen_,metEtaGen_,metEnergypuppiGen_,metPtpuppiGen_,metPhipuppiGen_,metEtapuppiGen_;
     float htAK4_;
     float htAK8_;
     std::vector<bool>  *triggerResult_;
@@ -166,7 +186,12 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<bool>  *isPhotonLoose_,*isPhotonMedium_,*isPhotonTight_,  *HaspixelSeed_ , *electronconvVeto_;
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
     std::vector<float> *ptGenphoton_,*etaGenphoton_,*phiGenphoton_,*energyGenphoton_;
+    std::vector<double> *Ecorrbump_;
     
+    
+    std::vector<float> *elecPt_, *elecEta_, *elecPhi_, *elecEnergy_, *elecID_, *elecISO_;
+    std::vector<float> *elecPtsmeared_, *elecEtasmeared_, *elecPhismeared_, *elecEnergysmeared_, *elecIDsmeared_, *elecISOsmeared_;    
+    std::vector<float> *muPt_, *muEta_, *muPhi_, *muEnergy_;
     
     //------------variable for met correction--------
     FactorizedJetCorrector *jetCorrector;
