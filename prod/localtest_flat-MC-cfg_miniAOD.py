@@ -42,7 +42,7 @@ process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_miniAODv2'
 
 #--------------------- Report and output ---------------------------
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(25000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -110,85 +110,13 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 process.source = cms.Source("PoolSource",
     # 2016B data "file:/afs/cern.ch/user/j/juska/eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v1/000/272/771/00000/B4A77EBA-DB15-E611-A15E-02163E013590.root")
-	fileNames = cms.untracked.vstring("/store/mc/RunIISpring16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/00000/1CE70D6E-334C-E611-8BB4-002590E50AF2.root") # mAODv2 
+	fileNames = cms.untracked.vstring("/store/mc/RunIISpring16MiniAODv1/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/02ED80EA-5012-E611-BC71-842B2B76670F.root") # mAODv2 
 	# mAODv1 "file:/afs/cern.ch/user/j/juska/eos/cms/store/mc/RunIISpring16MiniAODv1/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/4EC1A37D-840D-E611-957D-0025905C543A.root")
     )
 
 
 
-##-------------------- User analyzer  --------------------------------
-##-------------------- MET --------------------------------
 
-## MET CHS (not available as slimmedMET collection)
-## copied from https://github.com/cms-jet/JMEValidator/blob/CMSSW_7_6_X/python/FrameworkConfiguration.py
-def clean_met_(met):
-     del met.t01Variation
-     del met.t1Uncertainties
-     del met.t1SmearedVarsAndUncs
-     del met.tXYUncForRaw
-     del met.tXYUncForT1
-     del met.tXYUncForT01
-     del met.tXYUncForT1Smear
-     del met.tXYUncForT01Smear
-
-from PhysicsTools.PatAlgos.tools.metTools import addMETCollection
-
-process.genParticlesForMETAllVisible = cms.EDProducer(
-            "InputGenJetsParticleSelector",
-            src = cms.InputTag("prunedGenParticles"),
-            partonicFinalState = cms.bool(False),
-            excludeResonances = cms.bool(False),
-            excludeFromResonancePids = cms.vuint32(),
-            tausAsJets = cms.bool(False),
-
-            ignoreParticleIDs = cms.vuint32(
-                1000022,
-                1000012, 1000014, 1000016,
-                2000012, 2000014, 2000016,
-                1000039, 5100039,
-                4000012, 4000014, 4000016,
-                9900012, 9900014, 9900016,
-                39, 12, 14, 16
-                )
-)
-
-process.load('RecoMET.METProducers.genMetTrue_cfi')
-## Raw PF METs
-process.load('RecoMET.METProducers.PFMET_cfi')
-
-process.pfMet.src = cms.InputTag('packedPFCandidates')
-addMETCollection(process, labelName='patPFMet', metSource='pfMet') # RAW MET
-process.patPFMet.addGenMET = True
-
-process.pfMetCHS = process.pfMet.clone()
-process.pfMetCHS.src = cms.InputTag("chs")
-process.pfMetCHS.alias = cms.string('pfMetCHS')
-addMETCollection(process, labelName='patPFMetCHS', metSource='pfMetCHS')
-# RAW CHS MET
-process.patPFMetCHS.addGenMET = True
-
-
-## Slimmed METs
-from PhysicsTools.PatAlgos.slimming.slimmedMETs_cfi import slimmedMETs
-#### CaloMET is not available in MiniAOD
-del slimmedMETs.caloMET
-
-### CHS
-process.slimmedMETsCHS = slimmedMETs.clone()
-if hasattr(process, "patPFMetCHS"):
-     # Create MET from Type 1 PF collection
-     process.patPFMetCHS.addGenMET = True
-     process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
-     process.slimmedMETsCHS.rawUncertainties = cms.InputTag("patPFMetCHS") # only central value
-else:
-     # Create MET from RAW PF collection
-     process.patPFMetCHS.addGenMET = True
-     process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
-     del process.slimmedMETsCHS.rawUncertainties # not available
-
-clean_met_(process.slimmedMETsCHS)
-addMETCollection(process, labelName="slMETsCHS", metSource="slimmedMETsCHS")
-process.slMETsCHS.addGenMET = True
 #-----------------------------------------------------------
 ##Photon Energy smearer------------------------------------------
 process.load('Configuration.StandardSequences.Services_cff')
@@ -234,11 +162,13 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
-  met              = cms.InputTag('slMETsCHS'),
+  met              = cms.InputTag('slimmedMETs'),
+  metforggen       = cms.InputTag('slimmedMETs'),  
   metpuppi         = cms.InputTag('slimmedMETsPuppi'),
   eb               = cms.InputTag('reducedEBRecHits'),
   ee               = cms.InputTag('reducedEERecHits'),
-  metTypeI         = cms.InputTag('slMETsCHS'),
+  metTypeI         = cms.InputTag('slimmedMETs'),
+  PFCands          = cms.InputTag('packedPFCandidates'),
 
   vtx              = cms.InputTag('offlineSlimmedPrimaryVertices'),
   ptMinAK4         = cms.double(10),

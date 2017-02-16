@@ -16,6 +16,8 @@
 #include "DataFormats/JetReco/interface/JetCollection.h"
 #include "TTree.h"
 #include "TH1F.h"
+#include "TParameter.h"
+
 // For JECs
 #include "FWCore/ParameterSet/interface/FileInPath.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
@@ -109,6 +111,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     double ptMinPhoton_;
     bool mVerbose = false;
     bool isData_;
+    bool goodPVtx_;
     
     
     // Migrate to consumes-system for running in 80X
@@ -118,6 +121,9 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<pat::ElectronCollection> srcElectron_;
     edm::EDGetTokenT<pat::ElectronCollection> srcElectronsmeared_;
     edm::EDGetTokenT<pat::MuonCollection> srcMuon_;
+    edm::EDGetTokenT<pat::PackedCandidateCollection> srcPfCands_;
+    
+    
     edm::EDGetTokenT<edm::ValueMap<float>> full5x5SigmaIEtaIEtaMapToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoChargedIsolationToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoNeutralHadronIsolationToken_;
@@ -139,8 +145,9 @@ class DijetTreeProducer : public edm::EDAnalyzer
     
 
     edm::EDGetTokenT<double> srcRho_;
-    edm::EDGetTokenT<std::vector<pat::MET> > srcMET_;
-    edm::EDGetTokenT<std::vector<pat::MET> > srcMETpuppi_;
+    edm::EDGetTokenT<std::vector<pat::MET> > srcMET_      ;
+    edm::EDGetTokenT<std::vector<pat::MET> > srcMETforgen_;
+    edm::EDGetTokenT<std::vector<pat::MET> > srcMETpuppi_ ;
 
     edm::EDGetTokenT<pat::METCollection> metToken_;
     edm::EDGetTokenT<reco::VertexCollection> srcVrtx_;
@@ -173,6 +180,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     int   nJetsAK4_,nJetsPUPPI_, nJetsAK8_, nGenJetsAK4_, nGenJetsAK8_;
     int   nPhotons_, nPhotonsLoose_,nPhotonsMedium_,nPhotonsTight_, nGenphotons_;
     int   nMuonsLoose_;
+    TParameter<int>*  Nevent_tot;
 
     float rho_,metEnergy_,metPt_,metPhi_,metEta_,metEnergypuppi_,metPtpuppi_,metPhipuppi_,metEtapuppi_,metSig_,metcorrected_;
     float metEnergyGen_,metPtGen_,metPhiGen_,metEtaGen_,metEnergypuppiGen_,metPtpuppiGen_,metPhipuppiGen_,metEtapuppiGen_;
@@ -187,6 +195,9 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
     std::vector<float> *ptGenphoton_,*etaGenphoton_,*phiGenphoton_,*energyGenphoton_;
     std::vector<double> *Ecorrbump_;
+    
+    
+    //  std::vector<float> *PFpx, *PFpy, *PFpz, 
     
     
     std::vector<float> *elecPt_, *elecEta_, *elecPhi_, *elecEnergy_, *elecID_, *elecISO_;

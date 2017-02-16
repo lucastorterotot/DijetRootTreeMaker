@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include "TFile.h"
 #include "TH1D.h"
+#include "TParameter.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
 
@@ -68,34 +69,38 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
  // srceerechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("ee")));
   
   barrelRecHitCollection_ = cfg.getParameter<InputTag>("eb");
-  srcebrechit_ = consumes<EcalRecHitCollection>(barrelRecHitCollection_);
+  srcebrechit_            = consumes<EcalRecHitCollection>(barrelRecHitCollection_);
   
   endcapRecHitCollection_ = cfg.getParameter<InputTag>("ee");
-  srceerechit_ = consumes<EcalRecHitCollection>(endcapRecHitCollection_);
+  srceerechit_            = consumes<EcalRecHitCollection>(endcapRecHitCollection_);
  
  
   
-  srcJetsAK4_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsAK4")));
-  qgToken     = (consumes<edm::ValueMap<float> >(edm::InputTag("QGTagger", "qgLikelihood")));
-  srcJetsAK8_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsAK8")));
-  srcJetsPUPPI_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>("jetsPUPPI")));
+  srcJetsAK4_   = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>    ("jetsAK4")));
+  qgToken       = (consumes<edm::ValueMap<float> >(edm::InputTag              ("QGTagger", "qgLikelihood")));
+  srcJetsAK8_   = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>    ("jetsAK8")));
+  srcJetsPUPPI_ = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>    ("jetsPUPPI")));
   
-  srcRho_             = (consumes<double>(cfg.getParameter<edm::InputTag>             ("rho")));
+  srcRho_             = (consumes<double>(cfg.getParameter<edm::InputTag>                          ("rho")));
   srcMET_             = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("met")));
-  srcMETpuppi_             = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metpuppi")));
+  srcMETforgen_       = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metforggen")));
+  srcMETpuppi_        = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metpuppi")));
 
-  metToken_           = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metTypeI")));
-  srcVrtx_            = (consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>             ("vtx")));
-  srcJetsAK4puppiView_ =(consumes<edm::View<pat::Jet>>(cfg.getParameter<edm::InputTag>("jetsPUPPI")));
+  metToken_            = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>            ("metTypeI")));
+  srcVrtx_             = (consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>         ("vtx")));
+  srcJetsAK4puppiView_ =(consumes<edm::View<pat::Jet>>(cfg.getParameter<edm::InputTag>             ("jetsPUPPI")));
   
-  ptMinAK4_           = cfg.getParameter<double>                    ("ptMinAK4");
-  ptMinAK8_           = cfg.getParameter<double>                    ("ptMinAK8");
+  ptMinAK4_           = cfg.getParameter<double>                                                   ("ptMinAK4");
+  ptMinAK8_           = cfg.getParameter<double>                                                   ("ptMinAK8");
   
-  srcElectron_         = (consumes<pat::ElectronCollection>(cfg.getParameter<InputTag>("Electrons")));
-  srcElectronsmeared_  = (consumes<pat::ElectronCollection>(cfg.getParameter<InputTag>("Electronssmeared")));
-  srcMuon_             = (consumes<pat::MuonCollection>(cfg.getParameter<InputTag>("Muons")));
+  srcElectron_         = (consumes<pat::ElectronCollection>(cfg.getParameter<InputTag>             ("Electrons")));
+  srcElectronsmeared_  = (consumes<pat::ElectronCollection>(cfg.getParameter<InputTag>             ("Electronssmeared")));
+  srcMuon_             = (consumes<pat::MuonCollection>(cfg.getParameter<InputTag>                 ("Muons")));
   
   srcPU_              = consumes<std::vector<PileupSummaryInfo> >(cfg.getUntrackedParameter<edm::InputTag>    ("pu"));
+  srcPfCands_         = consumes<pat::PackedCandidateCollection>(cfg.getParameter<InputTag>    ("PFCands"));
+  
+  
   //PUInfoToken = consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("PUInfoInputTag"));
   
   // These are now causing data run to fail. Weird it used to work with 2015 version?!
@@ -248,6 +253,9 @@ enum class IsolationType {
     NEUTRAL_HADRONS,
     PHOTONS
     };
+    
+//Old Area
+/*
 float getEffectiveArea(float eta, IsolationType type) {
   eta = fabs(eta);
   switch (type) {
@@ -306,6 +314,65 @@ float getEffectiveArea(float eta, IsolationType type) {
   
   return -1;
 }
+*/
+float getEffectiveArea(float eta, IsolationType type) {
+  eta = fabs(eta);
+  switch (type) {
+  case IsolationType::CHARGED_HADRONS:
+    if (eta < 1.0)
+      return 0.0360;
+    else if (eta < 1.479)
+      return 0.0377;
+    else if (eta < 2.0)
+      return 0.0306;
+    else if (eta < 2.2)
+      return 0.0283;
+    else if (eta < 2.3)
+      return 0.0254;
+    else if (eta < 2.4)
+      return 0.0217;
+    else
+      return 0.0167;
+    break;
+    
+  case IsolationType::NEUTRAL_HADRONS:
+    if (eta < 1.0)
+      return 0.0597;
+    else if (eta < 1.479)
+      return 0.0807;
+    else if (eta < 2.0)
+      return 0.0629;
+    else if (eta < 2.2)
+      return 0.0197;
+    else if (eta < 2.3)
+      return 0.0184;
+    else if (eta < 2.4)
+      return 0.0284;
+    else
+      return 0.0591;
+    break;
+
+    //Official  
+  case IsolationType::PHOTONS:
+    if (eta < 1.0)
+      return 0.1210;
+    else if (eta < 1.479)
+      return 0.1107;
+    else if (eta < 2.0)
+      return 0.0699;
+    else if (eta < 2.2)
+      return 0.1056;
+    else if (eta < 2.3)
+      return 0.1457;
+    else if (eta < 2.4)
+      return 0.1719;
+    else
+      return 0.1998;
+    break;
+  }
+  
+  return -1;
+}
 
 double getCorrectedPFIsolation(double isolation, double rho, float eta, IsolationType type) 
 {
@@ -355,7 +422,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("metPhiPUPPI"               ,&metPhipuppi_            ,"metPhipuppi_/F");
   outTree_->Branch("metSig"               ,&metSig_            ,"metSig_/F");
   outTree_->Branch("metTypeI"             ,&metcorrected_      ,"metcorrected_/F");
-  
+  outTree_->Branch("goodPVtx"             ,&goodPVtx_      ,"goodPVtx_/B");
   
   outTree_->Branch("metEnergyGen"            ,&metEnergyGen_         ,"metEnergyGen_/F");
   outTree_->Branch("metPtGen"                ,&metPtGen_             ,"metPtGen_/F");
@@ -1044,28 +1111,37 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   Handle<double>  rho;
   iEvent.getByToken(srcRho_,rho);
   
-  Handle<vector<pat::MET> > met;
-  iEvent.getByToken(srcMET_,met);
   
-  Handle<vector<pat::MET> > metpuppi;
-  iEvent.getByToken(srcMETpuppi_,metpuppi);
 
   Handle<reco::VertexCollection> recVtxs;
   iEvent.getByToken(srcVrtx_,recVtxs);
+  if(!recVtxs.isValid() || recVtxs->size() == 0 ||  recVtxs->front().isFake()) goodPVtx_ = false ;
   
   const reco::Vertex& primaryVertex = recVtxs->at(0);
   
   edm::Handle<EcalRecHitCollection> _ebrechits;
   iEvent.getByToken(srcebrechit_,_ebrechits);
   
- // const EcalRecHitCollection *ebrechits = _ebrechits.product();
+
   
   edm::Handle< EcalRecHitCollection> _eerechits;
   iEvent.getByToken(srceerechit_,_eerechits);
-//  const EcalRecHitCollection *eerechits = _eerechits.product();
-
+  
+  
   //-------------- Event Info -----------------------------------
   rho_    = *rho;
+
+/*
+  Handle<vector<pat::MET> > met;
+  iEvent.getByToken(srcMET_,met);
+  
+  Handle<vector<pat::MET> > metpuppi;
+  iEvent.getByToken(srcMETpuppi_,metpuppi);
+
+
+
+
+  
   metEnergy_    = (*met)[0].energy();
   metEta_       = (*met)[0].eta();      
   metPhi_       = (*met)[0].phi();
@@ -1093,8 +1169,8 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
   if ((*met)[0].sumEt() > 0) {
     metSig_ = (*met)[0].et()/(*met)[0].sumEt();
-  }
-    
+}
+   */ 
   nVtx_   = recVtxs->size();
   run_    = iEvent.id().run();
   evt_    = iEvent.id().event();
@@ -1241,7 +1317,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
         if (triggerCache_.configurationUpdated()) {
           vtriggerSelector_[itrig]->init(triggerCache_);
         }
-        std::cout<<"which trigger : "<<vtriggerSelection_[itrig]<<std::endl;
+      //  std::cout<<"which trigger : "<<vtriggerSelection_[itrig]<<std::endl;
         result = (*(vtriggerSelector_[itrig]))(triggerCache_);
 
         for(unsigned int i = 0 ; i<sizetrigger; i++){
@@ -1313,6 +1389,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
    Handle<pat::MuonCollection> muon;
    iEvent.getByToken(srcMuon_,muon);
    pat::MuonCollection::const_iterator imuon= muon->begin();
+   nMuonsLoose_ = 0;
    for(; imuon != muon->end() ;++imuon){
   
      if(imuon->isLooseMuon())
@@ -1345,6 +1422,8 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
       iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);     
       double rhod = *rho;
+      //uint32_t index_photon_tight = 0;
+      pat::Photon PhotonT ;
       
       for(; iphoton != photons->end(); ++iphoton,++iphotonsmear,index++ ) 
       { 
@@ -1371,7 +1450,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  energyphotonSC_       ->push_back( iphoton->superCluster()->rawEnergy() );
 
 		  full5x5SigmaIEtaIEtaMapTokenphoton_   ->push_back((*full5x5SigmaIEtaIEtaMap)[PhotonReftmp]);
-		  phoChargedIsolationTokenphoton_       ->push_back(getCorrectedPFIsolation((*phoChargedIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::CHARGED_HADRONS));
+		  phoChargedIsolationTokenphoton_       ->push_back((*phoChargedIsolationMap)[PhotonReftmp]);
 		  phoNeutralHadronIsolationTokenphoton_ ->push_back(getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::NEUTRAL_HADRONS));
 		  phoPhotonIsolationTokenphoton_        ->push_back(getCorrectedPFIsolation((*phoPhotonIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::PHOTONS));
 		  
@@ -1437,11 +1516,105 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) ) 
 		{
 		     nPhotonsTight_++;
+		   //  index_photon_tight = index ;
+		     PhotonT = (*iphoton);
 		     isPhotonTight_   ->push_back(true);
 		     
 		 }             
           }
       }//end loop over photon collection
+      
+      edm::Handle<pat::PackedCandidateCollection> pfs;
+      iEvent.getByToken(srcPfCands_, pfs);
+      
+      
+      Handle<vector<pat::MET> > met;
+      iEvent.getByToken(srcMET_,met);
+      
+      Handle<vector<pat::MET> > rawmet;
+      iEvent.getByToken(srcMET_,rawmet);
+  
+      Handle<vector<pat::MET> > metforgenchs;
+      iEvent.getByToken(srcMETforgen_,metforgenchs);
+  
+  
+     Handle<vector<pat::MET> > metpuppi;
+     iEvent.getByToken(srcMETpuppi_,metpuppi);
+     
+     
+     pat::MET Met = (*met)[0];
+     
+     pat::MET rawMet = (*rawmet)[0];
+     rawMet.setP4( Met.uncorP4() );
+      
+      
+      if(nPhotonsTight_ == 1){
+      
+       float FootprintMEx = 0;
+       float FootprintMEy = 0;
+  
+  std::vector<reco::CandidatePtr> footprint;
+  for (unsigned int i = 0, n = PhotonT.numberOfSourceCandidatePtrs(); i < n; ++i) {
+    footprint.push_back(PhotonT.sourceCandidatePtr(i) );
+  }
+  // now loop on pf candidates
+  for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
+    const pat::PackedCandidate &pf = (*pfs)[i];
+    // pfcandidate-based footprint removal
+    if (std::find(footprint.begin(), footprint.end(), reco::CandidatePtr(pfs,i)) != footprint.end()) {
+      continue;
+    }
+    // federico
+    //    if(pf.fromPV() == 0) std::cout<<"Dropped PF candidates"<<std::endl;
+    if(pf.fromPV() == 0) continue;
+
+    FootprintMEx += -1.* pf.px();
+    FootprintMEy += -1.* pf.py();    
+  }// loop over pfCand
+  
+  // Re-adding  photon but reco 
+  FootprintMEx += -1.* PhotonT.px();
+  FootprintMEy += -1.* PhotonT.py();
+  
+  double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy);   
+  
+rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
+      
+      
+      
+  metEnergy_    = rawMet.energy();
+  metEta_       = rawMet.eta();      
+  metPhi_       = rawMet.phi();
+  metPt_        = rawMet.pt();
+  
+  if(!iEvent.isRealData() &&(*metforgenchs)[0].genMET ())
+  {
+      metEnergyGen_    = rawMet.genMET ()->energy();
+      metEtaGen_       = rawMet.genMET ()->eta();      
+      metPhiGen_       = rawMet.genMET ()->phi();
+      metPtGen_        = rawMet.genMET ()->pt();
+  }
+  
+  metEnergypuppi_    = (*metpuppi)[0].energy();
+  metEtapuppi_       = (*metpuppi)[0].eta();      
+  metPhipuppi_       = (*metpuppi)[0].phi();
+  metPtpuppi_        = (*metpuppi)[0].pt(); 
+  if(!iEvent.isRealData() &&(*metpuppi)[0].genMET ())
+  {
+     metEnergypuppiGen_    = (*metpuppi)[0].genMET ()->energy();
+     metEtapuppiGen_       = (*metpuppi)[0].genMET ()->eta();      
+     metPhipuppiGen_       = (*metpuppi)[0].genMET ()->phi();
+     metPtpuppiGen_        = (*metpuppi)[0].genMET ()->pt();
+  }
+  
+  if ((*met)[0].sumEt() > 0) {
+    metSig_ = (*met)[0].et()/(*met)[0].sumEt();
+  }
+      
+      
+      
+      
+   }   
     
   
   
@@ -1530,12 +1703,51 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     int NumConst = npr;
 
     float eta  = ijet->eta(); // removed fabs() -Juska
-    float pt   = ijet->correctedJet(0).pt()*jecFactorsAK4.at(*i); // Is this OK? Correct corrected? -Juska
-
+    float pt   = ijet->correctedJet("Uncorrected").pt()*jecFactorsAK4.at(*i); // Is this OK? Correct corrected? -Juska
+   // std::cout<<"chf "<<chf<<" nhf "<<nhf<< " chm "<<" nemf "<<nemf<<" cemf "<<cemf<<std::endl;  
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
-    int idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4);
-    int idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4);
-
+    int idL = -999 ; 
+    int idT = -999 ; 
+    
+    if(fabs(eta) < 3.0)
+    {
+      idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
+      if(fabs(eta) <= 2.7){
+         idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
+         if(fabs(eta) <= 2.4){
+            idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
+         
+         }
+      
+      }
+    
+    }else{
+       idL = ( nemf<0.90 && neMult>10)   ;
+       
+       
+       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    }
+    
+    
+    
+    
+      /*
+       idL = ( nemf>0.01 && nhf<0.98 && neMult > 2) && ((nhf<0.99 && nemf<0.99 && NumConst>1 && fabs(eta) <= 2.7) && ((fabs(eta) <= 2.4 && chf>0. && chMult>0 && cemf<0.99) || fabs(eta)>2.4)|| (fabs(eta)>2.7))  ;
+       
+       
+       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+       
+    
+    }else{
+       idL = ( nemf<0.90 && neMult>10)   ;
+       
+       
+       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    }*/
+    if(!iEvent.isRealData()&& !ijet->genJet()){
+      idL = 0 ;
+      idT = 0 ;     
+    }
     edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsview, ijetview - jetsview->begin()));
 
        
@@ -1698,11 +1910,17 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 
     float eta  = ijet->eta(); // removed fabs() -Juska
     float pt   = ijet->correctedJet(0).pt()*jecFactorsPUPPI.at(*i); // Is this OK? Correct corrected? -Juska
-
+   // std::cout<<"nemf "<<nemf<<" cemf "<<cemf<<" chf "<<chf<<" nhf "<<nhf<<std::endl;
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
-    int idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4);
-    int idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4);
-
+    int idL = -999 ; 
+    int idT = -999 ; 
+    idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4)  ;
+    idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    
+    if(!iEvent.isRealData()&& !ijet->genJet()){
+      idL = 0 ;
+      idT = 0 ;     
+    }
     edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsviewpuppi, ijetview - jetsviewpuppi->begin()));
 
        
@@ -1854,8 +2072,15 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     float pt   = ijet->correctedJet(0).pt()*jecFactorsAK8.at(*i); // Is this OK? Correct corrected? -Juska
 
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
-    int idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4);
-    int idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4);
+    int idL = -999 ; 
+    int idT = -999 ; 
+    idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4)  ;
+    idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    
+    if(!iEvent.isRealData()&& !ijet->genJet()){
+      idL = 0 ;
+      idT = 0 ;     
+    }
       
       
     if (pt > ptMinAK8_) {
@@ -1938,11 +2163,11 @@ bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, cons
     if (!isData_ && !photonRef->genPhoton())   
     return false;
    // #1: H/E
-    isValid &= photonRef->hadTowOverEm() < 0.05;
+    isValid &= photonRef->hadTowOverEm() < 0.0597;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.0102; //Official    
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01031; //Official    
     if (! isValid)
     return false;
     
@@ -1956,9 +2181,9 @@ bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, cons
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= (*phoChargedIsolationMap)[photonRef] < 3.32;
-    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (1.92 + 0.014*photonRef->pt()+0.000019*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (0.81 + 0.0053*photonRef->pt());
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)< 1.295;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (10.910 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (3.630 + 0.0047*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -1978,11 +2203,11 @@ bool DijetTreeProducer::isValidPhotonMedium(const pat::PhotonRef& photonRef, con
     if (!isData_ && !photonRef->genPhoton())   
     return false;
    // #1: H/E
-    isValid &= photonRef->hadTowOverEm() < 0.05;
+    isValid &= photonRef->hadTowOverEm() < 0.0396;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.0102; //Official    
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01022; //Official    
     if (! isValid)
     return false;
     
@@ -1996,9 +2221,9 @@ bool DijetTreeProducer::isValidPhotonMedium(const pat::PhotonRef& photonRef, con
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= (*phoChargedIsolationMap)[photonRef] < 1.37;
-    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (1.06 + 0.014*photonRef->pt()+0.000019*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (0.28 + 0.0053*photonRef->pt());
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.441;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (2.725 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (2.71 + 0.0047*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2017,11 +2242,11 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     if (!isData_ && !photonRef->genPhoton())   
     return false;
    // #1: H/E
-    isValid &= photonRef->hadTowOverEm() < 0.05;
+    isValid &= photonRef->hadTowOverEm() < 0.0269;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.0100; //Official    
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.00994; //Official    
     if (! isValid)
     return false;
     
@@ -2035,9 +2260,9 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= (*phoChargedIsolationMap)[photonRef] < 0.76;
-    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (0.97 + 0.014*photonRef->pt()+0.000019*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (0.08 + 0.0053*photonRef->pt());
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.202;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (0.264 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (2.362+0.0047*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2062,6 +2287,7 @@ void DijetTreeProducer::initialize()
   metEta_         = -999;
   metPt_          = -999;
   metPhi_         = -999;
+  goodPVtx_       = true;
   
   metEnergypuppi_      = -999;
   metEtapuppi_         = -999;
