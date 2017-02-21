@@ -1713,8 +1713,10 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
     {
       idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
       if(fabs(eta) <= 2.7){
+      
          idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
          if(fabs(eta) <= 2.4){
+         
             idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
          
          }
@@ -1914,9 +1916,26 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
     int idL = -999 ; 
     int idT = -999 ; 
-    idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4)  ;
-    idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    if(fabs(eta) < 3.0)
+    {
+      idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
+      if(fabs(eta) <= 2.7){
+      
+         idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
+         if(fabs(eta) <= 2.4){
+         
+            idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
+         
+         }
+      
+      }
     
+    }else{
+       idL = ( nemf<0.90 && neMult>10)   ;
+       
+       
+       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    }
     if(!iEvent.isRealData()&& !ijet->genJet()){
       idL = 0 ;
       idT = 0 ;     
@@ -2074,8 +2093,26 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
     int idL = -999 ; 
     int idT = -999 ; 
-    idL = (nhf<0.99 && nemf<0.99 && NumConst>1 && muf < 0.8) && ((fabs(eta) <= 2.4 && chf>0 && chMult>0 && cemf<0.99) || fabs(eta)>2.4)  ;
-    idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    if(fabs(eta) < 3.0)
+    {
+      idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
+      if(fabs(eta) <= 2.7){
+      
+         idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
+         if(fabs(eta) <= 2.4){
+         
+            idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
+         
+         }
+      
+      }
+    
+    }else{
+       idL = ( nemf<0.90 && neMult>10)   ;
+       
+       
+       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
+    }
     
     if(!iEvent.isRealData()&& !ijet->genJet()){
       idL = 0 ;
