@@ -4,7 +4,7 @@ Instructions for producing Gamma + jet step 1 root file
 ##########################################################
 # *Target: CMS Gamma + Jet  - JEC calculation            #
 # *Author: Hugues                                        #
-# *Last update: 07 Dec 2016                              #
+# *Last update: 22 Feb 2017                              #
 #                                                        #
 # Lines starting with '$' are commands to be executed    #
 # (after necessary changes when needed), all other text  #
@@ -17,16 +17,19 @@ $ ssh -X hlattaud@lxplus.cern.ch
 $ mkdir myworkdir
 $ cd myworkdir
 $ echo $SCRAM_ARCH # Let's check if we have a good compiler version in use
-slc6_amd64_gcc491 # <- seems to be incompatible with CMSSW 8.0.6, let's update
+slc6_amd64_gcc491 # <- seems to be incompatible with CMSSW 8.0.26.patch1, let's update
 $ export SCRAM_ARCH=slc6_amd64_gcc530
 
 
 
-first follow this twiki to install the Photon energy smearer that we will use later in the code.
 
+If you run on re-miniAOD sample use the CMSSW_8_0_26_patch1 realease and follow this twiki:
+https://twiki.cern.ch/twiki/bin/view/CMSPublic/ReMiniAOD03Feb2017Notes
+
+first follow this twiki to install the Photon energy smearer that we will use later in the code.
 https://twiki.cern.ch/twiki/bin/view/CMS/EGMSmearer
 
-following this twiki you should have a CMSSW environment :  
+following these twikis you should have a CMSSW environment ready for Egamma tuple production :  
 
 $ cd CMSSW/src
 $git clone https://github.com/lattaud/DijetRootTreeMaker.git CMSDIJET/DijetRootTreeMaker/
@@ -39,9 +42,9 @@ $ scram b -j 8
 
 Find a suitable miniAOD sample file for the test run. I found one here: 
 
-"/store/data/Run2016G/SinglePhoton/MINIAOD/PromptReco-v1/000/278/817/00000/B407B17A-9F63-E611-9581-02163E01369A.root"
+"/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root"
 
-you can now modifify the CMSSW run file mylocaltest_flat-data-cfg_miniAOD.py, 
+you can now modifify the CMSSW run file mylocaltest_flat-dataBCD-cfg_miniAOD.py, 
 
 Modify the number event to process here : 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
@@ -51,10 +54,11 @@ Modify the input rootfile to process here :
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring("file:myfile.root").
     
+In this config file you can modify the inputs collection on the JEC you bwant to use in the first place.
     
 You can now launch a local test : 
 
-$ cmsRun localtest_flat-data-cfg_miniAOD.py
+$ cmsRun localtest_flat-dataBCD-cfg_miniAOD.py
 
  Successful run looks something like this:
 
@@ -63,6 +67,18 @@ Begin processing the 8th record. Run 273730, Event 3146673520, LumiSection 2623 
 Begin processing the 9th record. Run 273730, Event 3146111224, LumiSection 2623 at 13-Jun-2016 10:49:45.187 CEST
 Begin processing the 10th record. Run 273730, Event 3146571947, LumiSection 2623 at 13-Jun-2016 10:49:45.189 CEST
 13-Jun-2016 10:49:45 CEST  Closed file file:/afs/cern.ch/user/j/juska/eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/730/00000/EA345ED4-B821-E611-BEA5-02163E0138E2.root
+
+
+You can now look at your output rootfile. A Healthy rootfile look like a file with a single tree named events that store all the variables your 're interested in.
+
+
+If all went correctly you can now begin crab production.
+
+$ cd prod/crab/
+
+you sould find  Templatecrab.py which is a crab config file that you have to modify with the right dataset you want to run on and the location to store your outputs.
+
+Your are now ready to go to the next step called DijettreeAnalyser.
 
 
 

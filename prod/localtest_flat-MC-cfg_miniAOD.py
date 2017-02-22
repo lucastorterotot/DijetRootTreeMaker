@@ -151,6 +151,24 @@ calo_collection=''
 cluster_collection=''
 pfcalo_collection=''
    
+   
+   
+#-------------------------To RUN ON ReminiAOD ------------------------   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
 process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
