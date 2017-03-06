@@ -53,8 +53,10 @@ Modify the input rootfile to process here :
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring("file:myfile.root").
-    
-In this config file you can modify the inputs collection on the JEC you bwant to use in the first place.
+   
+In this config file you can modify the inputs collection on the JEC you want to use in the first place.
+
+Change the flag isreMiniAOD to true if you run on re-miniaod.
     
 You can now launch a local test : 
 
@@ -69,7 +71,7 @@ Begin processing the 10th record. Run 273730, Event 3146571947, LumiSection 2623
 13-Jun-2016 10:49:45 CEST  Closed file file:/afs/cern.ch/user/j/juska/eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/730/00000/EA345ED4-B821-E611-BEA5-02163E0138E2.root
 
 
-You can now look at your output rootfile. A Healthy rootfile look like a file with a single tree named events that store all the variables your 're interested in.
+You can now look at your output rootfile. A Healthy rootfile look like a file with a single tree called events that store all the variables your are interested in.
 
 
 If all went correctly you can now begin crab production.

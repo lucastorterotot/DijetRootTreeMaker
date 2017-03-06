@@ -111,6 +111,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     double ptMinPhoton_;
     bool mVerbose = false;
     bool isData_;
+    bool isReminiAOD_;
     bool goodPVtx_;
     
     
@@ -148,8 +149,8 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<std::vector<pat::MET> > srcMET_      ;
     edm::EDGetTokenT<std::vector<pat::MET> > srcMETforgen_;
     edm::EDGetTokenT<std::vector<pat::MET> > srcMETpuppi_ ;
+    edm::EDGetTokenT<std::vector<pat::MET> > srcMETEGcleaned_;
 
-    edm::EDGetTokenT<pat::METCollection> metToken_;
     edm::EDGetTokenT<reco::VertexCollection> srcVrtx_;
 
     edm::EDGetTokenT<reco::GenJetCollection> srcGenJetsAK4_;
@@ -181,8 +182,16 @@ class DijetTreeProducer : public edm::EDAnalyzer
     int   nPhotons_, nPhotonsLoose_,nPhotonsMedium_,nPhotonsTight_, nGenphotons_;
     int   nMuonsLoose_;
     TParameter<int>*  Nevent_tot;
+    
+    //-----egcleanned variables-----
+    
+    bool  isEGfixpropagated_, isEcalMulEGfixempty;
+    
 
     float rho_,metEnergy_,metPt_,metPhi_,metEta_,metEnergypuppi_,metPtpuppi_,metPhipuppi_,metEtapuppi_,metSig_,metcorrected_;
+    
+    float PFmetX_, PFmetY_, EGmetX_, EGmetY_, CHSmetX_, CHSmetY_;
+    
     float metEnergyGen_,metPtGen_,metPhiGen_,metEtaGen_,metEnergypuppiGen_,metPtpuppiGen_,metPhipuppiGen_,metEtapuppiGen_;
     float htAK4_;
     float htAK8_;

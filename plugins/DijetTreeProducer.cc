@@ -74,8 +74,8 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   endcapRecHitCollection_ = cfg.getParameter<InputTag>("ee");
   srceerechit_            = consumes<EcalRecHitCollection>(endcapRecHitCollection_);
  
- 
-  
+  isData_ = cfg.getParameter<bool>("isData");
+  isReminiAOD_ = cfg.getParameter<bool>("isreMiniAOD");
   srcJetsAK4_   = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>    ("jetsAK4")));
   qgToken       = (consumes<edm::ValueMap<float> >(edm::InputTag              ("QGTagger", "qgLikelihood")));
   srcJetsAK8_   = (consumes<pat::JetCollection>(cfg.getParameter<InputTag>    ("jetsAK8")));
@@ -85,8 +85,12 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   srcMET_             = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("met")));
   srcMETforgen_       = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metforggen")));
   srcMETpuppi_        = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metpuppi")));
-
-  metToken_            = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>            ("metTypeI")));
+  if (isData_ && isReminiAOD_){
+  srcMETEGcleaned_    = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metEGcleaned")));
+  }else {
+  
+  srcMETEGcleaned_    = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("met")));
+  }
   srcVrtx_             = (consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>         ("vtx")));
   srcJetsAK4puppiView_ =(consumes<edm::View<pat::Jet>>(cfg.getParameter<edm::InputTag>             ("jetsPUPPI")));
   
@@ -104,7 +108,7 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   //PUInfoToken = consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("PUInfoInputTag"));
   
   // These are now causing data run to fail. Weird it used to work with 2015 version?!
-  isData_ = cfg.getParameter<bool>("isData");
+  
   //if(cfg.getParameter<int>)
   if (!isData_){
     
@@ -432,6 +436,15 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("metPtPUPPIGen"                ,&metPtpuppiGen_             ,"metPtpuppiGen_/F");
   outTree_->Branch("metEtaPUPPIGen"               ,&metEtapuppiGen_            ,"metEtapuppiGen_/F");
   outTree_->Branch("metPhiPUPPIGen"               ,&metPhipuppiGen_            ,"metPhipuppiGen_/F");
+  
+  
+  
+  outTree_->Branch("PFmetX"                ,&PFmetX_             ,"PFmetX_/F");
+  outTree_->Branch("PFmetY"                ,&PFmetY_             ,"PFmetY_/F");
+  outTree_->Branch("EGmetX"                ,&EGmetX_             ,"EGmetX_/F");
+  outTree_->Branch("EGmetY"                ,&EGmetY_             ,"EGmetY_/F");
+  outTree_->Branch("CHSmetX"                ,&CHSmetX_             ,"CHSmetX_/F");
+  outTree_->Branch("CHSmetY"                ,&CHSmetY_             ,"CHSmetY_/F");
   
   
   gen_eta          = new std::vector<float>;
@@ -1422,6 +1435,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
       iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);     
       double rhod = *rho;
+    //  double ptphotight = 0. ;
       //uint32_t index_photon_tight = 0;
       pat::Photon PhotonT ;
       
@@ -1485,12 +1499,19 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
 		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
 		  energysmearedphoton_  ->push_back( iphotonsmear->energy());		  
-		  if (!iEvent.isRealData()) {
-		  ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
-                  phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
-                  etaGenphoton_    ->push_back( iphoton->genPhoton()->eta() );
-                  energyGenphoton_ ->push_back( iphoton->genPhoton()->energy());
-	          nGenphotons_++;
+		  if (!iEvent.isRealData() ) {
+		  	if(iphoton->genPhoton()){
+		  		ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
+                  		phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
+                  		etaGenphoton_    ->push_back( iphoton->genPhoton()->eta() );
+                  		energyGenphoton_ ->push_back( iphoton->genPhoton()->energy());
+	          		nGenphotons_++;
+	          	}else{
+	          		ptGenphoton_     ->push_back( -999 );
+                  		phiGenphoton_    ->push_back( -999 );
+                  		etaGenphoton_    ->push_back( -999 );
+                  		energyGenphoton_ ->push_back( -999 );
+	          	}
 		  }
 		  
                 }
@@ -1519,6 +1540,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		   //  index_photon_tight = index ;
 		     PhotonT = (*iphoton);
 		     isPhotonTight_   ->push_back(true);
+		    // ptphotight = iphoton->pt();
 		     
 		 }             
           }
@@ -1536,7 +1558,10 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
       Handle<vector<pat::MET> > metforgenchs;
       iEvent.getByToken(srcMETforgen_,metforgenchs);
-  
+      
+      Handle<vector<pat::MET> > metEGcleaned;
+      iEvent.getByToken(srcMETEGcleaned_, metEGcleaned);
+      
   
      Handle<vector<pat::MET> > metpuppi;
      iEvent.getByToken(srcMETpuppi_,metpuppi);
@@ -1546,6 +1571,8 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
      
      pat::MET rawMet = (*rawmet)[0];
      rawMet.setP4( Met.uncorP4() );
+     
+     pat::MET EGcleanedMet = (*metEGcleaned)[0];
       
       
       if(nPhotonsTight_ == 1){
@@ -1576,11 +1603,31 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   FootprintMEx += -1.* PhotonT.px();
   FootprintMEy += -1.* PhotonT.py();
   
+  // slew rate mitigation fix
+  if (iEvent.isRealData() && isReminiAOD_){
+  FootprintMEx += (+1*Met.px() - EGcleanedMet.px());
+  FootprintMEy += (+1*Met.py() - EGcleanedMet.py());
+  }
+  /*if(ptphotight > 250.){
+  double test1 = 0. ;
+  double test2 = 0. ;
+  test1 += (+1*Met.px() - EGcleanedMet.px());
+  test2 += +1*Met.px() - EGcleanedMet.px();
+  
+  std::cout<<"test += parenthese : "<< test1 << std::endl;
+  std::cout<<"test +=  : "<< test2 << std::endl;
+ 
+  }*/
   double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy);   
   
 rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
       
-      
+   PFmetX_ =  Met.px();
+   PFmetY_ =  Met.py();
+   EGmetX_ =  EGcleanedMet.px();
+   EGmetY_ =  EGcleanedMet.py();
+   CHSmetX_ = FootprintMEx;
+   CHSmetY_ = FootprintMEy; 
       
   metEnergy_    = rawMet.energy();
   metEta_       = rawMet.eta();      
@@ -1746,10 +1793,10 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
        
        idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
     }*/
-    if(!iEvent.isRealData()&& !ijet->genJet()){
-      idL = 0 ;
-      idT = 0 ;     
-    }
+   // if(!iEvent.isRealData()&& !ijet->genJet()){
+   //   idL = 0 ;
+   //   idT = 0 ;     
+   // }
     edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsview, ijetview - jetsview->begin()));
 
        
@@ -1936,10 +1983,10 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
        
        idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
     }
-    if(!iEvent.isRealData()&& !ijet->genJet()){
-      idL = 0 ;
-      idT = 0 ;     
-    }
+   // if(!iEvent.isRealData()&& !ijet->genJet()){
+   //   idL = 0 ;
+   //   idT = 0 ;     
+   // }
     edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsviewpuppi, ijetview - jetsviewpuppi->begin()));
 
        
@@ -2197,8 +2244,8 @@ bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, cons
     bool isValid = true;
     edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMap;
     event.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
-    if (!isData_ && !photonRef->genPhoton())   
-    return false;
+   // if (!isData_ && !photonRef->genPhoton())   
+   // return false;
    // #1: H/E
     isValid &= photonRef->hadTowOverEm() < 0.0597;
     if (! isValid)
@@ -2237,8 +2284,8 @@ bool DijetTreeProducer::isValidPhotonMedium(const pat::PhotonRef& photonRef, con
     bool isValid = true;
     edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMap;
     event.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
-    if (!isData_ && !photonRef->genPhoton())   
-    return false;
+   // if (!isData_ && !photonRef->genPhoton())   
+   // return false;
    // #1: H/E
     isValid &= photonRef->hadTowOverEm() < 0.0396;
     if (! isValid)
@@ -2276,8 +2323,8 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     bool isValid = true;
     edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMap;
     event.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
-    if (!isData_ && !photonRef->genPhoton())   
-    return false;
+    //if (!isData_ && !photonRef->genPhoton())   
+   // return false;
    // #1: H/E
     isValid &= photonRef->hadTowOverEm() < 0.0269;
     if (! isValid)
@@ -2335,6 +2382,14 @@ void DijetTreeProducer::initialize()
   metEtaGen_         = -999;
   metPtGen_          = -999;
   metPhiGen_         = -999;
+  
+  
+  PFmetX_ = -999  ;
+  PFmetY_ = -999  ;
+  CHSmetX_= -999  ;
+  CHSmetY_= -999  ;
+  EGmetX_ = -999  ; 
+  EGmetY_ = -999  ;
   
   metEnergypuppiGen_      = -999;
   metEtapuppiGen_         = -999;

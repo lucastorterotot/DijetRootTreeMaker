@@ -100,8 +100,8 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 # handled separately there.
 
 process.source = cms.Source("PoolSource",
-    #fileNames = cms.untracked.vstring("root://eoscms//eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/411/00000/10CB3C59-721B-E611-AFB4-02163E012711.root")
-    fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_8_0_8_patch1/src/JetMETCorrections/GammaJetFilter/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
+    fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver1-v1/100000/04CFB75E-12EE-E611-918B-02163E0125C4.root")
+   # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_8_0_8_patch1/src/JetMETCorrections/GammaJetFilter/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
    # fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
     
 )
@@ -202,16 +202,15 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
   # There's no avoiding this in Consumes era
   isData          = cms.bool(True),
-
+  isreMiniAOD     = cms.bool(False),
   ## JETS/MET ########################################
   jetsAK4             = cms.InputTag('slimmedJets'), 
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
-  met              = cms.InputTag('slimmedMETs'),#'slMETsCHS'),
-  metforggen       = cms.InputTag('slimmedMETs'),  
+  met              = cms.InputTag('slimmedMETs'),
+  metforggen       = cms.InputTag('slimmedMETs'),
   metpuppi              = cms.InputTag('slimmedMETsPuppi'),
-  metTypeI         = cms.InputTag('slimmedMETs'),#'slMETsCHS'),
   PFCands = cms.InputTag('packedPFCandidates'),
   
  # QGT              = cms.InputTag('QGTagger'),
@@ -284,9 +283,6 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ## JECs ################
   redoJECs  = cms.bool(True),
 
-  ## Version Summer15_25nsV8 ( https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/ )
-  # Note that it hardly matters what is put in here, as these should be overriden in analysis step anyway. Juska.
-  # That's also why these JEC's are greatly dated.
   
   L1corrAK4_DATA = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer16_23Sep2016BCDV4_DATA/Summer16_23Sep2016BCDV4_DATA_L1FastJet_AK4PFchs.txt'),
   L2corrAK4_DATA = cms.FileInPath('CMSDIJET/DijetRootTreeMaker/data/Summer16_23Sep2016BCDV4_DATA/Summer16_23Sep2016BCDV4_DATA_L2Relative_AK4PFchs.txt'),
