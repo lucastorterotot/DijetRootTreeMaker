@@ -35,7 +35,7 @@ process.GlobalTag.globaltag = '80X_dataRun2_2016SeptRepro_v4' #80X_mcRun2_asympt
 
 #--------------------- Report and output ---------------------------
 # Note: in grid runs this parameter is not used.
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -100,7 +100,7 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 # handled separately there.
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver2-v2/100000/000C0045-12EB-E611-9BEC-008CFA197C34.root")
+    fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver2-v2/100000/000C0045-12EB-E611-9BEC-008CFA197C34.root","/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver2-v2/100000/0093042E-2FEB-E611-94E9-008CFA197DC4.root","/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver2-v2/100000/0096882C-04EB-E611-9C85-008CFA19741C.root")
    # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_8_0_8_patch1/src/JetMETCorrections/GammaJetFilter/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
    # fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
     
@@ -116,61 +116,6 @@ process.calibratedPatElectrons
 
 
 ##-------------------- User analyzer  --------------------------------
-
-
-##-------------------- MET --------------------------------
-
-## MET CHS (not available as slimmedMET collection)
-## copied from https://github.com/cms-jet/JMEValidator/blob/CMSSW_7_6_X/python/FrameworkConfiguration.py
-#def clean_met_(met):
- #    del met.t01Variation
- #    del met.t1Uncertainties
-#     del met.t1SmearedVarsAndUncs
- #    del met.tXYUncForRaw
- ##    del met.tXYUncForT1
- #    del met.tXYUncForT01
- #    del met.tXYUncForT1Smear
- #    del met.tXYUncForT01Smear
-
-#from PhysicsTools.PatAlgos.tools.metTools import addMETCollection
-
-## Raw PF METs
-#process.load('RecoMET.METProducers.PFMET_cfi')
-
-#process.pfMet.src = cms.InputTag('packedPFCandidates')
-#addMETCollection(process, labelName='patPFMet', metSource='pfMet') # RAW MET
-#process.patPFMet.addGenMET = False
-
-#process.pfMetCHS = process.pfMet.clone()
-
-#process.pfMetCHS.src = cms.InputTag("chs")
-#process.pfMetCHS.alias = cms.string('pfMetCHS')
-#addMETCollection(process, labelName='patPFMetCHS', metSource='pfMetCHS')
-# RAW CHS MET
-#process.patPFMetCHS.addGenMET = False
-
-
-## Slimmed METs
-#from PhysicsTools.PatAlgos.slimming.slimmedMETs_cfi import slimmedMETs
-#### CaloMET is not available in MiniAOD
-#del slimmedMETs.caloMET
-
-### CHS
-#process.slimmedMETsCHS = slimmedMETs.clone()
-#if hasattr(process, "patPFMetCHS"):
-#     # Create MET from Type 1 PF collection
-#     process.patPFMetCHS.addGenMET = False
-#     process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
-#     process.slimmedMETsCHS.rawUncertainties = cms.InputTag("patPFMetCHS") # only central value
-#else:
-     # Create MET from RAW PF collection
-#     process.patPFMetCHS.addGenMET = False
- #    process.slimmedMETsCHS.src = cms.InputTag("patPFMetCHS")
- #    del process.slimmedMETsCHS.rawUncertainties # not available
-
-#clean_met_(process.slimmedMETsCHS)
-#addMETCollection(process, labelName="slMETsCHS", metSource="slimmedMETsCHS")
-#process.slMETsCHS.addGenMET = False
 
 
 
@@ -196,7 +141,63 @@ process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other op
 
 
 
-#process.source.eventsToProcess = cms.untracked.VEventRange("273013:331112681","273013:331112681")
+# EG cleaned
+
+	## Following lines are for default MET for Type1 corrections.
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+
+   # If you only want to re-correct for JEC and get the proper uncertainties for the default MET
+runMetCorAndUncFromMiniAOD(process,
+                          isData=True ,
+                         )
+
+   # Now you are creating the e/g corrected MET on top of the bad muon corrected MET (on re-miniaod)
+from PhysicsTools.PatUtils.tools.corMETFromMuonAndEG import corMETFromMuonAndEG
+corMETFromMuonAndEG(process,
+                    pfCandCollection="", #not needed                                                                                                                                                                                                                                                                                                                      
+                    electronCollection="slimmedElectronsBeforeGSFix",
+                    photonCollection="slimmedPhotonsBeforeGSFix",
+                    corElectronCollection="slimmedElectrons",
+                    corPhotonCollection="slimmedPhotons",
+                    allMETEGCorrected=True,
+                    muCorrection=False,
+                    eGCorrection=True,
+                    runOnMiniAOD=True,
+                    postfix="MuEGClean"
+                    )
+process.slimmedMETsMuEGClean = process.slimmedMETs.clone()
+process.slimmedMETsMuEGClean.src = cms.InputTag("patPFMetT1MuEGClean")
+process.slimmedMETsMuEGClean.rawVariation =  cms.InputTag("patPFMetRawMuEGClean")
+process.slimmedMETsMuEGClean.t1Uncertainties = cms.InputTag("patPFMetT1%sMuEGClean")
+del process.slimmedMETsMuEGClean.caloMET
+ 
+     # If you are running in the scheduled mode:
+process.egcorrMET = cms.Sequence(
+        process.cleanedPhotonsMuEGClean+process.cleanedCorPhotonsMuEGClean+
+        process.matchedPhotonsMuEGClean + process.matchedElectronsMuEGClean +
+        process.corMETPhotonMuEGClean+process.corMETElectronMuEGClean+
+        process.patPFMetT1MuEGClean+process.patPFMetRawMuEGClean+
+        process.patPFMetT1SmearMuEGClean+process.patPFMetT1TxyMuEGClean+
+        process.patPFMetTxyMuEGClean+process.patPFMetT1JetEnUpMuEGClean+
+        process.patPFMetT1JetResUpMuEGClean+process.patPFMetT1SmearJetResUpMuEGClean+
+        process.patPFMetT1ElectronEnUpMuEGClean+process.patPFMetT1PhotonEnUpMuEGClean+
+        process.patPFMetT1MuonEnUpMuEGClean+process.patPFMetT1TauEnUpMuEGClean+
+        process.patPFMetT1UnclusteredEnUpMuEGClean+process.patPFMetT1JetEnDownMuEGClean+
+        process.patPFMetT1JetResDownMuEGClean+process.patPFMetT1SmearJetResDownMuEGClean+
+        process.patPFMetT1ElectronEnDownMuEGClean+process.patPFMetT1PhotonEnDownMuEGClean+
+        process.patPFMetT1MuonEnDownMuEGClean+process.patPFMetT1TauEnDownMuEGClean+
+        process.patPFMetT1UnclusteredEnDownMuEGClean+process.slimmedMETsMuEGClean)
+
+
+
+
+
+
+
+
+
+
+#process.source.eventsToProcess = cms.untracked.VEventRange("274999:1072833041","274999:1072833041")
 
 
 
@@ -226,7 +227,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
   met              = cms.InputTag('slimmedMETsUncorrected'),
   metforggen       = cms.InputTag('slimmedMETsUncorrected'),
-  metEGcleaned     = cms.InputTag('slimmedMETsEGClean'),  
+  metEGcleaned     = cms.InputTag('slimmedMETsMuEGClean',processName = "jetToolbox"),  
   metpuppi              = cms.InputTag('slimmedMETsPuppi'),
   PFCands = cms.InputTag('packedPFCandidates'),
   
@@ -330,5 +331,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
 
 process.p = cms.Path()
+process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
+process.p +=                      process.egcorrMET  
 process.p +=                      process.chs
 process.p +=                      process.dijets

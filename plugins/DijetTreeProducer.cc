@@ -438,14 +438,14 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("metPhiPUPPIGen"               ,&metPhipuppiGen_            ,"metPhipuppiGen_/F");
   
   
-  
+  /*
   outTree_->Branch("PFmetX"                ,&PFmetX_             ,"PFmetX_/F");
   outTree_->Branch("PFmetY"                ,&PFmetY_             ,"PFmetY_/F");
   outTree_->Branch("EGmetX"                ,&EGmetX_             ,"EGmetX_/F");
   outTree_->Branch("EGmetY"                ,&EGmetY_             ,"EGmetY_/F");
   outTree_->Branch("CHSmetX"                ,&CHSmetX_             ,"CHSmetX_/F");
   outTree_->Branch("CHSmetY"                ,&CHSmetY_             ,"CHSmetY_/F");
-  
+  */
   
   gen_eta          = new std::vector<float>;
   gen_phi          = new std::vector<float>;
@@ -801,10 +801,10 @@ void DijetTreeProducer::beginJob()
 
   //------------------------------------------------------------------
   triggerResult_  = new std::vector<bool>;
-  triggerPrescale_ = new std::vector<double>;
+  triggerPrescale_ = new std::vector<int>;
   triggerName_     = new std::vector<std::string>;
   outTree_->Branch("triggerResult","vector<bool>",&triggerResult_);
-  outTree_->Branch("triggerPrescale","vector<double>",&triggerPrescale_);
+  outTree_->Branch("triggerPrescale","vector<int>",&triggerPrescale_);
   outTree_->Branch("triggerName","vector<string>",&triggerName_);
 
 
@@ -1144,46 +1144,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   //-------------- Event Info -----------------------------------
   rho_    = *rho;
 
-/*
-  Handle<vector<pat::MET> > met;
-  iEvent.getByToken(srcMET_,met);
-  
-  Handle<vector<pat::MET> > metpuppi;
-  iEvent.getByToken(srcMETpuppi_,metpuppi);
 
-
-
-
-  
-  metEnergy_    = (*met)[0].energy();
-  metEta_       = (*met)[0].eta();      
-  metPhi_       = (*met)[0].phi();
-  metPt_        = (*met)[0].pt();
-  
-  if(!iEvent.isRealData() &&(*met)[0].genMET ())
-  {
-      metEnergyGen_    = (*met)[0].genMET ()->energy();
-      metEtaGen_       = (*met)[0].genMET ()->eta();      
-      metPhiGen_       = (*met)[0].genMET ()->phi();
-      metPtGen_        = (*met)[0].genMET ()->pt();
-  }
-  
-  metEnergypuppi_    = (*metpuppi)[0].energy();
-  metEtapuppi_       = (*metpuppi)[0].eta();      
-  metPhipuppi_       = (*metpuppi)[0].phi();
-  metPtpuppi_        = (*metpuppi)[0].pt(); 
-  if(!iEvent.isRealData() &&(*metpuppi)[0].genMET ())
-  {
-     metEnergypuppiGen_    = (*metpuppi)[0].genMET ()->energy();
-     metEtapuppiGen_       = (*metpuppi)[0].genMET ()->eta();      
-     metPhipuppiGen_       = (*metpuppi)[0].genMET ()->phi();
-     metPtpuppiGen_        = (*metpuppi)[0].genMET ()->pt();
-  }
-  
-  if ((*met)[0].sumEt() > 0) {
-    metSig_ = (*met)[0].et()/(*met)[0].sumEt();
-}
-   */ 
   nVtx_   = recVtxs->size();
   run_    = iEvent.id().run();
   evt_    = iEvent.id().event();
@@ -1308,7 +1269,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
   size_t sizetrigger = Trigger_result->size();
   const edm::TriggerNames& triggerNames = iEvent.triggerNames(*Trigger_result);
-  double prescalefactor = 1. ;
+  int prescalefactor = 1 ;
   std::string triggerName ;
   std::string ValidTriggerregex;
   std::vector<std::string> ValidTrigger ;
@@ -1435,6 +1396,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
       iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);     
       double rhod = *rho;
+     // double photTpx,photTpy,photTpT;
     //  double ptphotight = 0. ;
       //uint32_t index_photon_tight = 0;
       pat::Photon PhotonT ;
@@ -1541,6 +1503,9 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		     PhotonT = (*iphoton);
 		     isPhotonTight_   ->push_back(true);
 		    // ptphotight = iphoton->pt();
+		  //  photTpx = iphoton->px();
+		  //  photTpy = iphoton->py();
+		    //photTpT = iphoton->pt();
 		     
 		 }             
           }
@@ -1585,10 +1550,12 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     footprint.push_back(PhotonT.sourceCandidatePtr(i) );
   }
   // now loop on pf candidates
+ //  std::cout<<"foot print size : "<<footprint.size()<<std::endl;
   for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
     const pat::PackedCandidate &pf = (*pfs)[i];
     // pfcandidate-based footprint removal
     if (std::find(footprint.begin(), footprint.end(), reco::CandidatePtr(pfs,i)) != footprint.end()) {
+      //std::cout<<"PF : px : "<<pf.px()<< " py : "<<pf.py()<< " pT : "<< pf.pt() << std::endl;
       continue;
     }
     // federico
@@ -1600,35 +1567,38 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   }// loop over pfCand
   
   // Re-adding  photon but reco 
+  if(footprint.size() > 0){
   FootprintMEx += -1.* PhotonT.px();
   FootprintMEy += -1.* PhotonT.py();
-  
+  }
+
   // slew rate mitigation fix
   if (iEvent.isRealData() && isReminiAOD_){
-  FootprintMEx += (+1*Met.px() - EGcleanedMet.px());
-  FootprintMEy += (+1*Met.py() - EGcleanedMet.py());
+  FootprintMEx += (-1*Met.px() + EGcleanedMet.px());
+  FootprintMEy += (-1*Met.py() + EGcleanedMet.py());
   }
-  /*if(ptphotight > 250.){
-  double test1 = 0. ;
-  double test2 = 0. ;
-  test1 += (+1*Met.px() - EGcleanedMet.px());
-  test2 += +1*Met.px() - EGcleanedMet.px();
+
+
+  double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy);
   
-  std::cout<<"test += parenthese : "<< test1 << std::endl;
-  std::cout<<"test +=  : "<< test2 << std::endl;
- 
-  }*/
-  double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy);   
+  /* if(Met.px() != EGcleanedMet.px() &&  photTpT > 300.){   
+  std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" Bunch crossing number : "<<BXnumber_  << std::endl;
+  std::cout<<"slimmedMETsEGClean : MEx : "<<EGcleanedMet.px()<< " MEy : "<<EGcleanedMet.py()<< " MET : "<< EGcleanedMet.pt() << std::endl;
+  std::cout<<"slimmedMETsUncorrected : MEx : "<<Met.px()<< " MEy : "<<Met.py()<< " MET : "<< Met.pt() << std::endl;
+  std::cout<<"CHS footprint corrected : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< FootprintMEPt << std::endl;
+  std::cout<<"Photon : px : "<<photTpx<< " py : "<<photTpy<< " pT : "<< photTpT << std::endl;
+ }*/
+  
   
 rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
-      
+   /*   
    PFmetX_ =  Met.px();
    PFmetY_ =  Met.py();
    EGmetX_ =  EGcleanedMet.px();
    EGmetY_ =  EGcleanedMet.py();
    CHSmetX_ = FootprintMEx;
    CHSmetY_ = FootprintMEy; 
-      
+      */
   metEnergy_    = rawMet.energy();
   metEta_       = rawMet.eta();      
   metPhi_       = rawMet.phi();
@@ -2382,7 +2352,7 @@ void DijetTreeProducer::initialize()
   metEtaGen_         = -999;
   metPtGen_          = -999;
   metPhiGen_         = -999;
-  
+  /*
   
   PFmetX_ = -999  ;
   PFmetY_ = -999  ;
@@ -2390,7 +2360,7 @@ void DijetTreeProducer::initialize()
   CHSmetY_= -999  ;
   EGmetX_ = -999  ; 
   EGmetY_ = -999  ;
-  
+  */
   metEnergypuppiGen_      = -999;
   metEtapuppiGen_         = -999;
   metPtpuppiGen_          = -999;

@@ -167,7 +167,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<edm::TriggerResults> srcTriggerResults_;
     edm::EDGetTokenT<pat::PackedTriggerPrescales> srcTriggerPrescale_;
     std::vector<bool>  *triggerResultfromToken_;
-    std::vector<double> *triggerPrescale_; 
+    std::vector<int> *triggerPrescale_; 
     std::vector<std::string> *triggerName_;
     
     
