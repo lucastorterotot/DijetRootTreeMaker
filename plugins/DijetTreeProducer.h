@@ -119,6 +119,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
 
     edm::EDGetTokenT<pat::PhotonCollection> srcPhoton_;
     edm::EDGetTokenT<pat::PhotonCollection> srcPhotonsmeared_;
+    edm::EDGetTokenT<pat::PhotonCollection> srcPhotonUncorr_;
     edm::EDGetTokenT<pat::ElectronCollection> srcElectron_;
     edm::EDGetTokenT<pat::ElectronCollection> srcElectronsmeared_;
     edm::EDGetTokenT<pat::MuonCollection> srcMuon_;
