@@ -108,10 +108,11 @@ process.source = cms.Source("PoolSource",
 process.source.eventsToProcess = cms.untracked.VEventRange("276950:3930563733","277076:428143465","277076:430557535")
 #-------------------photon energy smearer-------------------------
 #correctionType = "80Xapproval"
-process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
-process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
-process.calibratedPatPhotons 
-process.calibratedPatElectrons 
+
+#process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
+#process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
+#process.calibratedPatPhotons 
+#process.calibratedPatElectrons
 
 
 
@@ -191,7 +192,63 @@ process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other op
 
 #------------------------------------------------------------
 
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
+dataFormat = DataFormat.MiniAOD
+switchOnVIDPhotonIdProducer(process, dataFormat)
+my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
+for idmod in my_id_modules:
+         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
+
+from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
+process = regressionWeights(process)
+
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                  #calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(8675389),
+                  #                                    engineName = cms.untracked.string('TRandom3'),
+                  #                                    ),
+                  calibratedPatPhotons    = cms.PSet( initialSeed = cms.untracked.uint32(8675389),
+                                                      engineName = cms.untracked.string('TRandom3'),
+                                                      ),
+                                                   )
+
+process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
+#process.load('EgammaAnalysis.ElectronTools.calibratedPatElectronsRun2_cfi')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
+
+process.regressionApplication
+
+
+#process.calibratedPatElectrons
+process.calibratedPatPhotons
+#process.calibratedPatElectrons.isMC = cms.bool(False)
+process.calibratedPatPhotons.isMC = cms.bool(False)
+
+
+process.EGMRegression = cms.Path(process.regressionApplication)
+#process.EGMSmearerElectrons = cms.Path(process.calibratedPatElectrons)
+process.EGMSmearerPhotons   = cms.Path(process.calibratedPatPhotons)
+
+#process.selectedElectrons = cms.EDFilter("PATElectronSelector",
+#    src = cms.InputTag("calibratedPatElectrons"),
+#    cut = cms.string("pt>5 && abs(eta)")
+#)
+
+#process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('selectedElectrons')
+#process.electronIDValueMapProducer.srcMiniAOD = cms.InputTag('selectedElectrons')
+#process.electronRegressionValueMapProducer.srcMiniAOD = cms.InputTag('selectedElectrons')
+#process.electronMVAValueMapProducer.srcMiniAOD = cms.InputTag('selectedElectrons')
+
+process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+    src = cms.InputTag('calibratedPatPhotons'),
+    cut = cms.string('pt>5 && abs(eta)')
+)
+
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag('selectedPhotons')
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag('selectedPhotons')
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
 
 
 
@@ -226,8 +283,8 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('slimmedPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
+  Photon                    = cms.InputTag('selectedPhotons'),
+  Photonsmeared             = cms.InputTag('selectedPhotons'),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
   phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
@@ -248,7 +305,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
    ## electrons ######################################## 
 
   Electrons                 = cms.InputTag('slimmedElectrons'),
-  Electronssmeared          = cms.InputTag('calibratedPatElectrons'),
+  Electronssmeared          = cms.InputTag('slimmedElectrons'),
   ## muons ########################################
 
   Muons                     = cms.InputTag('slimmedMuons'),
@@ -322,4 +379,12 @@ process.p = cms.Path()
 process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
 process.p +=                      process.egcorrMET  
 process.p +=                      process.chs
+process.p +=                      process.egmPhotonIDSequence
+process.p +=                      process.regressionApplication 
+#process.p +=                      process.calibratedPatPhotons 
+#process.p +=                      process.calibratedPatElectrons
+#process.p +=                      process.selectedElectrons
+#process.p +=                      process.egmGsfElectronIDSequence
+process.p +=                      process.selectedPhotons
+#process.p +=                      process.PhotonIDValueMapProducer
 process.p +=                      process.dijets
