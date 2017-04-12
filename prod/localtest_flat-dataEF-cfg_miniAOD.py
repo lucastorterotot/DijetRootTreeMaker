@@ -191,7 +191,7 @@ process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be
 process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
 #------------------------------------------------------------
-
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
 dataFormat = DataFormat.MiniAOD
@@ -200,6 +200,8 @@ my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonI
 for idmod in my_id_modules:
          setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
 
+
+#process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
 process = regressionWeights(process)
 
@@ -252,7 +254,7 @@ process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
 
 
 
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+
 
 # Residue from AOD and RECO running
 calo_collection=''
@@ -283,7 +285,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('selectedPhotons'),
+  Photon                    = cms.InputTag('slimmedPhotons'),
   Photonsmeared             = cms.InputTag('selectedPhotons'),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
@@ -379,9 +381,10 @@ process.p = cms.Path()
 process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
 process.p +=                      process.egcorrMET  
 process.p +=                      process.chs
+#process.p +=                      process.PhotonIDValueMapProducer
 process.p +=                      process.egmPhotonIDSequence
 process.p +=                      process.regressionApplication 
-#process.p +=                      process.calibratedPatPhotons 
+process.p +=                      process.calibratedPatPhotons 
 #process.p +=                      process.calibratedPatElectrons
 #process.p +=                      process.selectedElectrons
 #process.p +=                      process.egmGsfElectronIDSequence
