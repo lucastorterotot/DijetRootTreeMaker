@@ -60,6 +60,8 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   //ADD photons 
   srcPhoton_         = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photon")));
   srcPhotonsmeared_  = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photonsmeared")));
+  
+ // srcPhotonsnofix_   = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photonsmeared_nofix")));
   srcPhotonUncorr_   = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("Photon")));
   ptMinPhoton_       = cfg.getParameter<double>                    ("ptMinPhoton");
   full5x5SigmaIEtaIEtaMapToken_    =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5SigmaIEtaIEtaMap")));
@@ -89,7 +91,7 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   srcMETpuppi_        = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metpuppi")));
   if (isData_ && isReminiAOD_){
   srcMETEGcleaned_    = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("metEGcleaned")));
-  srcPhotonUncorr_    = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>("PhotonUncorr")));
+  srcPhotonUncorr_    = (consumes<pat::PhotonCollection>(cfg.getParameter<InputTag>                ("PhotonUncorr")));
   }else {
   
   srcMETEGcleaned_    = (consumes<pat::METCollection >(cfg.getParameter<edm::InputTag>             ("met")));
@@ -513,12 +515,16 @@ void DijetTreeProducer::beginJob()
   isPhotonMedium_      = new std::vector<bool>;
   isPhotonTight_       = new std::vector<bool>;
   Ecorrbump_           = new std::vector<double>;
+  
+  // ptphotonnofix_       = new std::vector<float>;  
  
   full5x5SigmaIEtaIEtaMapTokenphoton_   = new std::vector<float>;
   phoChargedIsolationTokenphoton_       = new std::vector<float>;
   phoNeutralHadronIsolationTokenphoton_ = new std::vector<float>;
   phoPhotonIsolationTokenphoton_        = new std::vector<float>;
-
+  
+  
+ // outTree_->Branch("PhotonPtnofix"         ,"vector<float>"   ,&ptphotonnofix_);
   outTree_->Branch("PhotonLoosePt"         ,"vector<float>"   ,&ptphoton_);
   outTree_->Branch("PhotonsmearPt"         ,"vector<float>"   ,&ptsmearedphoton_);
   outTree_->Branch("PhotonSCPt"           ,"vector<float>"   ,&ptphotonSC_);  
@@ -1065,7 +1071,8 @@ void DijetTreeProducer::endJob()
  delete muPhi_  ;    
  delete muEnergy_;
  delete Ecorrbump_;
-
+ 
+// delete ptphotonnofix_;
   
   for(unsigned i=0;i<vtriggerSelector_.size();i++) {
     delete vtriggerSelector_[i];
@@ -1116,6 +1123,9 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
   Handle<pat::PhotonCollection> photonssmear;
   iEvent.getByToken(srcPhotonsmeared_,photonssmear);
+  
+ // Handle<pat::PhotonCollection> photonsnofix;
+  //iEvent.getByToken(srcPhotonsnofix_, photonsnofix);
   
 //   //------------------ Genphoton ----------------------------------- 
 
@@ -1388,6 +1398,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       uint32_t index = 0;
       pat::PhotonCollection::const_iterator iphoton = photons->begin();
       pat::PhotonCollection::const_iterator iphotonsmear= photonssmear->begin();
+   //   pat::PhotonCollection::const_iterator iphotonnofix= photonsnofix->begin();
       
      // pat::PhotonCollection::const_iterator iphotonpt = photons->begin();
       //pat::PhotonCollection::const_iterator iphotonsuncorrpt= photonsUncorr->begin();
@@ -1414,6 +1425,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     //  double ptphotight = 0. ;
       //uint32_t index_photon_tight = 0;
       pat::Photon PhotonT ;
+      pat::Photon PhotonTOoB ;
     //  pat::Photon PhotonTcorr ; 
      /* std::cout<<" size of photon        : "<< photons->size() << std::endl;
       std::cout<<" size of photon uncorr : "<< photonsUncorr->size() << std::endl;
@@ -1430,7 +1442,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
          std::cout<<" pT of "<<nph<<"  photon uncorr : "<<iphotonsuncorrpt->pt()<<std::endl;
       }
 */
-      for(; iphoton != photons->end(); ++iphoton,++iphotonsmear,index++ ) 
+      for(; iphoton != photons->end(); ++iphoton,++iphotonsmear, index++ ) 
       { 
            nPhotons_++;
            pho =*iphoton;
@@ -1463,7 +1475,8 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  
 		  isPhotonLoose_        ->push_back( true) ;
 		  HaspixelSeed_         ->push_back(iphoton->hasPixelSeed());
-		  hadTowOverEm_         ->push_back(iphoton->hadTowOverEm());
+		  hadTowOverEm_         ->push_back(iphoton->hadronicOverEm());
+		 // std::cout<<"hadtowoverE : "<<pho.hadTowOverEm()<<" hoverE : "<<pho.hadronicOverEm()<<std::endl;
 		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());		  				  
 		  double Ecorr=1;
 		  if(iEvent.isRealData()){
@@ -1535,6 +1548,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		   //  index_photon_tight = index ;
 		//   std::cout<<" test bad alloc 3"<<std::endl;
 		     PhotonT = (*iphoton);
+		     PhotonTOoB = (*iphotonsmear);
 		//   std::cout<<" test bad alloc 4"<<std::endl;
 		  //   PhotonTcorr = (*iphoton);
 		     isPhotonTight_   ->push_back(true);
@@ -1579,24 +1593,36 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
      pat::MET rawMet = (*rawmet)[0];
      rawMet.setP4( Met.uncorP4() );
      
+     pat::MET rawMet74 = (*rawmet)[0];
+     rawMet74.setP4( Met.uncorP4() );
+     
      
      pat::MET EGcleanedMet = (*metEGcleaned)[0];
-   //  EGcleanedMet.setP4( EGcleanedMet.uncorP4() );
+     EGcleanedMet.setP4( EGcleanedMet.uncorP4() );
      pat::MET EGcleanedMetRAW = (*metEGcleaned)[0];
      EGcleanedMetRAW.setP4(EGcleanedMet.uncorP4());
       
       if(nPhotonsTight_ == 1){
       double deltar = 0 ;
-      float photonuncopx = 0;
-      float photonuncopy = 0;
-      
-           for(;iphotonsuncorr != photonsUncorr->end(); ++iphotonsuncorr){
+      //float photonuncopx = 0;
+     // float photonuncopy = 0;
+      int nlim = 0 ;
+      pat::Photon Photonuncorr ;
+           for(;iphotonsuncorr != photonsUncorr->end(); ++iphotonsuncorr/*, ++iphotonnofix*/){
             
             
             deltar = std::hypot((PhotonT.eta()-iphotonsuncorr->eta()),(PhotonT.phi()-iphotonsuncorr->phi())   );
-            if(deltar <= 0.3){
-               photonuncopx = iphotonsuncorr->px();
-               photonuncopy = iphotonsuncorr->py();
+            if(deltar <= 0.1 && nlim < 1){
+            nlim ++ ;  
+            Photonuncorr = (*iphotonsuncorr);
+          //  std::cout<<" photon before GX fix + reg Pt : "<<iphotonsuncorr->pt()<<" photon before GX fix pt : "<< iphotonnofix->pt() <<std::endl;
+           // std::cout<<" photon before GX fix + reg Px : "<<iphotonsuncorr->px()<<" photon before GX fix px : "<< iphotonnofix->px() <<std::endl;
+           // std::cout<<" photon before GX fix + reg Py : "<<iphotonsuncorr->py()<<" photon before GX fix py : "<< iphotonnofix->py() <<std::endl;
+              // ptphotonnofix_        -> push_back(iphotonnofix->px());
+              // ptsmearedphoton_      -> push_back(iphotonsuncorr->px());
+          //     photonuncopx = iphotonsuncorr->px();
+          //     photonuncopy = iphotonsuncorr->py();
+              // std::cout<<"test photon before GX px: "<<photonuncopx<<" py "<<photonuncopy<<std::endl;
             }   
       
       
@@ -1608,26 +1634,54 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
        float FootprintMEx = 0;
        float FootprintMEy = 0;
        
+       float FootprintMEx74 = 0;
+       float FootprintMEy74 = 0;
+       
   
   std::vector<reco::CandidatePtr> footprint;
 
-  for (unsigned int i = 0, n = PhotonT.numberOfSourceCandidatePtrs(); i < n; ++i) {
-    footprint.push_back(PhotonT.sourceCandidatePtr(i) );
+  for (unsigned int i = 0, n = Photonuncorr.numberOfSourceCandidatePtrs(); i < n; ++i) {
+    footprint.push_back(Photonuncorr.sourceCandidatePtr(i) );
+   // std::cout<<" source tight px : "<< PhotonT.sourceCandidatePtr(i).px() <<" py : "<<PhotonT.sourceCandidatePtr(i).py()<<std::endl;
   }
  // std::cout<<" test bad alloc 5"<<std::endl;
   
   
+  
+  
+  std::vector<reco::CandidatePtr> footprint_rereco;
+
+  for (unsigned int i = 0, n = PhotonTOoB.numberOfSourceCandidatePtrs(); i < n; ++i) {
+    footprint_rereco.push_back(PhotonTOoB.sourceCandidatePtr(i) );
+        std::cout<<" source tight  : "<< i<<std::endl;
+  }
+  
+  
+  
   // now loop on pf candidates
- //  std::cout<<"foot print size : "<<footprint.size()<<std::endl;
+  std::cout<<"photon 74X   : px : "<<PhotonT.px()<< " py : "<<PhotonT.py()<< " pT : "<< PhotonT.pt() <<" phi "  <<PhotonT.phi()<<" eta "<<PhotonT.eta()<<std::endl;
+  std::cout<<"photon 74X uncorr   : px : "<<Photonuncorr.px()<< " py : "<<Photonuncorr.py()<< " pT : "<< Photonuncorr.pt() <<" phi "  <<Photonuncorr.phi()<<" eta "<<Photonuncorr.eta()<<std::endl;
+  std::cout<<"photon 80X : px : "<<PhotonTOoB.px()<< " py : "<<PhotonTOoB.py()<< " pT : "<< PhotonTOoB.pt() <<" phi "  <<PhotonTOoB.phi()<<" eta "<<PhotonTOoB.eta()<<std::endl;
   for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
     const pat::PackedCandidate &pf = (*pfs)[i];
-    // pfcandidate-based footprint removal
-  //  PFMEx += -1.* pf.px(); 
-   // PFMEy += -1.* pf.py(); 
+    // pfcandidate-based footprint removal 
     
     if (std::find(footprint.begin(), footprint.end(), reco::CandidatePtr(pfs,i)) != footprint.end()) {
-      //std::cout<<"PF : px : "<<pf.px()<< " py : "<<pf.py()<< " pT : "<< pf.pt() << std::endl;
-      continue;
+      
+      
+      std::cout<<"PF old : px : "<<pf.px()<< " py : "<<pf.py()<< " pT : "<< pf.pt()<<" phi "  <<pf.phi()<<" eta "<<pf.eta()<<" Id linked to a photon "<< pf.isPhoton()<<" pdgid "<<pf.pdgId() << std::endl;
+    //  std::cout<<" delta R : "<< std::hypot((pf.eta()-PhotonT.eta()),(pf.phi()-PhotonT.phi()))<<" pf.pt()/PhotonT.pt() "<<pf.pt()/PhotonT.pt()<<std::endl;
+     // if((std::hypot((pf.eta()-PhotonT.eta()),(pf.phi()-PhotonT.phi()) > 0.01) && fabs((pf.pt()-PhotonT.pt())/PhotonT.pt())> 0.5) || !iEvent.isRealData() ){
+      continue;//}
+    }
+    
+    if (std::find(footprint_rereco.begin(), footprint_rereco.end(), reco::CandidatePtr(pfs,i)) != footprint_rereco.end()) {
+      
+      
+      std::cout<<"PF new : px : "<<pf.px()<< " py : "<<pf.py()<< " pT : "<< pf.pt()<<" phi "  <<pf.phi()<<" eta "<<pf.eta() << std::endl;
+      //std::cout<<" delta R : "<< std::hypot((pf.eta()-PhotonT.eta()),(pf.phi()-PhotonT.phi()))<<" pf.pt()/PhotonT.pt() "<<pf.pt()/PhotonT.pt()<<std::endl;
+     // if((std::hypot((pf.eta()-PhotonT.eta()),(pf.phi()-PhotonT.phi()) > 0.01) && fabs((pf.pt()-PhotonT.pt())/PhotonT.pt())> 0.5) || !iEvent.isRealData() ){
+     // continue;//}
     }
 
 
@@ -1635,33 +1689,45 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 
     FootprintMEx += -1.* pf.px();
     FootprintMEy += -1.* pf.py();
+    
+    FootprintMEx74 += -1.* pf.px();
+    FootprintMEy74 += -1.* pf.py();
       
   }// loop over pfCand
   
- 
+ // std::cout<<" Met CHS no footprint candidate : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy)  << std::endl;
   
   // Re-adding  photon but reco 
-  if(footprint.size() > 0){
-  FootprintMEx += -1.* photonuncopx;
-  FootprintMEy += -1.* photonuncopy;
+  if(footprint.size() > 0 ){
+  FootprintMEx += -1.* PhotonT.px();//
+  FootprintMEy += -1.* PhotonT.py();//
+  FootprintMEx74 += -1.* PhotonTOoB.px();
+  FootprintMEy74 += -1.* PhotonTOoB.py();
   
   }
 
   // slew rate mitigation fix
   if (iEvent.isRealData() && isReminiAOD_){
-  FootprintMEx += (-1*Met.px() + EGcleanedMet.px());
-  FootprintMEy += (-1*Met.py() + EGcleanedMet.py());
+ // FootprintMEx += (-1*Met.px() + EGcleanedMet.px());
+ // FootprintMEy += (-1*Met.py() + EGcleanedMet.py());
  
   }
 
 
   double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy) ;
+  double FootprintMEpt74 = sqrt(FootprintMEx74 * FootprintMEx74 + FootprintMEy74 * FootprintMEy74) ;
   
+  if(/*PhotonT.pt() > 300. && fabs(PhotonT.pt() - Photonuncorr.pt()) > 20. &&*/ PhotonT.userInt("hasGainSwitchFlag") == 1){
+  std::cout<<" Met CHS  74X : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< FootprintMEPt << std::endl;
+  std::cout<<" Met CHS  80X : MEx : "<<FootprintMEx74<< " MEy : "<<FootprintMEy74<< " MET : "<< FootprintMEpt74 << std::endl;
+  
+  std::cout<<" Met 74x -80X : MEx : "<<FootprintMEx - FootprintMEx74<< " MEy : "<<FootprintMEy - FootprintMEy74<< " MET : "<< FootprintMEPt - FootprintMEpt74 << std::endl;
+  std::cout<<" Phot 74x-80X : MEx : "<<PhotonT.px() - PhotonTOoB.px()<< " MEy : "<<PhotonT.py() - PhotonTOoB.py()<< " MET : "<< PhotonT.pt() - PhotonTOoB.pt() << std::endl;
+  }
   /*
-  
-   if(  photTpT > 300. ){   
+  // if(  photTpT > 300. ){   
   std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" Bunch crossing number : "<<BXnumber_  << std::endl;
-    std::cout<<"Photon :                  px : "<<photTpx<< " py : "<<photTpy<< " pT : "<< photTpT << std::endl;
+ //   std::cout<<"Photon :                  px : "<<photTpx<< " py : "<<photTpy<< " pT : "<< photTpT << std::endl;
    // std::cout<<"Photon not eg corrected : px : "<<photTuncorpx<< " py : "<<photTuncorpy<< " pT : "<< photTuncorpT << std::endl;
     
   std::cout<<"slimmedMETsEGClean : MEx : "<<EGcleanedMet.px()<< " MEy : "<<EGcleanedMet.py()<< " MET : "<< EGcleanedMet.pt() << std::endl;
@@ -1679,12 +1745,13 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   //  std::cout<<"Met from pfcandidates (CHS footprint old corrected)+(slimmedMETsEGClean-slimmedMETsUncorrected) : MEx : "<<FootprintMExold<< " MEy : "<<FootprintMEyold<< " MET : "<< FootprintMEPtold << std::endl;
     std::cout << std::endl;
   
- } */
+// } */
   
 rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
+rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0., FootprintMEpt74));
    
   metEnergy_    = rawMet.energy();//EGcleanedMet.energy();//
-  metEta_       = rawMet.eta(); //    EGcleanedMet.eta();// 
+  metEta_       = rawMet.eta(); //EGcleanedMet.eta();// 
   metPhi_       = rawMet.phi();//EGcleanedMet.phi();//
   metPt_        = rawMet.pt();//EGcleanedMet.pt();//
   
@@ -1696,7 +1763,7 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
       metPtGen_        = rawMet.genMET ()->pt();
   }
   
-  pat::MET MetrawPuppi = (*met)[0];
+  pat::MET MetrawPuppi = (*metpuppi)[0];
   MetrawPuppi.setP4( MetrawPuppi.uncorP4() );
   
   metEnergypuppi_    = MetrawPuppi.energy();
@@ -1773,14 +1840,19 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
 	}
     }
     
-
+  pat::Jet firstJet ;
   nJetsAK4_ = 0;
   float htAK4(0.0);
+  int jetotresp =  0 ;
   vector<TLorentzVector> vP4AK4;
   for(std::vector<unsigned>::const_iterator i = sortedAK4JetIdx.begin(); i != sortedAK4JetIdx.end(); ++i, indexjet++) {
 
     pat::JetCollection::const_iterator ijet = (jetsAK4->begin() + *i);
     pat::JetCollection::const_iterator ijetrawRCstore = (jetrawRC.begin()+ *i);
+    
+    jetotresp ++;
+    if (jetotresp == 1 ){
+    firstJet = (*ijet);}
     
     edm::View<pat::Jet>::const_iterator ijetview = (jetsview->begin() + *i);
     double chf = ijet->chargedHadronEnergyFraction();
@@ -1929,7 +2001,36 @@ rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., Foot
 
   }// jet loop  
   htAK4_     = htAK4;
- 
+  if(nPhotonsTight_ == 1){
+   
+   
+   
+   double Rbal80X = firstJet.pt() / PhotonTOoB.pt()  ;
+   double Rbal74X = firstJet.pt() / PhotonT.pt()  ;
+   
+   TLorentzVector Photon80X;
+   TLorentzVector Photon74X;
+   
+   Photon74X.SetPtEtaPhiE(PhotonT.pt(),PhotonT.eta(),PhotonT.phi(),PhotonT.energy());
+      
+   Photon80X.SetPtEtaPhiE(PhotonTOoB.pt(),PhotonTOoB.eta(),PhotonTOoB.phi(),PhotonTOoB.energy());
+   
+   TLorentzVector rawMet_80X;
+   TLorentzVector rawMet_74X ;
+   
+   rawMet_74X.SetPtEtaPhiE(rawMet.pt(),rawMet.eta(),rawMet.phi(),rawMet.energy());
+   rawMet_80X.SetPtEtaPhiE(rawMet74.pt(),rawMet74.eta(),rawMet74.phi(),rawMet74.energy());
+    
+   
+   double Rmpf80X = 1 + Photon80X.Pt()*rawMet_80X.Pt()* std::cos(rawMet_80X.DeltaPhi(Photon80X))/pow(Photon80X.Pt(),2);
+   double Rmpf74X = 1 + Photon74X.Pt()*rawMet_74X.Pt()* std::cos(rawMet_74X.DeltaPhi(Photon74X))/pow(Photon74X.Pt(),2);
+   
+   std::cout<<" Rbal 80x "<< Rbal80X <<" Rmpf "<< Rmpf80X<<std::endl;
+   std::cout<<" Rbal 74x "<< Rbal74X <<" Rmpf "<< Rmpf74X<<std::endl;
+   
+   
+  
+  }
 
 // PUPPI
 
@@ -2307,7 +2408,7 @@ bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, cons
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadTowOverEm() < 0.0597;
+    isValid &= photonRef->hadronicOverEm() < 0.0597;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
@@ -2347,7 +2448,7 @@ bool DijetTreeProducer::isValidPhotonMedium(const pat::PhotonRef& photonRef, con
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadTowOverEm() < 0.0396;
+    isValid &= photonRef->hadronicOverEm() < 0.0396;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
@@ -2386,7 +2487,7 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     //if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadTowOverEm() < 0.0269;
+    isValid &= photonRef->hadronicOverEm() < 0.0269;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
@@ -2685,6 +2786,8 @@ void DijetTreeProducer::initialize()
   muEnergy_    ->clear();
       
   Ecorrbump_   ->clear();
+  
+ // ptphotonnofix_ ->clear();
   
 }
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -110,11 +110,53 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 process.source = cms.Source("PoolSource",
     # 2016B data "file:/afs/cern.ch/user/j/juska/eos/cms/store/data/Run2016B/JetHT/MINIAOD/PromptReco-v1/000/272/771/00000/B4A77EBA-DB15-E611-A15E-02163E013590.root")
-	fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/QCD_Pt-120to170_EMEnriched_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/100000/02F9F731-90D5-E611-9551-B083FED04D68.root") # mAODv2 
+	fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root") # mAODv2 
 	# mAODv1 "file:/afs/cern.ch/user/j/juska/eos/cms/store/mc/RunIISpring16MiniAODv1/QCD_Pt_600to800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/4EC1A37D-840D-E611-957D-0025905C543A.root")
     )
 
+#---------------------MET recipe for reminiaod recipe-------------
 
+## Following lines are for default MET for Type1 corrections.
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+
+   # If you only want to re-correct for JEC and get the proper uncertainties for the default MET
+runMetCorAndUncFromMiniAOD(process,
+                          isData= False,
+                         )
+
+   # Now you are creating the bad muon corrected MET
+process.load('RecoMET.METFilters.badGlobalMuonTaggersMiniAOD_cff')
+process.badGlobalMuonTaggerMAOD.taggingMode = cms.bool(True)
+process.cloneGlobalMuonTaggerMAOD.taggingMode = cms.bool(True)
+
+from PhysicsTools.PatUtils.tools.muonRecoMitigation import muonRecoMitigation
+
+muonRecoMitigation(
+                       process = process,
+                       pfCandCollection = "packedPFCandidates", #input PF Candidate Collection
+                       runOnMiniAOD = True, #To determine if you are running on AOD or MiniAOD
+                       selection="", #You can use a custom selection for your bad muons. Leave empty if you would like to use the bad muon recipe definition.
+                       muonCollection="", #The muon collection name where your custom selection will be applied to. Leave empty if you would like to use the bad muon recipe definition.
+                       cleanCollName="cleanMuonsPFCandidates", #output pf candidate collection ame
+                       cleaningScheme="computeAllApplyClone", #Options are: "all", "computeAllApplyBad","computeAllApplyClone". Decides which (or both) bad muon collections to be used for MET cleaning coming from the bad muon recipe.
+                       postfix="" #Use if you would like to add a post fix to your muon / pf collections
+                       )
+
+runMetCorAndUncFromMiniAOD(process,
+                           isData=False,
+                           pfCandColl="cleanMuonsPFCandidates",
+                           recoMetFromPFCs=True,
+                           postfix="MuClean"
+                           )
+
+
+process.mucorMET = cms.Sequence(                     
+        process.badGlobalMuonTaggerMAOD *
+        process.cloneGlobalMuonTaggerMAOD *
+      #process.badMuons * # If you are using cleaning mode "all", uncomment this line
+        process.cleanMuonsPFCandidates *
+        process.fullPatMetSequenceMuClean
+        )
 
 
 #-----------------------------------------------------------
@@ -130,12 +172,59 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
                                                                                                                  engineName = cms.untracked.string('TRandom3'),
                                                                                            ),
                                                        )
-process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
-process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
-process.calibratedPatPhotons.isMC=cms.bool(True)
-process.calibratedPatElectrons.isMC=cms.bool(True)
-#process.calibratedPatPhotons 
-#process.calibratedPatElectrons 
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+
+dataFormat = DataFormat.MiniAOD
+switchOnVIDPhotonIdProducer(process, dataFormat)
+my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
+for idmod in my_id_modules:
+         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
+
+
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
+process = regressionWeights(process)
+
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                  #calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(8675389),
+                  #                                    engineName = cms.untracked.string('TRandom3'),
+                  #                                    ),
+                  calibratedPatPhotons    = cms.PSet( initialSeed = cms.untracked.uint32(8675389),
+                                                      engineName = cms.untracked.string('TRandom3'),
+                                                      ),
+                                                   )
+
+process.load('EgammaAnalysis.ElectronTools.regressionApplicationMC_cff')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
+#process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
+#process.regressionApplicationMC
+
+#process.calibratedPatPhotons
+
+process.calibratedPatPhotons.isMC = cms.bool(True)
+#process.calibratedPatbeforegxPhotons 
+#process.calibratedPatbeforegxPhotons.isMC = cms.bool(True)
+
+
+#process.EGMRegression = cms.Path(process.regressionApplicationMC)
+
+#process.EGMSmearerPhotons   = cms.Path(process.calibratedPatPhotons)
+
+
+
+process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+    src = cms.InputTag('calibratedPatPhotons'),
+    cut = cms.string('pt>5 && abs(eta)')
+)
+
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag('selectedPhotons')
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag('selectedPhotons')
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag('selectedPhotons')
+
+
 ##-------------Add quarkGluon tagging---------------------------
 
 
@@ -163,8 +252,8 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
-  met              = cms.InputTag('slimmedMETs'),
-  metforggen       = cms.InputTag('slimmedMETs'),
+  met              = cms.InputTag('slimmedMETs'),#MuClean',processName = "jetToolbox"),
+  metforggen       = cms.InputTag('slimmedMETs'),#MuClean',processName = "jetToolbox"),
   #metEGcleaned     = cms.InputTag('slimmedMETsEGClean'),    
   metpuppi         = cms.InputTag('slimmedMETsPuppi'),
   eb               = cms.InputTag('reducedEBRecHits'),
@@ -177,9 +266,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
    ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('slimmedPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
-  
+  Photon                    = cms.InputTag('selectedPhotons'),
+  Photonsmeared             = cms.InputTag('slimmedPhotons'),
+ # PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons'),  
  # GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
   phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
@@ -223,7 +312,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ## electrons ######################################## 
 
   Electrons                 = cms.InputTag('slimmedElectrons'),
-  Electronssmeared          = cms.InputTag('calibratedPatElectrons'),
+  Electronssmeared          = cms.InputTag('slimmedElectrons'),
   ## muons ########################################
 
   Muons                     = cms.InputTag('slimmedMuons'),
@@ -268,5 +357,11 @@ if runOnRECO:
                                                         
 process.p +=                     process.prunedGenParticlesDijet
 process.p +=                     process.chs 
-process.p +=                     process.slimmedGenJetsAK8                      
+process.p +=                     process.slimmedGenJetsAK8
+process.p +=                     process.mucorMET
+process.p +=                     process.fullPatMetSequence  # If you are re-correctign the default MET
+process.p +=                     process.regressionApplicationMC 
+process.p +=                     process.calibratedPatPhotons
+process.p +=                     process.selectedPhotons
+process.p +=                     process.egmPhotonIDSequence
 process.p +=                     process.dijets 

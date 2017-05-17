@@ -31,11 +31,11 @@ for type in ['AK4PFchs','AK4PFchs_antib']:
 ## ----------------- Global Tag ------------------
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v4'
-process.GlobalTag.globaltag = '80X_dataRun2_2016SeptRepro_v4' #80X_mcRun2_asymptotic_2016_miniAODv2
+process.GlobalTag.globaltag = '80X_dataRun2_2016SeptRepro_v7' #80X_mcRun2_asymptotic_2016_miniAODv2
 
 #--------------------- Report and output ---------------------------
 # Note: in grid runs this parameter is not used.
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -71,6 +71,9 @@ from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
 process.slimmedGenJetsAK8 = ak4GenJets.clone(src = 'packedGenParticles', rParam = 0.8)
 
 
+
+
+
 #-------------------------------------------------------
 # Gen Particles Pruner
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
@@ -100,23 +103,75 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 # handled separately there.
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver2-v2/100000/000C0045-12EB-E611-9BEC-008CFA197C34.root")
-   # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_8_0_8_patch1/src/JetMETCorrections/GammaJetFilter/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
+    #  fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/PromptReco-v3/000/284/036/00000/726BEBFC-619F-E611-862A-02163E0121A2.root")
+    fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root","file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents.root")
+   # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents_oldreco.root")
    # fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
     
 )
-#process.source.eventsToProcess = cms.untracked.VEventRange("274316:231020624","274316:231020624")
-#-------------------photon energy smearer-------------------------
-#correctionType = "80Xapproval"
-process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
-process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
-process.calibratedPatPhotons 
-process.calibratedPatElectrons 
+process.source.eventsToProcess = cms.untracked.VEventRange("283884:941499469","283884:939706570","283884:870499187","283885:16020018","274316:389398083")
 
+#---keep un reg photon slimmed and before gx fix -------------
+
+#process.slimmedPhotons_noreg = slimmedPhotonsclone()
+#process.slimmedPhotonsBeforeGSFix_noreg = slimmedPhotonsBeforeGSFix.clone()
+#------------------------------------------------------------
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+
+dataFormat = DataFormat.MiniAOD
+switchOnVIDPhotonIdProducer(process, dataFormat)
+my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
+for idmod in my_id_modules:
+         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
+
+
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
+process = regressionWeights(process)
+
+
+
+process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
+#process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
+
+
+#process.regressionApplication
+
+#process.calibratedPatPhotons
+process.calibratedPatPhotons.isMC = cms.bool(False)# this is 74X
+
+
+process.calibratedPatPhotons80X.isMC = cms.bool(False)
+
+
+#process.calibratedPatbeforegxPhotons 
+#process.calibratedPatbeforegxPhotons.isMC = cms.bool(False)
+
+
+#process.EGMRegression = cms.Path(process.regressionApplication)
+
+#process.EGMSmearerPhotons   = cms.Path(process.calibratedPatPhotons)
+
+
+
+process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+    src = cms.InputTag('calibratedPatPhotons'), # cms.InputTag('slimmedphoton74X'),# this is 74X regression 
+    cut = cms.string('pt>5 && abs(eta)')
+)
+srcViD = "selectedPhotons"#"slimmedPhotons"
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(srcViD)
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag(srcViD)
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
 
 
 ##-------------------- User analyzer  --------------------------------
 
+
+##-------------------- MET --------------------------------
 
 
 
@@ -142,7 +197,7 @@ corMETFromMuonAndEG(process,
                     electronCollection="slimmedElectronsBeforeGSFix",
                     photonCollection="slimmedPhotonsBeforeGSFix",
                     corElectronCollection="slimmedElectrons",
-                    corPhotonCollection="slimmedPhotons",
+                    corPhotonCollection="slimmedPhotons", #slimmedPhotons
                     allMETEGCorrected=True,
                     muCorrection=False,
                     eGCorrection=True,
@@ -179,7 +234,6 @@ process.egcorrMET = cms.Sequence(
 
 
 
-
 ##-------------Add quarkGluon tagging---------------------------
 
 
@@ -188,13 +242,13 @@ process.load('RecoJets.JetProducers.QGTagger_cfi')
 process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
 process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
-#------------------------------------------------------------
 
 
 
 
 
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+
+
 
 # Residue from AOD and RECO running
 calo_collection=''
@@ -214,7 +268,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
   met              = cms.InputTag('slimmedMETsUncorrected'),
   metforggen       = cms.InputTag('slimmedMETsUncorrected'),
-  metEGcleaned     = cms.InputTag('slimmedMETsMuEGClean',processName = "jetToolbox"), 
+  metEGcleaned     = cms.InputTag('slimmedMETsMuEGClean',processName = "jetToolbox"),   
   metpuppi              = cms.InputTag('slimmedMETsPuppi'),
   PFCands = cms.InputTag('packedPFCandidates'),
   
@@ -225,14 +279,16 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('slimmedPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
+  Photon                    = cms.InputTag('selectedPhotons'),
+  Photonsmeared             = cms.InputTag('calibratedPatPhotons80X'),
+ # Photonsmeared_nofix       = cms.InputTag('slimmedPhotonsBeforeGSFix',processName=cms.InputTag.skipCurrentProcess()),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
   phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
   phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
   phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
   PhotonUncorr              = cms.InputTag('slimmedPhotonsBeforeGSFix'),
+ # PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
   
@@ -247,7 +303,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
    ## electrons ######################################## 
 
   Electrons                 = cms.InputTag('slimmedElectrons'),
-  Electronssmeared          = cms.InputTag('calibratedPatElectrons'),
+  Electronssmeared          = cms.InputTag('slimmedElectrons'),
   ## muons ########################################
 
   Muons                     = cms.InputTag('slimmedMuons'),
@@ -317,8 +373,14 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 # ------------------ path --------------------------
 
 
-process.p = cms.Path()
-process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
-process.p +=                      process.egcorrMET  
+process.p = cms.Path()  
 process.p +=                      process.chs
+
+process.p +=                      process.regressionApplication 
+process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X
+#process.p +=                      process.calibratedPatPhotons80X
+process.p +=                      process.selectedPhotons
+process.p +=                      process.egmPhotonIDSequence
+process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
+process.p +=                      process.egcorrMET
 process.p +=                      process.dijets
