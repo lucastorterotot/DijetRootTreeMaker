@@ -104,12 +104,12 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 process.source = cms.Source("PoolSource",
     #  fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/PromptReco-v3/000/284/036/00000/726BEBFC-619F-E611-862A-02163E0121A2.root")
-    fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root","file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents.root")
+  #  fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root","file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents.root")
    # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents_oldreco.root")
-   # fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")
+    fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_5.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_6.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_7.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_8.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_9.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_10.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_11.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_12.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_13.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_14.root")
     
 )
-process.source.eventsToProcess = cms.untracked.VEventRange("283884:941499469","283884:939706570","283884:870499187","283885:16020018","274316:389398083")
+#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
 
 #---keep un reg photon slimmed and before gx fix -------------
 
@@ -130,7 +130,7 @@ process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
 process = regressionWeights(process)
 
-
+from EgammaAnalysis.ElectronTools.calibrationTablesRun2 import files
 
 process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
 process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
@@ -141,7 +141,10 @@ process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
 
 #process.calibratedPatPhotons
 process.calibratedPatPhotons.isMC = cms.bool(False)# this is 74X
+process.calibratedPatPhotons.correctionFile = cms.string(files["Moriond2017_JEC"])
 
+process.calibratedPatPhotonsbeforeGS.correctionFile = cms.string(files["Moriond2017_JEC"])
+process.calibratedPatPhotonsbeforeGS.isMC = cms.bool(False)
 
 process.calibratedPatPhotons80X.isMC = cms.bool(False)
 
@@ -377,7 +380,7 @@ process.p = cms.Path()
 process.p +=                      process.chs
 
 process.p +=                      process.regressionApplication 
-process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X
+process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X*process.calibratedPatPhotonsbeforeGS
 #process.p +=                      process.calibratedPatPhotons80X
 process.p +=                      process.selectedPhotons
 process.p +=                      process.egmPhotonIDSequence
