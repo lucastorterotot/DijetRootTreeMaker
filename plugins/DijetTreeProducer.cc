@@ -1835,7 +1835,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   std::cout<<" Met 74x -80X : MEx : "<<FootprintMEx - FootprintMEx74<< " MEy : "<<FootprintMEy - FootprintMEy74<< " MET : "<< FootprintMEPt - FootprintMEpt74 << std::endl;
   std::cout<<" Phot 74x-80X : MEx : "<<PhotonT.px() - PhotonTOoB.px()<< " MEy : "<<PhotonT.py() - PhotonTOoB.py()<< " MET : "<< PhotonT.pt() - PhotonTOoB.pt() << std::endl;
   }
-  
+  /*
   if(PhotonT.pt() >= 40. && PhotonT.pt() <= 50.)
   {
     std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
@@ -1859,7 +1859,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   if(PhotonT.pt() >= 495. )
   {
     std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
-  }
+  }*/
   
   /*
    if(  photTpT > 300. ){   

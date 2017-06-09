@@ -26,8 +26,8 @@ $ export SCRAM_ARCH=slc6_amd64_gcc530
 If you run on re-miniAOD sample use the CMSSW_8_0_26_patch1 realease and follow this twiki:
 https://twiki.cern.ch/twiki/bin/view/CMSPublic/ReMiniAOD03Feb2017Notes
 
-first follow this twiki to install the Photon energy smearer that we will use later in the code.
-https://twiki.cern.ch/twiki/bin/view/CMS/EGMSmearer
+first follow this twiki to install the Photon energy regression and scale / smearer that we will use later in the code.
+https://twiki.cern.ch/twiki/bin/viewauth/CMS/EGMRegression#Consistent_EGMSmearer
 
 following these twikis you should have a CMSSW environment ready for Egamma tuple production :  
 
@@ -42,7 +42,10 @@ $ scram b -j 8
 
 Find a suitable miniAOD sample file for the test run. I found one here: 
 
+for miniaod :
 "/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root"
+for reminiAOD : 
+"/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/02155C63-37EB-E611-ACCB-F04DA275C2FB.root"
 
 you can now modifify the CMSSW run file mylocaltest_flat-dataBCD-cfg_miniAOD.py, 
 
