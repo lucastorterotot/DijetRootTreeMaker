@@ -194,23 +194,16 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
                                                       engineName = cms.untracked.string('TRandom3'),
                                                       ),
                                                    )
-
+from EgammaAnalysis.ElectronTools.calibrationTablesRun2 import files
 process.load('EgammaAnalysis.ElectronTools.regressionApplicationMC_cff')
-process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
-#process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
-#process.regressionApplicationMC
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2MC_cfi')
 
-#process.calibratedPatPhotons
+
+
+
 
 process.calibratedPatPhotons.isMC = cms.bool(True)
-#process.calibratedPatbeforegxPhotons 
-#process.calibratedPatbeforegxPhotons.isMC = cms.bool(True)
-
-
-#process.EGMRegression = cms.Path(process.regressionApplicationMC)
-
-#process.EGMSmearerPhotons   = cms.Path(process.calibratedPatPhotons)
-
+#process.calibratedPatPhotons.correctionFile = cms.string(files["Moriond2017_JEC"])
 
 
 process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
@@ -308,6 +301,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
     l1tIgnoreMaskAndPrescale = cms.bool(False),
     throw                 = cms.bool(False)
   ),
+  triggerObjects = cms.InputTag('selectedPatTrigger'),
+  filters = cms.vstring(
+        'hltEG30R9Id90HE10IsoMHcalIsoFilter','hltEG50R9Id90HE10IsoMHcalIsoFilter', 'hltEG75R9Id90HE10IsoMHcalIsoFilter','hltEG90R9Id90HE10IsoMHcalIsoFilter','hltEG120R9Id90HE10IsoMTrackIsoFilter','hltEG165R9Id90HE10IsoMTrackIsoFilter'),
 
   ## electrons ######################################## 
 

@@ -137,6 +137,8 @@ class DijetTreeProducer : public edm::EDAnalyzer
     
     edm::EDGetTokenT<EcalRecHitCollection> srcebrechit_;
     edm::EDGetTokenT<EcalRecHitCollection> srceerechit_;
+    
+
 
     
     edm::EDGetTokenT<pat::JetCollection> srcJetsAK4_;
@@ -172,6 +174,8 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<int> *triggerPrescale_; 
     std::vector<std::string> *triggerName_;
     
+    edm::EDGetTokenT<edm::View<pat::TriggerObjectStandAlone>> triggerObjectsToken;
+    std::vector<std::string> filters_name ;
     
     triggerExpression::Data triggerCache_;
     std::vector<triggerExpression::Evaluator*> vtriggerSelector_;
@@ -192,7 +196,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
 
     float rho_,metEnergy_,metPt_,metPhi_,metEta_,metEnergypuppi_,metPtpuppi_,metPhipuppi_,metEtapuppi_,metSig_,metcorrected_;
     
-    float PFmetX_, PFmetY_, EGmetX_, EGmetY_, CHSmetX_, CHSmetY_;
+    float PFmetX_, PFmetY_, EGmetX_, EGmetY_, CHSmetX_, CHSmetY_, deltaNHfootprintX_,deltaNHfootprintY_;
     
     float metEnergyGen_,metPtGen_,metPhiGen_,metEtaGen_,metEnergypuppiGen_,metPtpuppiGen_,metPhipuppiGen_,metEtapuppiGen_;
     float htAK4_;
@@ -206,6 +210,8 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
     std::vector<float> *ptGenphoton_,*etaGenphoton_,*phiGenphoton_,*energyGenphoton_;
     std::vector<double> *Ecorrbump_;
+    
+    std::vector<bool>  *isMatch30_,*isMatch50_,*isMatch75_,*isMatch90_,*isMatch120_,*isMatch165_;
     
    //std::vector<float> *ptphotonnofix_;
     //  std::vector<float> *PFpx, *PFpy, *PFpz, 
