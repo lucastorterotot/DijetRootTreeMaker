@@ -109,7 +109,7 @@ process.source = cms.Source("PoolSource",
   #  fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_5.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_6.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_7.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_8.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_9.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_10.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_11.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_12.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_13.root","file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents_14.root")
     
 )
-process.source.eventsToProcess = cms.untracked.VEventRange("283884:599938894","283884:598913540","283884:608713271","283283:1732672268","283885:781824145")
+#process.source.eventsToProcess = cms.untracked.VEventRange("283884:599938894","283884:598913540","283884:608713271","283283:1732672268","283885:781824145")
 
 #---keep un reg photon slimmed and before gx fix -------------
 
@@ -144,9 +144,9 @@ process.calibratedPatPhotons.isMC = cms.bool(False)# this is 74X
 #process.calibratedPatPhotons.correctionFile = cms.string(files["Moriond2017_JEC"])
 
 #process.calibratedPatPhotonsbeforeGS.correctionFile = cms.string(files["Moriond2017_JEC"])
-process.calibratedPatPhotonsbeforeGS.isMC = cms.bool(False)
+#process.calibratedPatPhotonsbeforeGS.isMC = cms.bool(False)
 
-process.calibratedPatPhotons80X.isMC = cms.bool(False)
+#process.calibratedPatPhotons80X.isMC = cms.bool(False)
 
 
 #process.calibratedPatbeforegxPhotons 
@@ -160,7 +160,7 @@ process.calibratedPatPhotons80X.isMC = cms.bool(False)
 
 
 process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-    src = cms.InputTag('slimmedPhotons80X'), # cms.InputTag('slimmedphoton74X'),# this is 74X regression 
+    src = cms.InputTag('calibratedPatPhotons'), # cms.InputTag('slimmedphoton74X'),# this is 74X regression 
     cut = cms.string('pt>5 && abs(eta)')
 )
 srcViD = "selectedPhotons"#"slimmedPhotons"
@@ -283,7 +283,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
   Photon                    = cms.InputTag('selectedPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons80X'),
+  Photonsmeared             = cms.InputTag('slimmedPhotons'),
  # Photonsmeared_nofix       = cms.InputTag('slimmedPhotonsBeforeGSFix',processName=cms.InputTag.skipCurrentProcess()),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
@@ -382,7 +382,7 @@ process.p = cms.Path()
 process.p +=                      process.chs
 
 process.p +=                      process.regressionApplication 
-process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X*process.calibratedPatPhotonsbeforeGS
+process.p +=                      process.calibratedPatPhotons#*process.calibratedPatPhotons80X*process.calibratedPatPhotonsbeforeGS
 #process.p +=                      process.calibratedPatPhotons80X
 process.p +=                      process.selectedPhotons
 process.p +=                      process.egmPhotonIDSequence

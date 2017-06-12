@@ -195,8 +195,10 @@ process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService
                                                       ),
                                                    )
 from EgammaAnalysis.ElectronTools.calibrationTablesRun2 import files
-process.load('EgammaAnalysis.ElectronTools.regressionApplicationMC_cff')
-process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2MC_cfi')
+#process.load('EgammaAnalysis.ElectronTools.regressionApplicationMC_cff')
+process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
+#process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2MC_cfi')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
 
 
 

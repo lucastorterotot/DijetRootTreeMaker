@@ -1,0 +1,12 @@
+[
+  {
+    "name": "G1Jet_Pt-50To100",
+    "dataset": "/G1Jet_Pt-50To100_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM",
+    "Data.unitsPerJob": 500000
+  },
+  {
+    "name": "G1Jet_Pt-50To100_ext",
+    "dataset": "/G1Jet_Pt-50To100_TuneCUETP8M1_13TeV-amcatnlo-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v2/MINIAODSIM",
+    "Data.unitsPerJob": 500000
+  }
+]
