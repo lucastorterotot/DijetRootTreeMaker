@@ -83,6 +83,14 @@ $ cd prod/crab/
 
 you sould find  Templatecrab.py which is a crab config file that you have to modify with the right dataset you want to run on and the location to store your outputs.
 
+If you want to launch a lot of crab job, you should use the script prod/crab/CERN_crab/crabSubmit.py.
+To use it you have to modify the jason file prod/crab/CERN_crab/Sample_NLO.json with the relevant dataset and task name and add the new tasks you wxant to launch. 
+then just launch your job with the command : 
+
+$ python crabSubmit.py   -t crab_config_MGLO_600_inf.py  Sample_NLO.json
+
+
+
 Your are now ready to go to the next step called DijettreeAnalyser.
 
 
