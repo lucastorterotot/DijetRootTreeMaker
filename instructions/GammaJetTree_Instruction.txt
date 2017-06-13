@@ -31,6 +31,32 @@ https://twiki.cern.ch/twiki/bin/viewauth/CMS/EGMRegression#Consistent_EGMSmearer
 
 following these twikis you should have a CMSSW environment ready for Egamma tuple production :  
 
+The summary of all the command you need to run is given below : 
+
+#####EG regression smearer etc
+#####https://twiki.cern.ch/twiki/bin/viewauth/CMS/EGMRegression
+
+$git cms-init
+$git cms-merge-topic cms-egamma:EGM_gain_v1
+$cd EgammaAnalysis/ElectronTools/data
+$git clone -b Moriond17_gainSwitch_unc https://github.com/ECALELFS/ScalesSmearings.git
+$cd $CMSSW_BASE/src
+$scram b
+
+#### MET recipies (needed for bad muons and eventually GS)
+#### https://twiki.cern.ch/twiki/bin/view/CMSPublic/ReMiniAOD03Feb2017Notes
+
+$git cms-merge-topic cms-met:METRecipe_8020 -u
+
+### photon ID
+###https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2
+
+$git cms-merge-topic ikrav:egm_id_80X_v3_photons
+
+
+
+########SetUp the Gamma + Jet frame work ############
+
 $ cd CMSSW/src
 $git clone https://github.com/lattaud/DijetRootTreeMaker.git CMSDIJET/DijetRootTreeMaker/
 
