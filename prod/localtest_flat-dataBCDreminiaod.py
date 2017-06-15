@@ -35,7 +35,7 @@ process.GlobalTag.globaltag = '80X_dataRun2_2016SeptRepro_v7' #80X_mcRun2_asympt
 
 #--------------------- Report and output ---------------------------
 # Note: in grid runs this parameter is not used.
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -71,6 +71,9 @@ from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
 process.slimmedGenJetsAK8 = ak4GenJets.clone(src = 'packedGenParticles', rParam = 0.8)
 
 
+
+
+
 #-------------------------------------------------------
 # Gen Particles Pruner
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
@@ -100,22 +103,135 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 # handled separately there.
 
 process.source = cms.Source("PoolSource",
-   # fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root","/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/00DE53EF-97EA-E611-ADA2-7845C4FC35CC.root")
-    fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/03Feb2017-v1/110000/783F8347-72EB-E611-83CC-0025904C6626.root")
-   # fileNames = cms.untracked.vstring("/store/data/Run2016B/SinglePhoton/MINIAOD/23Sep2016-v3/60000/0075C97D-9B97-E611-9FBD-0CC47A7C34B0.root")"/store/data/Run2016B/SinglePhoton/MINIAOD/03Feb2017_ver2-v2/100000/000C0045-12EB-E611-9BEC-008CFA197C34.root",
+      fileNames = cms.untracked.vstring("/store/data/Run2016D/SinglePhoton/MINIAOD/18Apr2017-v1/120000/021B9430-0A3F-E711-A157-0CC47A4D76B2.root")
+   # fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root","file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents.root")
+   # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents_oldreco.root")
+    #fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents.root")
     
 )
-#process.source.eventsToProcess = cms.untracked.VEventRange("274316:231020624","274316:231020624")
-#-------------------photon energy smearer-------------------------
-#correctionType = "80Xapproval"
-process.load('EgammaAnalysis.ElectronTools.calibratedPhotonsRun2_cfi')
-process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
-process.calibratedPatPhotons 
-process.calibratedPatElectrons 
+#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
 
+#---keep un reg photon slimmed and before gx fix -------------
+
+#process.slimmedPhotons_noreg = slimmedPhotonsclone()
+#process.slimmedPhotonsBeforeGSFix_noreg = slimmedPhotonsBeforeGSFix.clone()
+#------------------------------------------------------------
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+
+dataFormat = DataFormat.MiniAOD
+switchOnVIDPhotonIdProducer(process, dataFormat)
+my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
+for idmod in my_id_modules:
+         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
+
+
+process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
+process = regressionWeights(process)
+
+from EgammaAnalysis.ElectronTools.calibrationTablesRun2 import files
+
+process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
+process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
+#process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
+
+
+#process.regressionApplication
+
+#process.calibratedPatPhotons
+process.calibratedPatPhotons.isMC = cms.bool(False)# this is 74X
+#process.calibratedPatPhotons.correctionFile = cms.string(files["Moriond2017_JEC"])
+
+#process.calibratedPatPhotonsbeforeGS.correctionFile = cms.string(files["Moriond2017_JEC"])
+#process.calibratedPatPhotonsbeforeGS.isMC = cms.bool(False)
+
+process.calibratedPatPhotons80X.isMC = cms.bool(False)
+
+
+#process.calibratedPatbeforegxPhotons 
+#process.calibratedPatbeforegxPhotons.isMC = cms.bool(False)
+
+
+#process.EGMRegression = cms.Path(process.regressionApplication)
+
+#process.EGMSmearerPhotons   = cms.Path(process.calibratedPatPhotons)
+
+
+
+process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+    src = cms.InputTag('calibratedPatPhotons80X'), # cms.InputTag('slimmedphoton74X'),# this is 74X regression 
+    cut = cms.string('pt>5 && abs(eta)')
+)
+srcViD = "selectedPhotons"#"slimmedPhotons"
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(srcViD)
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag(srcViD)
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
 
 
 ##-------------------- User analyzer  --------------------------------
+
+
+##-------------------- MET --------------------------------
+
+
+
+#---------------NewMet ReminiAOD recipe ---------------------
+
+
+
+
+# EG cleaned
+
+	## Following lines are for default MET for Type1 corrections.
+#from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+
+   # If you only want to re-correct for JEC and get the proper uncertainties for the default MET
+#runMetCorAndUncFromMiniAOD(process,
+#                          isData=True ,
+#                         )
+
+   # Now you are creating the e/g corrected MET on top of the bad muon corrected MET (on re-miniaod)
+#from PhysicsTools.PatUtils.tools.corMETFromMuonAndEG import corMETFromMuonAndEG
+#corMETFromMuonAndEG(process,
+#                    pfCandCollection="", #not needed                                                                                                                                                                                                                                                                                                                      
+#                    electronCollection="slimmedElectronsBeforeGSFix",
+#                    photonCollection="slimmedPhotonsBeforeGSFix",
+#                    corElectronCollection="slimmedElectrons",
+#                    corPhotonCollection="slimmedPhotons", #slimmedPhotons
+#                    allMETEGCorrected=True,
+#                    muCorrection=False,
+#                    eGCorrection=True,
+#                    runOnMiniAOD=True,
+#                    postfix="MuEGClean"
+#                    )
+#process.slimmedMETsMuEGClean = process.slimmedMETs.clone()
+#process.slimmedMETsMuEGClean.src = cms.InputTag("patPFMetT1MuEGClean")
+#process.slimmedMETsMuEGClean.rawVariation =  cms.InputTag("patPFMetRawMuEGClean")
+#process.slimmedMETsMuEGClean.t1Uncertainties = cms.InputTag("patPFMetT1%sMuEGClean")
+#del process.slimmedMETsMuEGClean.caloMET
+ 
+     # If you are running in the scheduled mode:
+#process.egcorrMET = cms.Sequence(
+#        process.cleanedPhotonsMuEGClean+process.cleanedCorPhotonsMuEGClean+
+#        process.matchedPhotonsMuEGClean + process.matchedElectronsMuEGClean +
+#        process.corMETPhotonMuEGClean+process.corMETElectronMuEGClean+
+ #       process.patPFMetT1MuEGClean+process.patPFMetRawMuEGClean+
+ #       process.patPFMetT1SmearMuEGClean+process.patPFMetT1TxyMuEGClean+
+#        process.patPFMetTxyMuEGClean+process.patPFMetT1JetEnUpMuEGClean+
+#        process.patPFMetT1JetResUpMuEGClean+process.patPFMetT1SmearJetResUpMuEGClean+
+#        process.patPFMetT1ElectronEnUpMuEGClean+process.patPFMetT1PhotonEnUpMuEGClean+
+#        process.patPFMetT1MuonEnUpMuEGClean+process.patPFMetT1TauEnUpMuEGClean+
+#        process.patPFMetT1UnclusteredEnUpMuEGClean+process.patPFMetT1JetEnDownMuEGClean+
+#        process.patPFMetT1JetResDownMuEGClean+process.patPFMetT1SmearJetResDownMuEGClean+
+#        process.patPFMetT1ElectronEnDownMuEGClean+process.patPFMetT1PhotonEnDownMuEGClean+
+#        process.patPFMetT1MuonEnDownMuEGClean+process.patPFMetT1TauEnDownMuEGClean+
+#        process.patPFMetT1UnclusteredEnDownMuEGClean+process.slimmedMETsMuEGClean)
+
+
+
 
 
 
@@ -129,64 +245,6 @@ process.load('RecoJets.JetProducers.QGTagger_cfi')
 process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
 process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
-#------------------------------------------------------------
-
-
-
-
-
-
-#---------------NewMet ReminiAOD recipe ---------------------
-
-
-
-
-# EG cleaned
-
-	## Following lines are for default MET for Type1 corrections.
-from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-
-   # If you only want to re-correct for JEC and get the proper uncertainties for the default MET
-runMetCorAndUncFromMiniAOD(process,
-                          isData=True ,
-                         )
-
-   # Now you are creating the e/g corrected MET on top of the bad muon corrected MET (on re-miniaod)
-from PhysicsTools.PatUtils.tools.corMETFromMuonAndEG import corMETFromMuonAndEG
-corMETFromMuonAndEG(process,
-                    pfCandCollection="", #not needed                                                                                                                                                                                                                                                                                                                      
-                    electronCollection="slimmedElectronsBeforeGSFix",
-                    photonCollection="slimmedPhotonsBeforeGSFix",
-                    corElectronCollection="slimmedElectrons",
-                    corPhotonCollection="slimmedPhotons",
-                    allMETEGCorrected=True,
-                    muCorrection=False,
-                    eGCorrection=True,
-                    runOnMiniAOD=True,
-                    postfix="MuEGClean"
-                    )
-process.slimmedMETsMuEGClean = process.slimmedMETs.clone()
-process.slimmedMETsMuEGClean.src = cms.InputTag("patPFMetT1MuEGClean")
-process.slimmedMETsMuEGClean.rawVariation =  cms.InputTag("patPFMetRawMuEGClean")
-process.slimmedMETsMuEGClean.t1Uncertainties = cms.InputTag("patPFMetT1%sMuEGClean")
-del process.slimmedMETsMuEGClean.caloMET
- 
-     # If you are running in the scheduled mode:
-process.egcorrMET = cms.Sequence(
-        process.cleanedPhotonsMuEGClean+process.cleanedCorPhotonsMuEGClean+
-        process.matchedPhotonsMuEGClean + process.matchedElectronsMuEGClean +
-        process.corMETPhotonMuEGClean+process.corMETElectronMuEGClean+
-        process.patPFMetT1MuEGClean+process.patPFMetRawMuEGClean+
-        process.patPFMetT1SmearMuEGClean+process.patPFMetT1TxyMuEGClean+
-        process.patPFMetTxyMuEGClean+process.patPFMetT1JetEnUpMuEGClean+
-        process.patPFMetT1JetResUpMuEGClean+process.patPFMetT1SmearJetResUpMuEGClean+
-        process.patPFMetT1ElectronEnUpMuEGClean+process.patPFMetT1PhotonEnUpMuEGClean+
-        process.patPFMetT1MuonEnUpMuEGClean+process.patPFMetT1TauEnUpMuEGClean+
-        process.patPFMetT1UnclusteredEnUpMuEGClean+process.patPFMetT1JetEnDownMuEGClean+
-        process.patPFMetT1JetResDownMuEGClean+process.patPFMetT1SmearJetResDownMuEGClean+
-        process.patPFMetT1ElectronEnDownMuEGClean+process.patPFMetT1PhotonEnDownMuEGClean+
-        process.patPFMetT1MuonEnDownMuEGClean+process.patPFMetT1TauEnDownMuEGClean+
-        process.patPFMetT1UnclusteredEnDownMuEGClean+process.slimmedMETsMuEGClean)
 
 
 
@@ -194,20 +252,6 @@ process.egcorrMET = cms.Sequence(
 
 
 
-
-
-
-#process.source.eventsToProcess = cms.untracked.VEventRange("283884:599636409","283884:600120223","283884:602229827","283884:602365281","283884:604218671","283884:606502179","283884:606706954","283884:606822891","283884:608713271","283884:930013492","283884:930685827","283884:933206253","283884:935131038","283884:939706570","283884:941974973","283884:941499469","283884:833084509","283884:833701137","283884:841228853","283885:1532178017")
-
-#process.source.eventsToProcess = cms.untracked.VEventRange("275657:177112215","275657:177350977")
-
-
-
-
-
-
-
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 
 # Residue from AOD and RECO running
 calo_collection=''
@@ -219,7 +263,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
   # There's no avoiding this in Consumes era
   isData          = cms.bool(True),
-  isreMiniAOD     = cms.bool(True),
+  isreMiniAOD     = cms.bool(False),
   ## JETS/MET ########################################
   jetsAK4             = cms.InputTag('slimmedJets'), 
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
@@ -227,7 +271,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
   met              = cms.InputTag('slimmedMETsUncorrected'),
   metforggen       = cms.InputTag('slimmedMETsUncorrected'),
-  metEGcleaned     = cms.InputTag('slimmedMETsMuEGClean',processName = "jetToolbox"),  
+  metEGcleaned     = cms.InputTag('slimmedMETsMuEGClean',processName = "jetToolbox"),   
   metpuppi              = cms.InputTag('slimmedMETsPuppi'),
   PFCands = cms.InputTag('packedPFCandidates'),
   
@@ -238,15 +282,16 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('slimmedPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
+  Photon                    = cms.InputTag('selectedPhotons'),
+  Photonsmeared             = cms.InputTag('calibratedPatPhotons80X'),
+ # Photonsmeared_nofix       = cms.InputTag('slimmedPhotonsBeforeGSFix',processName=cms.InputTag.skipCurrentProcess()),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
   phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
   phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
   phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
-  PhotonUncorr              = cms.InputTag('slimmedPhotonsBeforeGSFix'),
-  
+  #PhotonUncorr              = cms.InputTag('slimmedPhotonsBeforeGSFix'),
+ # PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
   
@@ -261,7 +306,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
    ## electrons ######################################## 
 
   Electrons                 = cms.InputTag('slimmedElectrons'),
-  Electronssmeared          = cms.InputTag('calibratedPatElectrons'),
+  Electronssmeared          = cms.InputTag('slimmedElectrons'),
   ## muons ########################################
 
   Muons                     = cms.InputTag('slimmedMuons'),
@@ -298,7 +343,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
     throw                 = cms.bool(False)
   ),
 
-
+  triggerObjects = cms.InputTag('selectedPatTrigger'),
+  filters = cms.vstring(
+        'hltEG30R9Id90HE10IsoMHcalIsoFilter','hltEG50R9Id90HE10IsoMHcalIsoFilter', 'hltEG75R9Id90HE10IsoMHcalIsoFilter','hltEG90R9Id90HE10IsoMHcalIsoFilter','hltEG120R9Id90HE10IsoMTrackIsoFilter','hltEG165R9Id90HE10IsoMTrackIsoFilter'),
   ## JECs ################
   redoJECs  = cms.bool(True),
 
@@ -329,10 +376,13 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
 
 # ------------------ path --------------------------
-
-
-process.p = cms.Path()
-process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
-process.p +=                      process.egcorrMET  
+process.p = cms.Path()  
 process.p +=                      process.chs
+process.p +=                      process.regressionApplication 
+process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X#*process.calibratedPatPhotonsbeforeGS
+#process.p +=                      process.calibratedPatPhotons80X
+process.p +=                      process.selectedPhotons
+process.p +=                      process.egmPhotonIDSequence
+#process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
+#process.p +=                      process.egcorrMET
 process.p +=                      process.dijets
