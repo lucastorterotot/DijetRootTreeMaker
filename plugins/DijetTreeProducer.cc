@@ -1927,40 +1927,40 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       
       
     //---- match the photon tight to the trigger object;
-    if(candhlt30.size() != 0 || candhlt50.size() != 0 || candhlt75.size() != 0 || candhlt90.size() != 0 || candhlt120.size() != 0 || candhlt165.size() != 0){
+     if(candhlt30.size() != 0 || candhlt50.size() != 0 || candhlt75.size() != 0 || candhlt90.size() != 0 || candhlt120.size() != 0 || candhlt165.size() != 0){
     for(size_t itrig = 0 ; itrig < candhlt30.size(); ++itrig ){
     
-    if(std::hypot((PhotonT.eta()-candhlt30.at(itrig).Eta()),(PhotonT.phi()-candhlt30.at(itrig).Phi())   )){ isMatch30_ -> push_back(true);} else{isMatch30_ -> push_back(false); } 
+    if(std::hypot((PhotonT.eta()-candhlt30.at(itrig).Eta()),(PhotonT.phi()-candhlt30.at(itrig).Phi())) < 0.3 && candhlt30.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt30.at(itrig).Pt()/PhotonT.pt() < 1.5) { isMatch30_ -> push_back(true);} else{isMatch30_ -> push_back(false); } 
       
      } 
      
      for(size_t itrig = 0 ; itrig < candhlt50.size(); ++itrig ){
     
-    if(std::hypot((PhotonT.eta()-candhlt50.at(itrig).Eta()),(PhotonT.phi()-candhlt50.at(itrig).Phi())   )){ isMatch50_ -> push_back(true);} else{isMatch50_ -> push_back(false); } 
+    if(std::hypot((PhotonT.eta()-candhlt50.at(itrig).Eta()),(PhotonT.phi()-candhlt50.at(itrig).Phi())) < 0.3  && candhlt50.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt50.at(itrig).Pt()/PhotonT.pt() < 1.5){ isMatch50_ -> push_back(true);} else{isMatch50_ -> push_back(false); } 
       
      }
      
      for(size_t itrig = 0 ; itrig < candhlt75.size(); ++itrig ){
     
-    if(std::hypot((PhotonT.eta()-candhlt75.at(itrig).Eta()),(PhotonT.phi()-candhlt75.at(itrig).Phi())   )){ isMatch75_ -> push_back(true);} else{isMatch75_ -> push_back(false); } 
+    if(std::hypot((PhotonT.eta()-candhlt75.at(itrig).Eta()),(PhotonT.phi()-candhlt75.at(itrig).Phi())) < 0.3 && candhlt75.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt75.at(itrig).Pt()/PhotonT.pt() < 1.5) { isMatch75_ -> push_back(true);} else{isMatch75_ -> push_back(false); } 
       
      }
      
      for(size_t itrig = 0 ; itrig < candhlt90.size(); ++itrig ){
     
-    if(std::hypot((PhotonT.eta()-candhlt90.at(itrig).Eta()),(PhotonT.phi()-candhlt90.at(itrig).Phi())   )){ isMatch90_ -> push_back(true);} else{isMatch90_ -> push_back(false); } 
+    if(std::hypot((PhotonT.eta()-candhlt90.at(itrig).Eta()),(PhotonT.phi()-candhlt90.at(itrig).Phi())) < 0.3 && candhlt90.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt90.at(itrig).Pt()/PhotonT.pt() < 1.5) { isMatch90_ -> push_back(true);} else{isMatch90_ -> push_back(false); } 
       
      }
      
      for(size_t itrig = 0 ; itrig < candhlt120.size(); ++itrig ){
     
-    if(std::hypot((PhotonT.eta()-candhlt120.at(itrig).Eta()),(PhotonT.phi()-candhlt120.at(itrig).Phi())   )){ isMatch120_ -> push_back(true);} else{isMatch120_ -> push_back(false); } 
+    if(std::hypot((PhotonT.eta()-candhlt120.at(itrig).Eta()),(PhotonT.phi()-candhlt120.at(itrig).Phi())) < 0.3  && candhlt120.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt120.at(itrig).Pt()/PhotonT.pt() < 1.5){ isMatch120_ -> push_back(true);} else{isMatch120_ -> push_back(false); } 
       
      }
      
      for(size_t itrig = 0 ; itrig < candhlt165.size(); ++itrig ){
     
-    if(std::hypot((PhotonT.eta()-candhlt165.at(itrig).Eta()),(PhotonT.phi()-candhlt165.at(itrig).Phi())   )){ isMatch165_ -> push_back(true);} else{isMatch165_ -> push_back(false); } 
+    if(std::hypot((PhotonT.eta()-candhlt165.at(itrig).Eta()),(PhotonT.phi()-candhlt165.at(itrig).Phi())) < 0.3  && candhlt165.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt165.at(itrig).Pt()/PhotonT.pt() < 1.5){ isMatch165_ -> push_back(true);} else{isMatch165_ -> push_back(false); } 
       
      }
      
