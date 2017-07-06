@@ -531,6 +531,7 @@ void DijetTreeProducer::beginJob()
   isMatch90_        = new std::vector<bool>;
   isMatch120_       = new std::vector<bool>;
   isMatch165_       = new std::vector<bool>;
+  isGenMatch_       = new std::vector<bool>;
   
   outTree_->Branch("isMatch30"                                 ,"vector<bool>"   ,&isMatch30_);
   outTree_->Branch("isMatch50"                                 ,"vector<bool>"   ,&isMatch50_);
@@ -538,6 +539,8 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("isMatch90"                                 ,"vector<bool>"   ,&isMatch90_);
   outTree_->Branch("isMatch120"                                ,"vector<bool>"   ,&isMatch120_);
   outTree_->Branch("isMatch165"                                ,"vector<bool>"   ,&isMatch165_);
+  outTree_->Branch("isGenMatch"                                ,"vector<bool>"   ,&isGenMatch_);
+  
   
         
   
@@ -1103,6 +1106,7 @@ void DijetTreeProducer::endJob()
  delete isMatch90_     ;    
  delete isMatch120_    ;    
  delete isMatch165_    ;
+ delete isGenMatch_    ;
  
  
 // delete ptphotonnofix_;
@@ -1605,12 +1609,14 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
                   		phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
                   		etaGenphoton_    ->push_back( iphoton->genPhoton()->eta() );
                   		energyGenphoton_ ->push_back( iphoton->genPhoton()->energy());
+                  		isGenMatch_      ->push_back(true);
 	          		nGenphotons_++;
 	          	}else{
 	          		ptGenphoton_     ->push_back( -999 );
                   		phiGenphoton_    ->push_back( -999 );
                   		etaGenphoton_    ->push_back( -999 );
                   		energyGenphoton_ ->push_back( -999 );
+                  		isGenMatch_      ->push_back(false);
 	          	}
 		  }
 		  
@@ -1927,7 +1933,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       
       
     //---- match the photon tight to the trigger object;
-     if(candhlt30.size() != 0 || candhlt50.size() != 0 || candhlt75.size() != 0 || candhlt90.size() != 0 || candhlt120.size() != 0 || candhlt165.size() != 0){
+    if(candhlt30.size() != 0 || candhlt50.size() != 0 || candhlt75.size() != 0 || candhlt90.size() != 0 || candhlt120.size() != 0 || candhlt165.size() != 0){
     for(size_t itrig = 0 ; itrig < candhlt30.size(); ++itrig ){
     
     if(std::hypot((PhotonT.eta()-candhlt30.at(itrig).Eta()),(PhotonT.phi()-candhlt30.at(itrig).Phi())) < 0.3 && candhlt30.at(itrig).Pt()/PhotonT.pt() > 0.5 && candhlt30.at(itrig).Pt()/PhotonT.pt() < 1.5) { isMatch30_ -> push_back(true);} else{isMatch30_ -> push_back(false); } 
@@ -2983,6 +2989,7 @@ void DijetTreeProducer::initialize()
   isMatch90_    ->clear() ;    
   isMatch120_   ->clear() ;    
   isMatch165_   ->clear() ;
+  isGenMatch_   ->clear() ;
       
   Ecorrbump_   ->clear();
   

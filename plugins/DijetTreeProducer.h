@@ -211,7 +211,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<float> *ptGenphoton_,*etaGenphoton_,*phiGenphoton_,*energyGenphoton_;
     std::vector<double> *Ecorrbump_;
     
-    std::vector<bool>  *isMatch30_,*isMatch50_,*isMatch75_,*isMatch90_,*isMatch120_,*isMatch165_;
+    std::vector<bool>  *isMatch30_,*isMatch50_,*isMatch75_,*isMatch90_,*isMatch120_,*isMatch165_, *isGenMatch_;
     
    //std::vector<float> *ptphotonnofix_;
     //  std::vector<float> *PFpx, *PFpy, *PFpz, 
