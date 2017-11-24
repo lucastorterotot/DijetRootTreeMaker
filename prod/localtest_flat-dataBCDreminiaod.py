@@ -31,11 +31,11 @@ for type in ['AK4PFchs','AK4PFchs_antib']:
 ## ----------------- Global Tag ------------------
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 #process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v4'
-process.GlobalTag.globaltag = '80X_dataRun2_2016SeptRepro_v7' #80X_mcRun2_asymptotic_2016_miniAODv2
+process.GlobalTag.globaltag = '80X_dataRun2_2016LegacyRepro_v4' #80X_mcRun2_asymptotic_2016_miniAODv2
 
 #--------------------- Report and output ---------------------------
 # Note: in grid runs this parameter is not used.
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
@@ -103,7 +103,7 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 # handled separately there.
 
 process.source = cms.Source("PoolSource",
-      fileNames = cms.untracked.vstring("/store/data/Run2016D/SinglePhoton/MINIAOD/18Apr2017-v1/120000/021B9430-0A3F-E711-A157-0CC47A4D76B2.root")
+      fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
    # fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root","file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents.root")
    # fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/pickevents_oldreco.root")
     #fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/h/hlattaud/private/CMSSW_9_1_0/src/pickevents.root")
@@ -146,7 +146,7 @@ process.calibratedPatPhotons.isMC = cms.bool(False)# this is 74X
 #process.calibratedPatPhotonsbeforeGS.correctionFile = cms.string(files["Moriond2017_JEC"])
 #process.calibratedPatPhotonsbeforeGS.isMC = cms.bool(False)
 
-process.calibratedPatPhotons80X.isMC = cms.bool(False)
+#process.calibratedPatPhotons80X.isMC = cms.bool(False)
 
 
 #process.calibratedPatbeforegxPhotons 
@@ -160,7 +160,7 @@ process.calibratedPatPhotons80X.isMC = cms.bool(False)
 
 
 process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-    src = cms.InputTag('calibratedPatPhotons80X'), # cms.InputTag('slimmedphoton74X'),# this is 74X regression 
+    src = cms.InputTag('calibratedPatPhotons'), # cms.InputTag('slimmedphoton74X'),# this is 74X regression 
     cut = cms.string('pt>5 && abs(eta)')
 )
 srcViD = "selectedPhotons"#"slimmedPhotons"
@@ -264,14 +264,15 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   # There's no avoiding this in Consumes era
   isData          = cms.bool(True),
   isreMiniAOD     = cms.bool(False),
+  Endcaps_photon  = cms.bool(True),
   ## JETS/MET ########################################
   jetsAK4             = cms.InputTag('slimmedJets'), 
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
-  met              = cms.InputTag('slimmedMETsUncorrected'),
-  metforggen       = cms.InputTag('slimmedMETsUncorrected'),
-  metEGcleaned     = cms.InputTag('slimmedMETsMuEGClean',processName = "jetToolbox"),   
+  met              = cms.InputTag('slimmedMETs'),
+  metforggen       = cms.InputTag('slimmedMETs'),
+  metEGcleaned     = cms.InputTag('slimmedMETs'),   
   metpuppi              = cms.InputTag('slimmedMETsPuppi'),
   PFCands = cms.InputTag('packedPFCandidates'),
   
@@ -283,7 +284,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
   Photon                    = cms.InputTag('selectedPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons80X'),
+  Photonsmeared             = cms.InputTag('calibratedPatPhotons'),
  # Photonsmeared_nofix       = cms.InputTag('slimmedPhotonsBeforeGSFix',processName=cms.InputTag.skipCurrentProcess()),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
@@ -379,7 +380,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 process.p = cms.Path()  
 process.p +=                      process.chs
 process.p +=                      process.regressionApplication 
-process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X#*process.calibratedPatPhotonsbeforeGS
+process.p +=                      process.calibratedPatPhotons
 #process.p +=                      process.calibratedPatPhotons80X
 process.p +=                      process.selectedPhotons
 process.p +=                      process.egmPhotonIDSequence
