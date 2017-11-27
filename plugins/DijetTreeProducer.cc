@@ -15,6 +15,7 @@
 #include "TParameter.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include <boost/regex.hpp>
 
 #include "CMSDIJET/DijetRootTreeMaker/plugins/DijetTreeProducer.h"
 #include "FWCore/Framework/interface/EventSetup.h"
