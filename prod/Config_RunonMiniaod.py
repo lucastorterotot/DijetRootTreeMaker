@@ -405,6 +405,7 @@ process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other op
 
 # Recluster the ak4 jets or not
 
+#waiting for zeynep config
 #if runOnReclusteredJets:
    
 
