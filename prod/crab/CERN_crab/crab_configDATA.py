@@ -7,7 +7,7 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/prod/localtest_flat-dataBCD-cfg_miniAOD.py'
+config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_29/src/CMSDIJET/DijetRootTreeMaker/prod/localtest_flat-dataBCDreminiaod.py'
 config.JobType.pyCfgParams = ['runOnData=True']
 
 config.Data.inputDataset = '/SinglePhoton/Run2016B-03Feb2017_ver2-v2/MINIAOD'
@@ -15,7 +15,7 @@ config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Coll
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 250
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/phys_jetmet/hlattaud/GammaJet/GJet-ReReco-Run2016B'
+config.Data.outLFNDirBase = '/store/group/phys_jetmet/hlattaud/GammaJet/'
 
-config.Site.storageSite = 'T2_CH_CERN'
+config.Site.storageSite = 'T3_FR_IPNL'
 

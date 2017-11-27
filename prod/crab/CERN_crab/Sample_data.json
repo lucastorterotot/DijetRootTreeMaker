@@ -1,33 +1,59 @@
 [
   {
-    "name": "GJet-promptreco-Run2017C_v1_V5",
-    "dataset": "/SinglePhoton/Run2017C-PromptReco-v1/MINIAOD",
-    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_promptreco_2017_runC"
+    "name": "GJet-07Aug17-Run2016B_ver1_v1_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016B-07Aug17_ver1-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
   },
   {
-    "name": "GJet-promptreco-Run2017C_v3_V5",
-    "dataset": "/SinglePhoton/Run2017C-PromptReco-v3/MINIAOD",
-    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_promptreco_2017_runC"
+    "name": "GJet-07Aug17-Run2016B_ver2_v1_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016B-07Aug17_ver2-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
   },
   {
-    "name": "GJet-promptreco-Run2017C_v2_V5",
-    "dataset": "/SinglePhoton/Run2017C-PromptReco-v2/MINIAOD",
-    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_promptreco_2017_runC"
+    "name": "GJet-07Aug17-Run2016C_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016C-07Aug17-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
   },
   {
-    "name": "GJet-promptreco-Run2017D_v1_V2",
-    "dataset": "/SinglePhoton/Run2017D-PromptReco-v1/MINIAOD",
-    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_promptreco_2017_runD"
+    "name": "GJet-07Aug17-Run2016D_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016D-07Aug17-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
   },
   {
-    "name": "GJet-promptreco-Run2017B_v1_V5",
-    "dataset": "/SinglePhoton/Run2017B-PromptReco-v1/MINIAOD",
-    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_promptreco_2017_runB"
+    "name": "GJet-07Aug17-Run2016E_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016E-07Aug17-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
   },
   {
-    "name": "GJet-promptreco-Run2017B_v2_V5",
-    "dataset": "/SinglePhoton/Run2017B-PromptReco-v2/MINIAOD",
-    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_promptreco_2017_runB"
+    "name": "GJet-07Aug17-Run2016Fearly_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016F-07Aug17-v1/MINIAOD",
+    "Data.lumiMask": "/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/prod/crab/CERN_crab/earlyFJSON.txt",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
+  },
+  {
+    "name": "GJet-07Aug17-Run2016Flate__V1_endcap",
+    "dataset": "/SinglePhoton/Run2016F-07Aug17-v1/MINIAOD",
+    "Data.lumiMask": "/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_26_patch1/src/CMSDIJET/DijetRootTreeMaker/prod/crab/CERN_crab/lateFJSON.txt",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
+  },
+  {
+    "name": "GJet-07Aug17-Run2016G_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016G-07Aug17-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
+  },
+  {
+    "name": "GJet-07Aug17-Run2016H_V1_endcap",
+    "dataset": "/SinglePhoton/Run2016H-07Aug17-v1/MINIAOD",
+    "Data.unitsPerJob": 250,
+    "Data.outLFNDirBase": "/store/user/hlattaud/GammaJet/Gjet_2016_legacy/"
   }
   
 ]

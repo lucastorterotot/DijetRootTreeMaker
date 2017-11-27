@@ -242,6 +242,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   # There's no avoiding this in Consumes era
   isData          = cms.bool(False),
   isreMiniAOD     = cms.bool(False),
+  Endcaps_photon  = cms.bool(False),
   ## JETS/MET ########################################
   jetsAK4             = cms.InputTag('slimmedJets'), 
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),

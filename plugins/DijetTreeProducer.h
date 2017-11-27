@@ -66,6 +66,9 @@ class DijetTreeProducer : public edm::EDAnalyzer
     virtual bool isValidPhotonLoose(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
     virtual bool isValidPhotonMedium(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
     virtual bool isValidPhotonTight(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight); 
+    virtual bool isValidEndcapPhotonLoose(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
+    virtual bool isValidEndcapPhotonMedium(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
+    virtual bool isValidEndcapPhotonTight(const pat::PhotonRef& photonRef,const edm::Event& event, double generatorWeight);
     virtual void endJob();
     virtual ~DijetTreeProducer();
     
@@ -112,6 +115,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     bool mVerbose = false;
     bool isData_;
     bool isReminiAOD_;
+    bool RunEndcapPhoton_;
     bool goodPVtx_;
     
     
