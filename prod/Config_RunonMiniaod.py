@@ -26,22 +26,22 @@ options.register(
 )
 
 options.register(
-    'isRunonData', 'False', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'isRunonData', False, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'Indicates whether the job processes data or simulation'
 )
 
 options.register(
-    'isLegacy', 'True', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'isLegacy', True, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'In case of data, distinguishes Reminiaod and legacy rereco. Ignored for simulation'
 )
 
 options.register(
-    'isEndcaps', 'False', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'isEndcaps', False, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'specify wether or not you run on endcaps photons'
 )
 
 options.register(
-    'UseReclusteredJets', 'False', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'UseReclusteredJets', False, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'specify wether or not you run with reclustered Jets from reco'
 )
 
@@ -63,6 +63,9 @@ runOnEndcaps         = options.isEndcaps
 runOnReclusteredJets = options.UseReclusteredJets
 
 print(runOnData)
+print(runOnLegacy)
+if not runOnEndcaps:
+    print(runOnEndcaps)
 
 if runOnData:
    print('You are running on datas')
@@ -107,7 +110,7 @@ if len(options.JECMC) == 0:
     
     
     print 'WARNING: No MC JEC provided. Will use the default one: {}.'.format(
-        options.JECData
+        options.JECMC
 )
 
 
@@ -224,21 +227,7 @@ else:
        process.source = cms.Source("PoolSource",
            fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")
            )
-#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
-
-if not runOnData:
-     ##Photon Energy smearer------------------------------------------
-      process.load('Configuration.StandardSequences.Services_cff')
-      process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-
-                                                       calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
-                                                                                                                 engineName = cms.untracked.string('TRandom3'),
-                                                                                           ),
-                                                       
-                                                       calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
-                                                                                                                 engineName = cms.untracked.string('TRandom3'),
-                                                                                           ),
-                                                       )  
+#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083") 
 
 
 # Add map producer for photon identification 
@@ -261,6 +250,23 @@ from EgammaAnalysis.ElectronTools.calibrationTablesRun2 import files
 process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
 process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
 
+
+if not runOnData:
+     ##Photon Energy smearer------------------------------------------
+      process.load('Configuration.StandardSequences.Services_cff')
+      process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+
+                                                       calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                                                                                                                 engineName = cms.untracked.string('TRandom3'),
+                                                                                           ),
+                                                       
+                                                       calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                                                                                                                 engineName = cms.untracked.string('TRandom3'),
+                                                                                           ),
+                                                       ) 
+
+
+
 if not runOnLegacy:
       process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
       if runOnData: 
@@ -276,6 +282,8 @@ else:
 
 
 if runOnLegacy:
+        
+        process.calibratedPatPhotons.correctionFile = cms.string(files["Legacy2016_17AUg17"])
         process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
               src = cms.InputTag('calibratedPatPhotons'),
               cut = cms.string('pt>5 && abs(eta)'))
