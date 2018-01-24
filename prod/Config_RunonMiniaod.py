@@ -26,22 +26,22 @@ options.register(
 )
 
 options.register(
-    'isRunonData', 'False', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'isRunonData', False, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'Indicates whether the job processes data or simulation'
 )
 
 options.register(
-    'isLegacy', 'True', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'isLegacy', True, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'In case of data, distinguishes Reminiaod and legacy rereco. Ignored for simulation'
 )
 
 options.register(
-    'isEndcaps', 'False', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'isEndcaps', False, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'specify wether or not you run on endcaps photons'
 )
 
 options.register(
-    'UseReclusteredJets', 'False', VarParsing.multiplicity.singleton, VarParsing.varType.bool,
+    'UseReclusteredJets', False, VarParsing.multiplicity.singleton, VarParsing.varType.bool,
     'specify wether or not you run with reclustered Jets from reco'
 )
 
