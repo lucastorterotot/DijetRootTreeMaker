@@ -15,6 +15,7 @@
 #include "TParameter.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include <algorithm>
 
 #include "CMSDIJET/DijetRootTreeMaker/plugins/DijetTreeProducer.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -390,8 +391,8 @@ float getEffectiveArea(float eta, IsolationType type) {
 double getCorrectedPFIsolation(double isolation, double rho, float eta, IsolationType type) 
 {
   float effectiveArea = getEffectiveArea(eta, type); 
-  //  return std::max(isolation - rho*effectiveArea, 0.);
-  return isolation - rho*effectiveArea;
+    return std::max(isolation - rho*effectiveArea, 0.);
+ // return isolation - rho*effectiveArea;
 }
 
 
