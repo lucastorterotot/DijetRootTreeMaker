@@ -660,7 +660,7 @@ void DijetTreeProducer::beginJob()
   neHadMultAK4_      = new std::vector<int>;
   neMultAK4_         = new std::vector<int>;
   phoMultAK4_        = new std::vector<int>;
-  
+  hadronflavour_ = new std::vector<int>;  
 
 
   outTree_->Branch("jetPtAK4"                ,"vector<float>"     ,&ptAK4_);
@@ -689,11 +689,12 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("jetHofAK4"               ,"vector<float>"    ,&hofAK4_);
   outTree_->Branch("idLAK4"                  ,"vector<int>"      ,&idLAK4_);   
   outTree_->Branch("idTAK4"                  ,"vector<int>"      ,&idTAK4_);   
-  outTree_->Branch("chHadMultAK4"          ,"vector<int>"      ,&chHadMultAK4_);   
+  outTree_->Branch("chHadMultAK4"           ,"vector<int>"      ,&chHadMultAK4_);   
   outTree_->Branch("chMultAK4"              ,"vector<int>"      ,&chMultAK4_);   
   outTree_->Branch("neHadMultAK4"           ,"vector<int>"      ,&neHadMultAK4_);   
   outTree_->Branch("neMultAK4"              ,"vector<int>"      ,&neMultAK4_);   
   outTree_->Branch("phoMultAK4"             ,"vector<int>"      ,&phoMultAK4_);   
+  outTree_->Branch("hadronflavour"          ,"vector<int>"      ,&hadronflavour_);   
   
   //-------Jet PUPPI-----------------
   ptPUPPI_             = new std::vector<float>;
@@ -979,7 +980,7 @@ void DijetTreeProducer::endJob()
   delete neHadMultAK4_ ;
   delete neMultAK4_    ;
   delete phoMultAK4_   ;
-
+  delete hadronflavour_;
 
  delete ptPUPPI_;
  delete jecPUPPI_;
@@ -2270,7 +2271,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       neHadMultAK4_     ->push_back(neHadMult);  
       neMultAK4_        ->push_back(neMult);
       phoMultAK4_       ->push_back(phoMult); 
-      
+      hadronflavour_    ->push_back(ijet->hadronFlavour());
     }
 
   }// jet loop  
@@ -2993,7 +2994,7 @@ void DijetTreeProducer::initialize()
   neHadMultAK4_     ->clear();
   neMultAK4_        ->clear();
   phoMultAK4_        ->clear();
- 
+  hadronflavour_     ->clear();
  
   nJetsPUPPI_ = -999;
  
