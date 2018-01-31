@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process('jetToolbox')
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 500
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 
 
@@ -194,6 +194,7 @@ process.prunedGenParticlesDijet = cms.EDProducer('GenParticlePruner',
     "keep ( status = 3 || (status>=21 && status<=29) )", # keep hard process particles
     )
 )
+
 
 
 
@@ -478,12 +479,12 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
      
      ###for SinglePhotons
-     'HLT_Photon30_R9Id90_HE10_IsoM_v*',
-     'HLT_Photon50_R9Id90_HE10_IsoM_v*',
-     'HLT_Photon75_R9Id90_HE10_IsoM_v*',
-     'HLT_Photon90_R9Id90_HE10_IsoM_v*',
-     'HLT_Photon120_R9Id90_HE10_IsoM_v*',
-     'HLT_Photon165_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon30_v*',
+     'HLT_Photon50_v*',
+     'HLT_Photon75_v*',
+     'HLT_Photon90_v*',
+     'HLT_Photon120_v*',
+     'HLT_Photon175_v*',
      
   ),
   
@@ -502,7 +503,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
   triggerObjects = cms.InputTag('selectedPatTrigger'),
   filters = cms.vstring(
-        'hltEG30R9Id90HE10IsoMHcalIsoFilter','hltEG50R9Id90HE10IsoMHcalIsoFilter', 'hltEG75R9Id90HE10IsoMHcalIsoFilter','hltEG90R9Id90HE10IsoMHcalIsoFilter','hltEG120R9Id90HE10IsoMTrackIsoFilter','hltEG165R9Id90HE10IsoMTrackIsoFilter'),
+        'hltEG30HEFilter','hltEG50HEFilter', 'hltEG75HEFilter','hltEG90HEFilter','hltEG120HEFilter','hltEG175HEFilter'),
   ## JECs ################
   redoJECs  = cms.bool(True),
 

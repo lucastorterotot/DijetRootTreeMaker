@@ -534,6 +534,7 @@ void DijetTreeProducer::beginJob()
   isMatch120_       = new std::vector<bool>;
   isMatch165_       = new std::vector<bool>;
   isGenMatch_       = new std::vector<bool>;
+  isFakephoton_     = new std::vector<bool>;
   
   outTree_->Branch("isMatch30"                                 ,"vector<bool>"   ,&isMatch30_);
   outTree_->Branch("isMatch50"                                 ,"vector<bool>"   ,&isMatch50_);
@@ -578,7 +579,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("isPhotonLoose"                                 ,"vector<bool>"   ,&isPhotonLoose_);
   outTree_->Branch("isPhotonMedium"                                ,"vector<bool>"   ,&isPhotonMedium_);
   outTree_->Branch("isPhotonTight"                                 ,"vector<bool>"   ,&isPhotonTight_);
-  
+  outTree_->Branch("isfakephoton"                                  ,"vector<bool>"   ,&isFakephoton_);  
   
   //---------------Electrons----------------------------------
   
@@ -1110,6 +1111,7 @@ void DijetTreeProducer::endJob()
  delete isMatch120_    ;    
  delete isMatch165_    ;
  delete isGenMatch_    ;
+ delete isFakephoton_  ;
  
  
 // delete ptphotonnofix_;
@@ -1227,7 +1229,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       cout << "an edm::LogError call for PileUpError used to be here, but that does not work anymore -Juska" << endl;
     }
   }// if MC
-  
+ edm::Handle<reco::GenParticleCollection> prunedGenParticles;
   //-------------- Gen Event Info -----------------------------------
   if (!iEvent.isRealData()) {
 
@@ -1259,7 +1261,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
    
       
     
-    edm::Handle<reco::GenParticleCollection> prunedGenParticles;
+
     if (!iEvent.isRealData())
       iEvent.getByToken(srcPrunedGenParticles_, prunedGenParticles);
     
@@ -1494,16 +1496,13 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   //------------------------photons---------------
 
       uint32_t index = 0;
+      edm::Handle<pat::PackedCandidateCollection> pfs;
+      iEvent.getByToken(srcPfCands_, pfs);
+      
       pat::PhotonCollection::const_iterator iphoton = photons->begin();
       pat::PhotonCollection::const_iterator iphotonsmear= photonssmear->begin();
-   //   pat::PhotonCollection::const_iterator iphotonnofix= photonsnofix->begin();
-      
-     // pat::PhotonCollection::const_iterator iphotonpt = photons->begin();
-      //pat::PhotonCollection::const_iterator iphotonsuncorrpt= photonsUncorr->begin();
-      
       pat::PhotonCollection::const_iterator iphotonsuncorr= photonsUncorr->begin();
       pat::Photon pho;
-      //pat::Photon phouncoor;
       nPhotons_ = 0;
       nPhotonsLoose_ = 0;
       nPhotonsMedium_ = 0;
@@ -1518,45 +1517,89 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
       iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);     
       double rhod = *rho;
-     // double photTpx = 0 ,photTpy= 0 ,photTpT= 0 ;
-     // double photTuncorpx= 0 ,photTuncorpy= 0 ,photTuncorpT= 0 ;
-    //  double ptphotight = 0. ;
-      //uint32_t index_photon_tight = 0;
-      // remove the vector after the syn with Hgg
      std::vector<pat::Photon> PhotonT_vec;
      std::vector<pat::Photon> PhotonTOoB_vec ;
      pat::Photon PhotonT ;
      pat::Photon PhotonTOoB ;
-    //  pat::Photon PhotonTcorr ; 
-     /* std::cout<<" size of photon        : "<< photons->size() << std::endl;
-      std::cout<<" size of photon uncorr : "<< photonsUncorr->size() << std::endl;
-      int nph = 0 ;
-      //for (auto const &photon: *photons)
-      
-      for(; iphotonpt != photons->end(); ++iphotonpt,nph++ ) 
-      {
-         std::cout<<" pT of "<<nph<<" photon : "<<iphotonpt->pt()<<std::endl;
-      }
-      nph = 0 ;
-      for(; iphotonsuncorrpt != photonsUncorr->end(); ++iphotonsuncorrpt,nph++ ) 
-      {
-         std::cout<<" pT of "<<nph<<"  photon uncorr : "<<iphotonsuncorrpt->pt()<<std::endl;
-      }
-*/
-      for(; iphoton != photons->end(); ++iphoton,++iphotonsmear, index++ ) 
-      { 
+std::vector<unsigned> sortedPhotonIdx;
+std::multimap<double, unsigned> sortedPhoton;
+for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != photons->end(); ++iphoton)
+	{
+	  
+	  sortedPhoton.insert(std::make_pair(iphoton->pt(), iphoton - photons->begin()));
+	
+	}
+      // get jet indices in decreasing pT order
+
+      for(std::multimap<double, unsigned>::const_reverse_iterator it = sortedPhoton.rbegin(); it != sortedPhoton.rend(); ++it)
+        sortedPhotonIdx.push_back(it->second);
+
+//std::cout<<" event "<< std::endl;
+
+      for(std::vector<unsigned>::const_iterator i = sortedPhotonIdx.begin(); i != sortedPhotonIdx.end(); ++i) {
+
+      pat::PhotonCollection::const_iterator iphoton = (photons->begin() + *i);
+
            nPhotons_++;
            pho =*iphoton;
            PhotonT_vec.push_back((*iphoton));
-          // std::cout<<" test bad alloc 1"<<std::endl;
+         // std::cout<<" photon pt in the event "  <<    iphoton->pt() <<" eta : "<<iphoton->eta()<<" photon n° "<< nPhotons_<<std::endl;	    
           if(!RunEndcapPhoton_){ 
-	   if (fabs(iphoton->eta()) <= 1.3) 
+	   if (fabs(iphoton->eta()) <= 1.3 && nPhotons_ == 1 ) 
 	   {               
-	       pat::PhotonRef PhotonReftmp(photons, index);	      
-	        if (isValidPhotonLoose(PhotonReftmp, iEvent, generatorWeight)) 
+	       pat::PhotonRef PhotonReftmp(photons, index);
+
+	        if (isValidPhotonLoose_Datadrivenpresel(PhotonReftmp, iEvent, generatorWeight)) 
 		{			
 		  
-		         
+		  Double_t Sum_pt_pfphotoncandidate = 0.;
+		  Double_t Sum_pt_pfphotoncandidate_charged = 0.;
+		  Double_t Sum_pt_genparticle = 0. ;
+		  for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
+		   const pat::PackedCandidate &pf = (*pfs)[i];
+
+		   if(std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))  < 0.4  && pf.pdgId() == 22 && std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi())) > 0.0001 && fabs( (iphoton->pt() - pf.pt())/iphoton->pt()) > 0.80 ){
+		   	//	   std::cout<<" packed Pf candidate n° "<<i<<" pt : "<<  pf.pt() << " DR : "<<std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))<<" ID : "<<pf.pdgId()<< " diff ptt rel "<< fabs( (iphoton->pt() - pf.pt())/iphoton->pt()) <<std::endl;
+		     Sum_pt_pfphotoncandidate += pf.pt();
+		     }
+		   if(std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))  < 0.4  && pf.charge() != 0){
+		     Sum_pt_pfphotoncandidate_charged += pf.pt();
+		     }
+		   }
+		  // std::cout<<" test veto preselec : photon iso : "<< Sum_pt_pfphotoncandidate<< " charged iso : "<< Sum_pt_pfphotoncandidate_charged<<std::endl;
+		  
+		  
+		  //is fake photon ?
+		  bool isfake_photon = true ;
+		  if(!iEvent.isRealData() &&  iphoton->genPhoton() && fabs(iphoton->pt() - iphoton->genPhoton()->pt())/iphoton->genPhoton()->pt() < 0.2 ) isfake_photon = false ;
+		  if(!isfake_photon ){
+		  if( prunedGenParticles.isValid() ) {
+            
+                   for( reco::GenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
+		  
+		  if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.0001 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5){ 
+		  
+		  Sum_pt_genparticle  += it->pt();
+		  
+		  //std::cout<<" gen Pf candidate pt : "<<  it->pt() << " DR : "<<std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))<<" ID : "<<it->pdgId()<< " diff ptt rel "<<  (iphoton->pt() - it->pt())/iphoton->pt() <<std::endl;
+		  
+		  }
+		  }
+		//  std::cout<< " iso requirement "<< Sum_pt_genparticle<<std::endl;
+		  if( Sum_pt_genparticle < 5. ) isFakephoton_             ->push_back(false);
+		  
+		  }else{
+		  
+		  isFakephoton_             ->push_back(true);
+		  }
+		  
+		  }
+		  
+		  
+		  
+		  if(Sum_pt_pfphotoncandidate > 15.) continue; 
+		  if(Sum_pt_pfphotoncandidate_charged > 15.) continue;
+		  
 		  nPhotonsLoose_++;                           
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
@@ -1578,7 +1621,6 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  isPhotonLoose_        ->push_back( true) ;
 		  HaspixelSeed_         ->push_back(iphoton->hasPixelSeed());
 		  hadTowOverEm_         ->push_back(iphoton->hadronicOverEm());
-		 // std::cout<<"hadtowoverE : "<<pho.hadTowOverEm()<<" hoverE : "<<pho.hadronicOverEm()<<std::endl;
 		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());		  				  
 		  double Ecorr=1;
 		  Ecorrbump_            ->push_back( Ecorr                 );
@@ -1624,27 +1666,14 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		    
 		 }
 
-		//std::cout<<" test bad alloc 2"<<std::endl;
-		if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) /*&& (*iphotonsuncorr).pt()*/) 
+		if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) ) 
 		{
-		    // phouncoor = *iphotonsuncorr;     
 		     nPhotonsTight_++;
-		   //  index_photon_tight = index ;
-		//   std::cout<<" test bad alloc 3"<<std::endl;
 		     PhotonT = (*iphoton);
 		     PhotonTOoB = (*iphotonsmear);
 		     PhotonT_vec.push_back((*iphoton));
                      PhotonTOoB_vec.push_back((*iphotonsmear)); 
-
-		  //   PhotonTcorr = (*iphoton);
-		     isPhotonTight_   ->push_back(true);
-		   // ptphotight = iphoton->pt();
-		  //  photTpx = iphoton->px();
-		  //  photTpy = iphoton->py();
-		 //   photTpT = iphoton->pt();
-		    //photTuncorpx = iphotonsuncorr->px();
-		   // photTuncorpy = iphotonsuncorr->py();
-		   // photTuncorpT = iphotonsuncorr->pt(); 
+		     isPhotonTight_   ->push_back(true); 
 		 }             
           }}else{
              if (fabs(iphoton->eta()) >= 1.305 && fabs(iphoton->eta()) <= 2.5) 
@@ -1675,7 +1704,6 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  isPhotonLoose_        ->push_back( true) ;
 		  HaspixelSeed_         ->push_back(iphoton->hasPixelSeed());
 		  hadTowOverEm_         ->push_back(iphoton->hadronicOverEm());
-		 // std::cout<<"hadtowoverE : "<<pho.hadTowOverEm()<<" hoverE : "<<pho.hadronicOverEm()<<std::endl;
 		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());		  				  
 		  double Ecorr=1;
 		  Ecorrbump_            ->push_back( Ecorr                 );
@@ -1721,46 +1749,21 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		    
 		 }
 
-		//std::cout<<" test bad alloc 2"<<std::endl;
-		if (isValidEndcapPhotonTight(PhotonReftmp, iEvent, generatorWeight) /*&& (*iphotonsuncorr).pt()*/) 
+
+		if (isValidEndcapPhotonTight(PhotonReftmp, iEvent, generatorWeight)) 
 		{
-		    // phouncoor = *iphotonsuncorr;     
 		     nPhotonsTight_++;
-		   //  index_photon_tight = index ;
-		//   std::cout<<" test bad alloc 3"<<std::endl;
 		     PhotonT = (*iphoton);
 		     PhotonTOoB = (*iphotonsmear);
 		     PhotonT_vec.push_back((*iphoton));
                      PhotonTOoB_vec.push_back((*iphotonsmear)); 
-
-		  //   PhotonTcorr = (*iphoton);
 		     isPhotonTight_   ->push_back(true);
-		   // ptphotight = iphoton->pt();
-		  //  photTpx = iphoton->px();
-		  //  photTpy = iphoton->py();
-		 //   photTpT = iphoton->pt();
-		    //photTuncorpx = iphotonsuncorr->px();
-		   // photTuncorpy = iphotonsuncorr->py();
-		   // photTuncorpT = iphotonsuncorr->pt(); 
+		    
 		 }
           
           }}
       }//end loop over photon collection
-      
-     
-    /*  for(unsigned int i = 0 ; i < PhotonT_vec.size() ; i++){
-       
-       std::cout<<"photon 74X["<<i+1<<"] R9"<<PhotonT_vec.at(i).r9()<<" Pt of "<< PhotonT_vec.at(i).pt()<<" etaSC "<< PhotonT_vec.at(i).superCluster()->eta()<<" eta "<< PhotonT_vec.at(i).eta()<<" energy "<<PhotonT_vec.at(i).energy() <<std::endl;
-       //std::cout<<"Pt of photon 80X["<<i+1<<"] "<< PhotonTOoB_vec.at(i).pt()<<std::endl;
-      
-      
-      
-      }*/
-      
-      edm::Handle<pat::PackedCandidateCollection> pfs;
-      iEvent.getByToken(srcPfCands_, pfs);
-      
-      
+  
       Handle<vector<pat::MET> > met;
       iEvent.getByToken(srcMET_,met);
       
@@ -1809,14 +1812,6 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
             if(deltar <= 0.1 && nlim < 1){
             nlim ++ ;  
             Photonuncorr = (*iphotonsuncorr);
-          //  std::cout<<" photon before GX fix + reg Pt : "<<iphotonsuncorr->pt()<<" photon before GX fix pt : "<< iphotonnofix->pt() <<std::endl;
-           // std::cout<<" photon before GX fix + reg Px : "<<iphotonsuncorr->px()<<" photon before GX fix px : "<< iphotonnofix->px() <<std::endl;
-           // std::cout<<" photon before GX fix + reg Py : "<<iphotonsuncorr->py()<<" photon before GX fix py : "<< iphotonnofix->py() <<std::endl;
-              // ptphotonnofix_        -> push_back(iphotonnofix->px());
-              // ptsmearedphoton_      -> push_back(iphotonsuncorr->px());
-          //     photonuncopx = iphotonsuncorr->px();
-          //     photonuncopy = iphotonsuncorr->py();
-              // std::cout<<"test photon before GX px: "<<photonuncopx<<" py "<<photonuncopy<<std::endl;
             }   
       
       
@@ -1852,29 +1847,17 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     footprint_rereco.push_back(PhotonTOoB.sourceCandidatePtr(i) );
      //   std::cout<<" source tight  : "<< i<<std::endl;
   }
-  
-  
-  
-  // now loop on pf candidates
- /* std::cout<<"photon 74X   : px : "<<PhotonT.px()<< " py : "<<PhotonT.py()<< " pT : "<< PhotonT.pt() <<" phi "  <<PhotonT.phi()<<" eta "<<PhotonT.eta()<<std::endl;
-  std::cout<<"photon 74X uncorr   : px : "<<Photonuncorr.px()<< " py : "<<Photonuncorr.py()<< " pT : "<< Photonuncorr.pt() <<" phi "  <<Photonuncorr.phi()<<" eta "<<Photonuncorr.eta()<<std::endl;
-  std::cout<<"photon 80X : px : "<<PhotonTOoB.px()<< " py : "<<PhotonTOoB.py()<< " pT : "<< PhotonTOoB.pt() <<" phi "  <<PhotonTOoB.phi()<<" eta "<<PhotonTOoB.eta()<<std::endl;
-  
-  */
+
   for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
     const pat::PackedCandidate &pf = (*pfs)[i];
     // pfcandidate-based footprint removal 
     
     if (std::find(footprint.begin(), footprint.end(), reco::CandidatePtr(pfs,i)) != footprint.end()) {
       
-      
-     // std::cout<<"PF old : px : "<<pf.px()<< " py : "<<pf.py()<< " pT : "<< pf.pt()<<" phi "  <<pf.phi()<<" eta "<<pf.eta()<<" Id linked to a photon "<< pf.isPhoton()<<" pdgid "<<pf.pdgId() << std::endl;
-    //  std::cout<<" delta R : "<< std::hypot((pf.eta()-PhotonT.eta()),(pf.phi()-PhotonT.phi()))<<" pf.pt()/PhotonT.pt() "<<pf.pt()/PhotonT.pt()<<std::endl;
-     // if((std::hypot((pf.eta()-PhotonT.eta()),(pf.phi()-PhotonT.phi()) > 0.01) && fabs((pf.pt()-PhotonT.pt())/PhotonT.pt())> 0.5) || !iEvent.isRealData() ){
-      continue;//}
+      continue;
     }
     
-    if(std::hypot((PhotonT.eta()-pf.eta()),(PhotonT.phi()-pf.phi())  < 0.3  && pf.pdgId() == 130)){
+    if(std::hypot((PhotonT.eta()-pf.eta()),(PhotonT.phi()-pf.phi())  < 0.3 ) && pf.pdgId() == 130){
         FootprintfromNHMEx += -1. * pf.px();
         FootprintfromNHMEy += -1. * pf.py();
         
@@ -1922,54 +1905,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   std::cout<<" Met 74x -80X : MEx : "<<FootprintMEx - FootprintMEx74<< " MEy : "<<FootprintMEy - FootprintMEy74<< " MET : "<< FootprintMEPt - FootprintMEpt74 << std::endl;
   std::cout<<" Phot 74x-80X : MEx : "<<PhotonT.px() - PhotonTOoB.px()<< " MEy : "<<PhotonT.py() - PhotonTOoB.py()<< " MET : "<< PhotonT.pt() - PhotonTOoB.pt() << std::endl;
   }
-  /*
-  if(PhotonT.pt() >= 40. && PhotonT.pt() <= 50.)
-  {
-    std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
-  }
   
-  if(PhotonT.pt() >= 95. && PhotonT.pt() <= 105.)
-  {
-    std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
-  }
-  
-  if(PhotonT.pt() >= 295. && PhotonT.pt() <= 305.)
-  {
-    std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
-  }
-  
-  if(PhotonT.pt() >= 395. && PhotonT.pt() <= 405.)
-  {
-    std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
-  }
-  
-  if(PhotonT.pt() >= 495. )
-  {
-    std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" photon pT : "<< PhotonT.pt() << " eta : "<<PhotonT.eta()<<" phi : "<<PhotonT.phi() <<" SC raw energy : "<<PhotonT.superCluster()->rawEnergy()<<std::endl;
-  }*/
-  
-  /*
-   if(  photTpT > 300. ){   
-  std::cout<<"event ID : "<<evt_<< " Run number : "<<run_<< " Lumi section : "<< lumi_<<" Bunch crossing number : "<<BXnumber_  << std::endl;
-    std::cout<<"Photon :                  px : "<<photTpx<< " py : "<<photTpy<< " pT : "<< photTpT << std::endl;
-   // std::cout<<"Photon not eg corrected : px : "<<photTuncorpx<< " py : "<<photTuncorpy<< " pT : "<< photTuncorpT << std::endl;
-    
-  std::cout<<"slimmedMETsEGClean : MEx : "<<EGcleanedMet.px()<< " MEy : "<<EGcleanedMet.py()<< " MET : "<< EGcleanedMet.pt() << std::endl;
-  //std::cout<<"slimmedMETsUncorrected : MEx : "<<Met.px()<< " MEy : "<<Met.py()<< " MET : "<< Met.pt() << std::endl;
- // std::cout<<"slimmedMETsUncorrected RAW : MEx : "<<Metraw.px()<< " MEy : "<<Metraw.py()<< " MET : "<< Metraw.pt() << std::endl;
-//  std::cout<<"Met from pfcandidates : MEx : "<<PFMEx<< " MEy : "<<PFMEy<< " MET : "<< PFMEPt << std::endl;
-//  std::cout<<"delta  photon uncorr - photon: px                                : "<< photTuncorpx - photTpx<< " py : "<< photTuncorpy - photTpy << " pT : "<<std::sqrt(std::pow(photTuncorpx - photTpx,2)+std::pow(photTuncorpy - photTpy,2))   << std::endl;
-  
- // std::cout<<"Met correction Raw (slimmedMETsEGClean-slimmedMETsUncorrected) : MEx : "<<-1*Metraw.px() + EGcleanedMetRAW.px()<< " MEy : "<<-1*Metraw.py() + EGcleanedMetRAW.py()<< " pT : "<<   std::sqrt(std::pow(-1*Metraw.px() + EGcleanedMetRAW.px(),2)+std::pow(-1*Metraw.py() + EGcleanedMetRAW.py(),2))<< std::endl;
-  
- // std::cout<<"Met correction    (slimmedMETsEGClean-slimmedMETsUncorrected) : MEx : "<<-1*Met.px() + EGcleanedMet.px()<< " MEy : "<<-1*Met.py() + EGcleanedMet.py()<< " pT : "<<   std::sqrt(std::pow(-1*Met.px() + EGcleanedMet.px(),2)+std::pow(-1*Met.py() + EGcleanedMet.py(),2))<< std::endl;
- 
-
-    std::cout<<"Raw Met CHS  : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< FootprintMEPt << std::endl;
-  //  std::cout<<"Met from pfcandidates (CHS footprint old corrected)+(slimmedMETsEGClean-slimmedMETsUncorrected) : MEx : "<<FootprintMExold<< " MEy : "<<FootprintMEyold<< " MET : "<< FootprintMEPtold << std::endl;
-    std::cout << std::endl;
-  
-// } */
   
 rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
 rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0., FootprintMEpt74));
@@ -2185,26 +2121,6 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
        idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
     }
     
-    
-    
-    
-      /*
-       idL = ( nemf>0.01 && nhf<0.98 && neMult > 2) && ((nhf<0.99 && nemf<0.99 && NumConst>1 && fabs(eta) <= 2.7) && ((fabs(eta) <= 2.4 && chf>0. && chMult>0 && cemf<0.99) || fabs(eta)>2.4)|| (fabs(eta)>2.7))  ;
-       
-       
-       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
-       
-    
-    }else{
-       idL = ( nemf<0.90 && neMult>10)   ;
-       
-       
-       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
-    }*/
-   // if(!iEvent.isRealData()&& !ijet->genJet()){
-   //   idL = 0 ;
-   //   idT = 0 ;     
-   // }
     edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsview, ijetview - jetsview->begin()));
 
        
@@ -2277,394 +2193,8 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 
   }// jet loop  
   htAK4_     = htAK4;
-  if(nPhotonsTight_ == 1){
-   
-   
-   
-   double Rbal80X = firstJet.pt() / PhotonTOoB.pt()  ;
-   double Rbal74X = firstJet.pt() / PhotonT.pt()  ;
-   
-   TLorentzVector Photon80X;
-   TLorentzVector Photon74X;
-   
-   Photon74X.SetPtEtaPhiE(PhotonT.pt(),PhotonT.eta(),PhotonT.phi(),PhotonT.energy());
-      
-   Photon80X.SetPtEtaPhiE(PhotonTOoB.pt(),PhotonTOoB.eta(),PhotonTOoB.phi(),PhotonTOoB.energy());
-   
-   TLorentzVector rawMet_80X;
-   TLorentzVector rawMet_74X ;
-   
-   rawMet_74X.SetPtEtaPhiE(rawMet.pt(),rawMet.eta(),rawMet.phi(),rawMet.energy());
-   rawMet_80X.SetPtEtaPhiE(rawMet74.pt(),rawMet74.eta(),rawMet74.phi(),rawMet74.energy());
-    
-   
-   double Rmpf80X = 1 + Photon80X.Pt()*rawMet_80X.Pt()* std::cos(rawMet_80X.DeltaPhi(Photon80X))/pow(Photon80X.Pt(),2);
-   double Rmpf74X = 1 + Photon74X.Pt()*rawMet_74X.Pt()* std::cos(rawMet_74X.DeltaPhi(Photon74X))/pow(Photon74X.Pt(),2);
-   
-  // std::cout<<" Rbal 80x "<< Rbal80X <<" Rmpf "<< Rmpf80X<<std::endl;
-  // std::cout<<" Rbal 74x "<< Rbal74X <<" Rmpf "<< Rmpf74X<<std::endl;
-   
-   
   
-  }
 
-// PUPPI
-
-
-
-  std::vector<double> jecFactorsPUPPI;
-  std::vector<unsigned> sortedPUPPIJetIdx;
-
-
-  uint32_t indexjetpuppi = 0;
-  if(redoJECs_)
-    {
-      // sort PUPPI jets by increasing pT
-      std::multimap<double, unsigned> sortedPUPPIJets;
-     
-    
-
-      for(pat::JetCollection::const_iterator ijet = jetsPUPPI->begin();ijet != jetsPUPPI->end(); ++ijet)
-	{
-	  double correction = 1.;
-	  JetCorrectorPUPPI_DATA->setJetEta(ijet->eta());
-	  JetCorrectorPUPPI_DATA->setJetPt(ijet->correctedJet(0).pt());
-	  JetCorrectorPUPPI_DATA->setJetA(ijet->jetArea());
-	  JetCorrectorPUPPI_DATA->setRho(rho_);
-	  JetCorrectorPUPPI_MC->setJetEta(ijet->eta());
-	  JetCorrectorPUPPI_MC->setJetPt(ijet->correctedJet(0).pt());
-	  JetCorrectorPUPPI_MC->setJetA(ijet->jetArea());
-	  JetCorrectorPUPPI_MC->setRho(rho_);
-	  if (iEvent.isRealData()) 
-	    correction = JetCorrectorPUPPI_DATA->getCorrection();
-	  else
-	    correction = JetCorrectorPUPPI_MC->getCorrection();
-	    
-           
-	  jecFactorsPUPPI.push_back(correction);
-	  sortedPUPPIJets.insert(std::make_pair(ijet->correctedJet(0).pt()*correction, ijet - jetsPUPPI->begin()));
-	
-	}
-      // get jet indices in decreasing pT order
-
-      for(std::multimap<double, unsigned>::const_reverse_iterator it = sortedPUPPIJets.rbegin(); it != sortedPUPPIJets.rend(); ++it)
-        sortedPUPPIJetIdx.push_back(it->second);
-
-    }
-  else
-    {
-      for(pat::JetCollection::const_iterator ijet = jetsPUPPI->begin();ijet != jetsPUPPI->end(); ++ijet)
-	{
-	  jecFactorsPUPPI.push_back(1./ijet->jecFactor(0));
-	}
-    }
-    
-
-  nJetsPUPPI_ = 0;
-  vector<TLorentzVector> vP4PUPPI;
-  for(std::vector<unsigned>::const_iterator i = sortedPUPPIJetIdx.begin(); i != sortedPUPPIJetIdx.end(); ++i, indexjetpuppi++) {
-
-    pat::JetCollection::const_iterator ijet = (jetsPUPPI->begin() + *i);
-    pat::JetCollection::const_iterator ijetrawRCstore = (jetrawRCpuppi.begin()+ *i);
-    
-    edm::View<pat::Jet>::const_iterator ijetview = (jetsviewpuppi->begin() + *i);
-    double chf = ijet->chargedHadronEnergyFraction();
-    double nhf = ijet->neutralHadronEnergyFraction(); // + ijet->HFHadronEnergyFraction();
-    double phf = ijet->photonEnergy()/(ijet->jecFactor(0) * ijet->energy());
-    double elf = ijet->electronEnergy()/(ijet->jecFactor(0) * ijet->energy());
-    //double muf = ijet->muonEnergy()/(ijet->jecFactor(0) * ijet->energy());
-    double muf = ijet->muonEnergyFraction();
-
-    double hf_hf = ijet->HFHadronEnergyFraction();
-    double hf_emf= ijet->HFEMEnergyFraction();
-    double hof   = ijet->hoEnergyFraction();
-
-    int chm    = ijet->chargedHadronMultiplicity();
-      
-    int chMult = ijet->chargedMultiplicity();
-    int neMult = ijet->neutralMultiplicity();
-    int npr    = chMult + neMult;
-
-    int chHadMult = chm; //ijet->chargedHadronMultiplicity();
-    int neHadMult = ijet->neutralHadronMultiplicity();
-    int phoMult = ijet->photonMultiplicity();
-      
-    // Juska's added fractions for identical JetID with recommendations
-    double nemf = ijet->neutralEmEnergyFraction();
-    double cemf = ijet->chargedEmEnergyFraction();
-    int NumConst = npr;
-
-    float eta  = ijet->eta(); // removed fabs() -Juska
-    float pt   = ijet->correctedJet(0).pt()*jecFactorsPUPPI.at(*i); // Is this OK? Correct corrected? -Juska
-   // std::cout<<"nemf "<<nemf<<" cemf "<<cemf<<" chf "<<chf<<" nhf "<<nhf<<std::endl;
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
-    int idL = -999 ; 
-    int idT = -999 ; 
-    if(fabs(eta) < 3.0)
-    {
-      idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
-      if(fabs(eta) <= 2.7){
-      
-         idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
-         if(fabs(eta) <= 2.4){
-         
-            idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
-         
-         }
-      
-      }
-    
-    }else{
-       idL = ( nemf<0.90 && neMult>10)   ;
-       
-       
-       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
-    }
-   // if(!iEvent.isRealData()&& !ijet->genJet()){
-   //   idL = 0 ;
-   //   idT = 0 ;     
-   // }
-    edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsviewpuppi, ijetview - jetsviewpuppi->begin()));
-
-       
-      
-    if (pt > ptMinAK4_) {
-      nJetsPUPPI_++;
-      vP4PUPPI.push_back(TLorentzVector(ijet->correctedJet(0).px()*jecFactorsPUPPI.at(*i),ijet->correctedJet(0).py()*jecFactorsPUPPI.at(*i),ijet->correctedJet(0).pz()*jecFactorsPUPPI.at(*i),ijet->correctedJet(0).energy()*jecFactorsPUPPI.at(*i)));
-      chfPUPPI_           ->push_back(chf);
-      nhfPUPPI_           ->push_back(nhf);
-      phfPUPPI_           ->push_back(phf);
-      elfPUPPI_           ->push_back(elf);
-      mufPUPPI_           ->push_back(muf);
-      nemfPUPPI_          ->push_back(nemf);
-      cemfPUPPI_          ->push_back(cemf);
-      hf_hfPUPPI_         ->push_back(hf_hf);
-      hf_emfPUPPI_        ->push_back(hf_emf);
-      hofPUPPI_           ->push_back(hof);
-      jecPUPPI_           ->push_back(jecFactorsPUPPI.at(*i));
-      ptPUPPI_            ->push_back(pt);
-      phiPUPPI_           ->push_back(ijet->phi());
-      etaPUPPI_           ->push_back(ijet->eta());
-      massPUPPI_          ->push_back(ijet->correctedJet(0).mass()*jecFactorsPUPPI.at(*i));
-      energyPUPPI_        ->push_back(ijet->correctedJet(0).energy()*jecFactorsPUPPI.at(*i));
-
-      
-      if (!iEvent.isRealData() && ijet->genJet()) {
-        ptGenPUPPI_            ->push_back(ijet->genJet()->pt());
- 	phiGenPUPPI_           ->push_back(ijet->genJet()->phi());
- 	etaGenPUPPI_           ->push_back(ijet->genJet()->eta());
- 	massGenPUPPI_          ->push_back(ijet->genJet()->mass());
- 	energyGenPUPPI_        ->push_back(ijet->genJet()->energy());
-	if(ijet->genParton())
-	{
- 	  pdgIDGenPUPPI_         ->push_back(ijet->genParton()->pdgId());
-	}else{pdgIDGenPUPPI_         ->push_back(-999.);}
-      }else
-      {
-        
-        ptGenPUPPI_            ->push_back(-999.);
- 	phiGenPUPPI_           ->push_back(-999.);
- 	etaGenPUPPI_           ->push_back(-999.);
- 	massGenPUPPI_          ->push_back(-999.);
- 	energyGenPUPPI_        ->push_back(-999.);
-	pdgIDGenPUPPI_         ->push_back(-999.);
- 	
-      }
-
-      
-      ptPUPPIraw_            ->push_back(ijetrawRCstore->pt());
-      phiPUPPIraw_           ->push_back(ijetrawRCstore->phi());
-      etaPUPPIraw_           ->push_back(ijetrawRCstore->eta());
-      massPUPPIraw_          ->push_back(ijetrawRCstore->mass());
-      energyPUPPIraw_        ->push_back(ijetrawRCstore->energy());
-      
-      areaPUPPI_          ->push_back(ijet->jetArea());
-      //csvPUPPI_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-      //qgdPUPPI_           ->push_back((*qgHandle)[jetReftmp]);
-
-
-      idLPUPPI_           ->push_back(idL);
-      idTPUPPI_           ->push_back(idT);
-      chHadMultPUPPI_     ->push_back(chHadMult);
-      chMultPUPPI_        ->push_back(chMult);
-      neHadMultPUPPI_     ->push_back(neHadMult);  
-      neMultPUPPI_        ->push_back(neMult);
-      phoMultPUPPI_       ->push_back(phoMult); 
-      
-    }
-
-  }// jet loop  
-
-  // AK8
-  std::vector<double> jecFactorsAK8;
-  std::vector<unsigned> sortedAK8JetIdx;
-  if(redoJECs_)
-    {
-      // sort AK8 jets by increasing pT
-      std::multimap<double, unsigned> sortedAK8Jets;
-      for(pat::JetCollection::const_iterator ijet = jetsAK8->begin();ijet != jetsAK8->end(); ++ijet)
-	{
-	  double correction = 1.;
-
-	  JetCorrectorAK8_DATA->setJetEta(ijet->eta());
-	  JetCorrectorAK8_DATA->setJetPt(ijet->correctedJet(0).pt());
-	  JetCorrectorAK8_DATA->setJetA(ijet->jetArea());
-	  JetCorrectorAK8_DATA->setRho(rho_);
-	  JetCorrectorAK8_MC->setJetEta(ijet->eta());
-	  JetCorrectorAK8_MC->setJetPt(ijet->correctedJet(0).pt());
-	  JetCorrectorAK8_MC->setJetA(ijet->jetArea());
-	  JetCorrectorAK8_MC->setRho(rho_);
-
-	  if (iEvent.isRealData()) 
-	    correction = JetCorrectorAK8_DATA->getCorrection();
-	  else
-	    correction = JetCorrectorAK8_MC->getCorrection();
-
-
-	  jecFactorsAK8.push_back(correction);
-	  sortedAK8Jets.insert(std::make_pair(ijet->correctedJet(0).pt()*correction, ijet - jetsAK8->begin()));
-	}
-      // get jet indices in decreasing pT order
-      for(std::multimap<double, unsigned>::const_reverse_iterator it = sortedAK8Jets.rbegin(); it != sortedAK8Jets.rend(); ++it)
-        sortedAK8JetIdx.push_back(it->second);
-    }
-  else
-    {
-      for(pat::JetCollection::const_iterator ijet = jetsAK8->begin();ijet != jetsAK8->end(); ++ijet)
-	{
-	  jecFactorsAK8.push_back(1./ijet->jecFactor(0));
-	  sortedAK8JetIdx.push_back(ijet - jetsAK8->begin());
-	}
-    }
-
-  nJetsAK8_ = 0;
-  float htAK8(0.0);
-  vector<TLorentzVector> vP4AK8;
-  for(std::vector<unsigned>::const_iterator i = sortedAK8JetIdx.begin(); i != sortedAK8JetIdx.end(); ++i) {
-
-    
-
-    pat::JetCollection::const_iterator ijet = (jetsAK8->begin() + *i);
-    double chf = ijet->chargedHadronEnergyFraction();
-    double nhf = ijet->neutralHadronEnergyFraction(); // + ijet->HFHadronEnergyFraction();
-    double phf = ijet->photonEnergy()/(ijet->jecFactor(0) * ijet->energy());
-    double elf = ijet->electronEnergy()/(ijet->jecFactor(0) * ijet->energy());
-    //double muf = ijet->muonEnergy()/(ijet->jecFactor(0) * ijet->energy());
-    double muf = ijet->muonEnergyFraction();
-
-    double hf_hf = ijet->HFHadronEnergyFraction();
-    double hf_emf= ijet->HFEMEnergyFraction();
-    double hof    = ijet->hoEnergyFraction();
-
-    int chm    = ijet->chargedHadronMultiplicity();
-      
-    int chMult = ijet->chargedMultiplicity();
-    int neMult = ijet->neutralMultiplicity();
-    int npr    = chMult + neMult;
-
-    int chHadMult = chm; //ijet->chargedHadronMultiplicity();
-    int neHadMult = ijet->neutralHadronMultiplicity();
-    int phoMult = ijet->photonMultiplicity();
-      
-    // Juska's added fractions for identical JetID with recommendations
-    double nemf = ijet->neutralEmEnergyFraction();
-    double cemf = ijet->chargedEmEnergyFraction();
-    int NumConst = npr;
-
-    float eta  = ijet->eta(); // removed fabs() -Juska
-    float pt   = ijet->correctedJet(0).pt()*jecFactorsAK8.at(*i); // Is this OK? Correct corrected? -Juska
-
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
-    int idL = -999 ; 
-    int idT = -999 ; 
-    if(fabs(eta) < 3.0)
-    {
-      idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
-      if(fabs(eta) <= 2.7){
-      
-         idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
-         if(fabs(eta) <= 2.4){
-         
-            idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
-         
-         }
-      
-      }
-    
-    }else{
-       idL = ( nemf<0.90 && neMult>10)   ;
-       
-       
-       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
-    }
-    
-    if(!iEvent.isRealData()&& !ijet->genJet()){
-      idL = 0 ;
-      idT = 0 ;     
-    }
-      
-      
-    if (pt > ptMinAK8_) {
-      htAK8 += pt;
-      nJetsAK8_++;
-
-      vP4AK8.push_back(TLorentzVector(ijet->correctedJet(0).px()*jecFactorsAK8.at(*i),ijet->correctedJet(0).py()*jecFactorsAK8.at(*i),ijet->correctedJet(0).pz()*jecFactorsAK8.at(*i),ijet->correctedJet(0).energy()*jecFactorsAK8.at(*i)));
-      chfAK8_           ->push_back(chf);
-      nhfAK8_           ->push_back(nhf);
-      phfAK8_           ->push_back(phf);
-      elfAK8_           ->push_back(elf);
-      mufAK8_           ->push_back(muf);
-      nemfAK8_          ->push_back(nemf);
-      cemfAK8_          ->push_back(cemf);
-      hf_hfAK8_         ->push_back(hf_hf);
-      hf_emfAK8_        ->push_back(hf_emf);
-      hofAK8_           ->push_back(hof);
-      jecAK8_           ->push_back(jecFactorsAK8.at(*i));
-      ptAK8_            ->push_back(pt);
-      phiAK8_           ->push_back(ijet->phi());
-      etaAK8_           ->push_back(ijet->eta());
-      massAK8_          ->push_back(ijet->correctedJet(0).mass()*jecFactorsAK8.at(*i));
-      energyAK8_        ->push_back(ijet->correctedJet(0).energy()*jecFactorsAK8.at(*i));
-      areaAK8_          ->push_back(ijet->jetArea());
-      csvAK8_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-      idLAK8_           ->push_back(idL);
-      idTAK8_           ->push_back(idT);
-      
-      
-      chHadMultAK8_     ->push_back(chHadMult);
-      chMultAK8_        ->push_back(chMult);
-      neHadMultAK8_     ->push_back(neHadMult);  
-      neMultAK8_        ->push_back(neMult);
-      phoMultAK8_       ->push_back(phoMult); 
-	
-	
-	
-    }
-  }// jet loop  
-  htAK8_     = htAK8;
-      
-  //-------------- Gen Jets Info -----------------------------------
-
-  if (!iEvent.isRealData()) {
-        
-    //AK8
-    nGenJetsAK8_ = 0;
-    vector<TLorentzVector> vP4GenAK8;      
-    reco::GenJetCollection genJetsAK8 = *handle_genJetsAK8;
-    for(reco::GenJetCollection::const_iterator ijet = genJetsAK8.begin();ijet != genJetsAK8.end(); ++ijet) { 	
-      //float eta  = fabs(ijet->eta());
-      float pt   = ijet->pt();
-      if (pt > ptMinAK8_) {
-	nGenJetsAK8_++;
-	vP4GenAK8.push_back(TLorentzVector(ijet->px(),ijet->py(),ijet->pz(),ijet->energy()));
-	ptGenAK8_            ->push_back(pt);
-	phiGenAK8_           ->push_back(ijet->phi());
-	etaGenAK8_           ->push_back(ijet->eta());
-	massGenAK8_          ->push_back(ijet->mass());
-	energyGenAK8_        ->push_back(ijet->energy());
-      }
-    }// jet loop  
-  }//if MC 
     
   //---- Fill Tree --- 
   outTree_->Fill();     
@@ -2674,6 +2204,29 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 }//end analyze for each event
 
 //--------------------------Photon ID and selection--------------------------
+
+bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef& photonRef, const edm::Event& event, double generatorWeight)
+{
+    bool isValid = true;
+    edm::Handle<edm::ValueMap<float> > full5x5SigmaIEtaIEtaMap;
+    event.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
+   // if (!isData_ && !photonRef->genPhoton())   
+   // return false;
+   // #1: H/E
+    isValid &= photonRef->hadronicOverEm() < 0.0597;
+    if (! isValid)
+    return false;
+    //#2: sigma ietaieta
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01031; //Official    
+    if (! isValid)
+    return false;
+    isValid &= photonRef->passElectronVeto();
+    if (! isValid)
+    return false;
+    return isValid;
+    
+    
+}
 
 
 bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, const edm::Event& event, double generatorWeight)
@@ -3191,6 +2744,7 @@ void DijetTreeProducer::initialize()
   isMatch120_   ->clear() ;    
   isMatch165_   ->clear() ;
   isGenMatch_   ->clear() ;
+  isFakephoton_ ->clear() ;
       
   Ecorrbump_   ->clear();
   
