@@ -40,6 +40,7 @@
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "DataFormats/EcalDetId/interface/EEDetId.h"
 #include "DataFormats/PatCandidates/interface/VIDCutFlowResult.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
 //#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 //#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -69,6 +70,10 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   phoChargedIsolationToken_        =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoChargedIsolation")));
   phoNeutralHadronIsolationToken_  =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoNeutralHadronIsolation")));
   phoPhotonIsolationToken_         =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoPhotonIsolation")));
+  phoFull5x5SigmaIEtaIPhiToken_    =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5SigmaIEtaIPhiMap")));
+  phoFull5x5E5x5Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E2x2Map")));
+  phoFull5x5E2x2Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E5x5Map")));  
+  phoESEffSigmaRRToken_            =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("esEffSigmaRRMap"))); 
   
  // srcebrechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("eb")));  
  // srceerechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("ee")));
@@ -124,7 +129,7 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
 
      srcGenJetsAK4_      = (consumes<GenJetCollection>(cfg.getParameter<edm::InputTag>("genJetsAK4")));
      srcGenJetsAK8_      = (consumes<GenJetCollection>(cfg.getParameter<edm::InputTag>("genJetsAK8")));
-     srcPrunedGenParticles_ = (consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("genParticles")));
+     srcPrunedGenParticles_ = (consumes<pat::PackedGenParticleCollection>(cfg.getParameter<edm::InputTag>("genParticles")));
      srcGenInfo_           = consumes<GenEventInfoProduct>(cfg.getUntrackedParameter<edm::InputTag>  ("ptHat"));
      }
 
@@ -555,6 +560,16 @@ void DijetTreeProducer::beginJob()
   phoPhotonIsolationTokenphoton_        = new std::vector<float>;
   
   
+  phoFull5x5SigmaIEtaIPhiTokenphoton_  = new std::vector<float>;
+  phoFull5x5E5x5Tokenphoton_           = new std::vector<float>;
+  phoFull5x5E2x2Tokenphoton_           = new std::vector<float>;
+  phoESEffSigmaRRTokenphoton_          = new std::vector<float>; 
+  R9_                                  = new std::vector<float>;
+  etawidth_                            = new std::vector<float>;
+  phiwidth_                            = new std::vector<float>;
+  ES_energy_                           = new std::vector<float>;
+  
+  
  // outTree_->Branch("PhotonPtnofix"         ,"vector<float>"   ,&ptphotonnofix_);
   outTree_->Branch("PhotonLoosePt"         ,"vector<float>"   ,&ptphoton_);
   outTree_->Branch("PhotonsmearPt"         ,"vector<float>"   ,&ptsmearedphoton_);
@@ -579,7 +594,16 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("isPhotonLoose"                                 ,"vector<bool>"   ,&isPhotonLoose_);
   outTree_->Branch("isPhotonMedium"                                ,"vector<bool>"   ,&isPhotonMedium_);
   outTree_->Branch("isPhotonTight"                                 ,"vector<bool>"   ,&isPhotonTight_);
-  outTree_->Branch("isfakephoton"                                  ,"vector<bool>"   ,&isFakephoton_);  
+  outTree_->Branch("isfakephoton"                                  ,"vector<bool>"   ,&isFakephoton_); 
+  
+  outTree_->Branch("Photonfull5x5SigmaIEtaIPhiMapToken"           ,"vector<float>"   ,&phoFull5x5SigmaIEtaIPhiTokenphoton_);
+  outTree_->Branch("Photonfull5x5E5x5MapToken"                    ,"vector<float>"   ,&phoFull5x5E5x5Tokenphoton_);
+  outTree_->Branch("Photonfull5x5E2x2MapToken"                    ,"vector<float>"   ,&phoFull5x5E2x2Tokenphoton_);
+  outTree_->Branch("PhotonESEffSigmaRRMapToken"                   ,"vector<float>"   ,&phoESEffSigmaRRTokenphoton_);
+  outTree_->Branch("PhotonR9"                                     ,"vector<float>"   ,&R9_);
+  outTree_->Branch("Photon_etawidth"                              ,"vector<float>"   ,&etawidth_);
+  outTree_->Branch("Photon_phiwidth"                              ,"vector<float>"   ,&phiwidth_);
+  outTree_->Branch("Photon_ES_energy"                             ,"vector<float>"   ,&ES_energy_); 
   
   //---------------Electrons----------------------------------
   
@@ -1113,6 +1137,15 @@ void DijetTreeProducer::endJob()
  delete isGenMatch_    ;
  delete isFakephoton_  ;
  
+ delete phoFull5x5SigmaIEtaIPhiTokenphoton_ ;
+ delete phoFull5x5E5x5Tokenphoton_          ;
+ delete phoFull5x5E2x2Tokenphoton_          ;
+ delete phoESEffSigmaRRTokenphoton_         ; 
+ delete R9_                                 ;
+ delete etawidth_                           ;
+ delete phiwidth_                           ;
+ delete ES_energy_                          ;
+ 
  
 // delete ptphotonnofix_;
   
@@ -1229,7 +1262,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       cout << "an edm::LogError call for PileUpError used to be here, but that does not work anymore -Juska" << endl;
     }
   }// if MC
- edm::Handle<reco::GenParticleCollection> prunedGenParticles;
+ edm::Handle<pat::PackedGenParticleCollection> prunedGenParticles;
   //-------------- Gen Event Info -----------------------------------
   if (!iEvent.isRealData()) {
 
@@ -1274,7 +1307,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     
     if( prunedGenParticles.isValid() ) {
             
-      for( reco::GenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
+      for( pat::PackedGenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
         // exit from loop when you reach the required number of GenParticles
         //if(eta->size() >= maxSize)
         //  break;
@@ -1303,12 +1336,12 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
     	int midx = -1;
 
-	for( reco::GenParticleCollection::const_iterator mit = prunedGenParticles->begin(); mit != prunedGenParticles->end(); ++mit ) {
+	for( pat::PackedGenParticleCollection::const_iterator mit = prunedGenParticles->begin(); mit != prunedGenParticles->end(); ++mit ) {
 	
-    	  if( it->mother()==&(*mit) ) {
+    	 /* if( it->mother()==&(*mit) ) {
     	    midx = std::distance(prunedGenParticles->begin(),mit);
     	    break;
-    	  }
+    	  }*/
     	}
     	gen_motherIndex->push_back( midx ); 
 
@@ -1515,14 +1548,24 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       edm::Handle<edm::ValueMap<float> > phoNeutralHadronIsolationMap;
       iEvent.getByToken(phoNeutralHadronIsolationToken_, phoNeutralHadronIsolationMap);
       edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
-      iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);     
+      iEvent.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
+      edm::Handle<edm::ValueMap<float> > phoFull5x5SigmaIEtaIPhiMap;
+      iEvent.getByToken(phoFull5x5SigmaIEtaIPhiToken_, phoFull5x5SigmaIEtaIPhiMap);
+      edm::Handle<edm::ValueMap<float> > phoFull5x5E5x5Map;
+      iEvent.getByToken(phoFull5x5E5x5Token_, phoFull5x5E5x5Map);
+      edm::Handle<edm::ValueMap<float> > phoFull5x5E2x2Map;
+      iEvent.getByToken(phoFull5x5E2x2Token_, phoFull5x5E2x2Map);
+      edm::Handle<edm::ValueMap<float> > phoESEffSigmaRRMap;
+      iEvent.getByToken(phoESEffSigmaRRToken_, phoESEffSigmaRRMap);
+           
       double rhod = *rho;
      std::vector<pat::Photon> PhotonT_vec;
      std::vector<pat::Photon> PhotonTOoB_vec ;
      pat::Photon PhotonT ;
      pat::Photon PhotonTOoB ;
-std::vector<unsigned> sortedPhotonIdx;
-std::multimap<double, unsigned> sortedPhoton;
+     std::vector<unsigned> sortedPhotonIdx;
+     std::multimap<double, unsigned> sortedPhoton;
+
 for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != photons->end(); ++iphoton)
 	{
 	  
@@ -1545,10 +1588,11 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
            PhotonT_vec.push_back((*iphoton));
          // std::cout<<" photon pt in the event "  <<    iphoton->pt() <<" eta : "<<iphoton->eta()<<" photon n° "<< nPhotons_<<std::endl;	    
           if(!RunEndcapPhoton_){ 
-	   if (fabs(iphoton->eta()) <= 1.3 && nPhotons_ == 1 ) 
+	   if (fabs(iphoton->eta()) <= 1.3 ) 
 	   {               
 	       pat::PhotonRef PhotonReftmp(photons, index);
-
+		if (nPhotons_ == 1 ) 
+	        {
 	        if (isValidPhotonLoose_Datadrivenpresel(PhotonReftmp, iEvent, generatorWeight)) 
 		{			
 		  
@@ -1559,56 +1603,74 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		   const pat::PackedCandidate &pf = (*pfs)[i];
 
 		   if(std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))  < 0.4  && pf.pdgId() == 22 && std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi())) > 0.0001 && fabs( (iphoton->pt() - pf.pt())/iphoton->pt()) > 0.80 ){
-		   	//	   std::cout<<" packed Pf candidate n° "<<i<<" pt : "<<  pf.pt() << " DR : "<<std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))<<" ID : "<<pf.pdgId()<< " diff ptt rel "<< fabs( (iphoton->pt() - pf.pt())/iphoton->pt()) <<std::endl;
+		   		//   std::cout<<" packed Pf candidate n° "<<i<<" pt : "<<  pf.pt() << " DR : "<<std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))<<" ID : "<<pf.pdgId()<< " diff ptt rel "<< fabs( (iphoton->pt() - pf.pt())/iphoton->pt()) <<std::endl;
 		     Sum_pt_pfphotoncandidate += pf.pt();
 		     }
 		   if(std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))  < 0.4  && pf.charge() != 0){
 		     Sum_pt_pfphotoncandidate_charged += pf.pt();
 		     }
 		   }
-		  // std::cout<<" test veto preselec : photon iso : "<< Sum_pt_pfphotoncandidate<< " charged iso : "<< Sum_pt_pfphotoncandidate_charged<<std::endl;
+		 //  std::cout<<" test veto preselec : photon iso : "<< Sum_pt_pfphotoncandidate<< " charged iso : "<< Sum_pt_pfphotoncandidate_charged<<std::endl;
 		  
 		  
 		  //is fake photon ?
 		  bool isfake_photon = true ;
-		  if(!iEvent.isRealData() &&  iphoton->genPhoton() && fabs(iphoton->pt() - iphoton->genPhoton()->pt())/iphoton->genPhoton()->pt() < 0.2 ) isfake_photon = false ;
-		  if(!isfake_photon ){
-		  if( prunedGenParticles.isValid() ) {
-            
-                   for( reco::GenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
+		  if(!iEvent.isRealData() &&  iphoton->genPhoton() && fabs(iphoton->pt() - iphoton->genPhoton()->pt())/iphoton->genPhoton()->pt() < 0.2 ){
 		  
-		  if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.0001 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5){ 
+		   isfake_photon = false ;
+		 //  std::cout<<" event "<<std::endl;
+		 //  std::cout<<" "<<std::endl;
+		 //  std::cout<<" photon pt in the event "  <<    iphoton->pt() <<" eta : "<<iphoton->eta()<<" photon n° "<< nPhotons_<<std::endl;
+		   }
+		  if(Sum_pt_pfphotoncandidate > 15.) continue; 
+		  if(Sum_pt_pfphotoncandidate_charged > 15.) continue;
+		  
+		  
+		  if(!isfake_photon ){
+		  if( !iEvent.isRealData() && prunedGenParticles.isValid() ) {
+           // std::cout<<" test 2"<<std::endl;
+                   for( pat::PackedGenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
+		  
+		  if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.01 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5){ 
 		  
 		  Sum_pt_genparticle  += it->pt();
 		  
-		  //std::cout<<" gen Pf candidate pt : "<<  it->pt() << " DR : "<<std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))<<" ID : "<<it->pdgId()<< " diff ptt rel "<<  (iphoton->pt() - it->pt())/iphoton->pt() <<std::endl;
+		//  std::cout<<" gen  candidate "<<it->mother(0)->pdgId()<<" mother pt "<<it->mother(2)->pt()<<" number of mother "<<it->numberOfMothers() <<" DR mother"<<std::hypot((iphoton->eta()-it->mother(2)->eta()),(iphoton->phi()-it->mother(2)->phi()))<< " pt : "<<  it->pt() << " DR : "<<std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))<<" ID : "<<it->pdgId()<< " diff ptt rel "<<  (iphoton->pt() - it->pt())/iphoton->pt() <<std::endl;
 		  
 		  }
 		  }
-		//  std::cout<< " iso requirement "<< Sum_pt_genparticle<<std::endl;
-		  if( Sum_pt_genparticle < 5. ) isFakephoton_             ->push_back(false);
+		//  std::cout<< " gen iso requirement "<< Sum_pt_genparticle<<std::endl;
+		  
+		  if( Sum_pt_genparticle < 5. ){ 
+		  isFakephoton_             ->push_back(false);
+		//  std::cout<<" test 3"<<std::endl;
+		  }else{
+		   isFakephoton_             ->push_back(true);
+		  }
 		  
 		  }else{
 		  
 		  isFakephoton_             ->push_back(true);
 		  }
 		  
+		  }else{
+		     
+		  isFakephoton_             ->push_back(true);
 		  }
 		  
 		  
 		  
-		  if(Sum_pt_pfphotoncandidate > 15.) continue; 
-		  if(Sum_pt_pfphotoncandidate_charged > 15.) continue;
+	//	  std::cout<<" MVA variable : r9 "<<  iphoton->full5x5_r9()<<" etawidth "<<iphoton->superCluster()->etaWidth()<<" phiwidth " <<  iphoton->superCluster()->phiWidth() << " ietaiphi "<<(*phoFull5x5SigmaIEtaIPhiMap)[PhotonReftmp]<<" 2*2 "<<(*phoFull5x5E2x2Map)[PhotonReftmp]<<" 5*5 "<<(*phoFull5x5E5x5Map)[PhotonReftmp]<<" ES/raw "<<iphoton->superCluster()->preshowerEnergy() <<" sigmarr "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;
 		  
 		  nPhotonsLoose_++;                           
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
-		  phiphotonSC_          ->push_back( iphoton->superCluster()->eta());
+		  phiphotonSC_          ->push_back( iphoton->superCluster()->phi());
 
 
                   etaphoton_            ->push_back( iphoton->eta()        );
-		  etaphotonSC_          ->push_back( iphoton->superCluster()->phi());
+		  etaphotonSC_          ->push_back( iphoton->superCluster()->eta());
 
                   energyphoton_         ->push_back( iphoton->energy() );
 		  energyphotonSC_       ->push_back( iphoton->superCluster()->rawEnergy() );
@@ -1624,10 +1686,22 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());		  				  
 		  double Ecorr=1;
 		  Ecorrbump_            ->push_back( Ecorr                 );
-		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
-		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
-		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
-		  energysmearedphoton_  ->push_back( iphotonsmear->energy());		  
+		  
+		 phoFull5x5SigmaIEtaIPhiTokenphoton_  ->push_back((*phoFull5x5SigmaIEtaIPhiMap)[PhotonReftmp]);
+		 phoFull5x5E5x5Tokenphoton_           ->push_back((*phoFull5x5E5x5Map)[PhotonReftmp]);
+		 phoFull5x5E2x2Tokenphoton_           ->push_back((*phoFull5x5E2x2Map)[PhotonReftmp]);
+		 phoESEffSigmaRRTokenphoton_          ->push_back((*phoESEffSigmaRRMap)[PhotonReftmp]);
+		 R9_                                  ->push_back(iphoton->r9());
+		 etawidth_                            ->push_back(iphoton->superCluster()->etaWidth());
+		 phiwidth_                            ->push_back(iphoton->superCluster()->phiWidth());
+		 ES_energy_                           ->push_back(iphoton->superCluster()->preshowerEnergy());
+		  
+		     //photons for met calibration
+		     PhotonT = (*iphoton);
+		     PhotonTOoB = (*iphotonsmear);
+		     PhotonT_vec.push_back((*iphoton));
+                     PhotonTOoB_vec.push_back((*iphotonsmear));
+		  		  
 		  if (!iEvent.isRealData() ) {
 		  	if(iphoton->genPhoton()){
 		  		ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
@@ -1665,17 +1739,29 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		    
 		    
 		 }
+		 
+		 
 
 		if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) ) 
 		{
-		     nPhotonsTight_++;
-		     PhotonT = (*iphoton);
-		     PhotonTOoB = (*iphotonsmear);
-		     PhotonT_vec.push_back((*iphoton));
-                     PhotonTOoB_vec.push_back((*iphotonsmear)); 
+		     nPhotonsTight_++; 
 		     isPhotonTight_   ->push_back(true); 
-		 }             
-          }}else{
+		 }
+		 
+		}
+          if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) &&fabs(iphoton->eta()) <= 1.3 ) 
+		{
+		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
+		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
+		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
+		  energysmearedphoton_  ->push_back( iphotonsmear->energy());
+		 } 
+		              
+          }
+          
+          
+          
+          }else{
              if (fabs(iphoton->eta()) >= 1.305 && fabs(iphoton->eta()) <= 2.5) 
 	   {               
 	       pat::PhotonRef PhotonReftmp(photons, index);	      
@@ -1687,11 +1773,11 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
-		  phiphotonSC_          ->push_back( iphoton->superCluster()->eta());
+		  phiphotonSC_          ->push_back( iphoton->superCluster()->phi());
 
 
                   etaphoton_            ->push_back( iphoton->eta()        );
-		  etaphotonSC_          ->push_back( iphoton->superCluster()->phi());
+		  etaphotonSC_          ->push_back( iphoton->superCluster()->eta());
 
                   energyphoton_         ->push_back( iphoton->energy() );
 		  energyphotonSC_       ->push_back( iphoton->superCluster()->rawEnergy() );
@@ -2747,6 +2833,15 @@ void DijetTreeProducer::initialize()
   isFakephoton_ ->clear() ;
       
   Ecorrbump_   ->clear();
+  
+  phoFull5x5SigmaIEtaIPhiTokenphoton_ ->clear();
+  phoFull5x5E5x5Tokenphoton_          ->clear();
+  phoFull5x5E2x2Tokenphoton_          ->clear();
+  phoESEffSigmaRRTokenphoton_         ->clear();
+  R9_                                 ->clear();
+  etawidth_                           ->clear();
+  phiwidth_                           ->clear();
+  ES_energy_                          ->clear();
   
  // ptphotonnofix_ ->clear();
   

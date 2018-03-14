@@ -42,7 +42,7 @@
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
-
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 enum JetAlgorithm {
   AK4,
   AK8,
@@ -136,6 +136,10 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<edm::ValueMap<float>> phoChargedIsolationToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoNeutralHadronIsolationToken_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoPhotonIsolationToken_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5SigmaIEtaIPhiToken_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5E5x5Token_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5E2x2Token_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoESEffSigmaRRToken_;
     
     edm::InputTag barrelRecHitCollection_;
     edm::InputTag endcapRecHitCollection_;
@@ -164,7 +168,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
 
     edm::EDGetTokenT<reco::GenJetCollection> srcGenJetsAK4_;
     edm::EDGetTokenT<reco::GenJetCollection> srcGenJetsAK8_;
-    edm::EDGetTokenT<reco::GenParticleCollection> srcPrunedGenParticles_;
+    edm::EDGetTokenT<pat::PackedGenParticleCollection> srcPrunedGenParticles_;
     
     edm::EDGetTokenT<std::vector<PileupSummaryInfo> > srcPU_;
     edm::EDGetTokenT<GenEventInfoProduct> srcGenInfo_;
@@ -208,8 +212,14 @@ class DijetTreeProducer : public edm::EDAnalyzer
     float htAK8_;
     std::vector<bool>  *triggerResult_;
     
+    
+    
+    
+    
+    
+    
     //---- photon variables --------------
-    std::vector<float> *ptphoton_,*etaphoton_,*phiphoton_,*energyphoton_,*full5x5SigmaIEtaIEtaMapTokenphoton_,*phoChargedIsolationTokenphoton_,*phoNeutralHadronIsolationTokenphoton_,*phoPhotonIsolationTokenphoton_,*hadTowOverEm_;
+    std::vector<float> *ptphoton_,*etaphoton_,*phiphoton_,*energyphoton_,*full5x5SigmaIEtaIEtaMapTokenphoton_,*phoChargedIsolationTokenphoton_,*phoNeutralHadronIsolationTokenphoton_,*phoPhotonIsolationTokenphoton_,*hadTowOverEm_, *phoFull5x5SigmaIEtaIPhiTokenphoton_, *phoFull5x5E5x5Tokenphoton_, *phoFull5x5E2x2Tokenphoton_, *phoESEffSigmaRRTokenphoton_, *R9_, *etawidth_, *phiwidth_, *ES_energy_;
     std::vector<float> *ptsmearedphoton_,*etasmearedphoton_,*phismearedphoton_,*energysmearedphoton_,*full5x5SigmaIEtaIEtaMapTokensmearedphoton_,*phoChargedIsolationTokensmearedphoton_,*phoNeutralHadronIsolationTokensmearedphoton_,*phosmearedphotonIsolationTokensmearedphoton_;
     std::vector<bool>  *isPhotonLoose_,*isPhotonMedium_,*isPhotonTight_,  *HaspixelSeed_ , *electronconvVeto_, *isFakephoton_;
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
