@@ -140,6 +140,9 @@ class DijetTreeProducer : public edm::EDAnalyzer
     edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5E5x5Token_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5E2x2Token_;
     edm::EDGetTokenT<edm::ValueMap<float>> phoESEffSigmaRRToken_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5E2x5Token_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoFull5x5E1x3Token_;
+    edm::EDGetTokenT<edm::ValueMap<float>> phoWorstChargedIsolationToken_;
     
     edm::InputTag barrelRecHitCollection_;
     edm::InputTag endcapRecHitCollection_;
@@ -211,15 +214,10 @@ class DijetTreeProducer : public edm::EDAnalyzer
     float htAK4_;
     float htAK8_;
     std::vector<bool>  *triggerResult_;
-    
-    
-    
-    
-    
-    
+        
     
     //---- photon variables --------------
-    std::vector<float> *ptphoton_,*etaphoton_,*phiphoton_,*energyphoton_,*full5x5SigmaIEtaIEtaMapTokenphoton_,*phoChargedIsolationTokenphoton_,*phoNeutralHadronIsolationTokenphoton_,*phoPhotonIsolationTokenphoton_,*hadTowOverEm_, *phoFull5x5SigmaIEtaIPhiTokenphoton_, *phoFull5x5E5x5Tokenphoton_, *phoFull5x5E2x2Tokenphoton_, *phoESEffSigmaRRTokenphoton_, *R9_, *etawidth_, *phiwidth_, *ES_energy_;
+    std::vector<float> *ptphoton_,*etaphoton_,*phiphoton_,*energyphoton_,*full5x5SigmaIEtaIEtaMapTokenphoton_,*phoChargedIsolationTokenphoton_,*phoNeutralHadronIsolationTokenphoton_,*phoPhotonIsolationTokenphoton_,*hadTowOverEm_, *phoFull5x5SigmaIEtaIPhiTokenphoton_, *phoFull5x5E5x5Tokenphoton_, *phoFull5x5E2x2Tokenphoton_, *phoESEffSigmaRRTokenphoton_, *R9_, *etawidth_, *phiwidth_, *ES_energy_, *phoFull5x5E2x5Tokenphoton_, *phoFull5x5E1x3Tokenphoton_, *phoWorstChargedIsolationTokenphoton_;
     std::vector<float> *ptsmearedphoton_,*etasmearedphoton_,*phismearedphoton_,*energysmearedphoton_,*full5x5SigmaIEtaIEtaMapTokensmearedphoton_,*phoChargedIsolationTokensmearedphoton_,*phoNeutralHadronIsolationTokensmearedphoton_,*phosmearedphotonIsolationTokensmearedphoton_;
     std::vector<bool>  *isPhotonLoose_,*isPhotonMedium_,*isPhotonTight_,  *HaspixelSeed_ , *electronconvVeto_, *isFakephoton_;
     std::vector<float> *ptphotonSC_,*etaphotonSC_,*phiphotonSC_,*energyphotonSC_;
