@@ -71,8 +71,8 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   phoNeutralHadronIsolationToken_  =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoNeutralHadronIsolation")));
   phoPhotonIsolationToken_         =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoPhotonIsolation")));
   phoFull5x5SigmaIEtaIPhiToken_    =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5SigmaIEtaIPhiMap")));
-  phoFull5x5E5x5Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E2x2Map")));
-  phoFull5x5E2x2Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E5x5Map")));  
+  phoFull5x5E5x5Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E5x5Map")));
+  phoFull5x5E2x2Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E2x2Map")));  
   phoESEffSigmaRRToken_            =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("esEffSigmaRRMap")));
   phoFull5x5E2x5Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E2x5MaxMap")));
   phoFull5x5E1x3Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E1x3Map")));
