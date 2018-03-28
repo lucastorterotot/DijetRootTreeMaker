@@ -39,4 +39,20 @@
     "name": "GJets_HT-600ToInf_ext",
     "dataset": "/GJets_HT-600ToInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/MINIAODSIM"
   }
-]
+  
+]{
+    "name": "QCD_Pt_15to30_allMVAvariable_V8",
+    "dataset": "/QCD_Pt_15to30_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"
+  },
+  {
+    "name": "QCD_Pt_30to50_allMVAvariable_V8",
+    "dataset": "/QCD_Pt_30to50_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"
+  },
+  {
+    "name": "QCD_Pt_50to80_allMVAvariable_V8",
+    "dataset": "/QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"
+  },
+  {
+    "name": "QCD_Pt_80to120_allMVAvariable_V8",
+    "dataset": "/QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"
+  },
