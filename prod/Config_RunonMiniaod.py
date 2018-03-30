@@ -204,6 +204,44 @@ process.prunedGenParticlesDijet = cms.EDProducer('GenParticlePruner',
 process.out.outputCommands.append("keep *_slimmedGenJets_*_*")
 process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
+
+
+
+
+
+if not runOnData:
+      #################################################
+      ## Update PAT jets
+      #################################################
+
+      from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+
+      ## b-tag discriminators
+      bTagDiscriminators = [
+          'pfTrackCountingHighEffBJetTags',
+          'pfTrackCountingHighPurBJetTags',
+          'pfJetProbabilityBJetTags',
+          'pfJetBProbabilityBJetTags',
+          'pfSimpleSecondaryVertexHighEffBJetTags',
+          'pfSimpleSecondaryVertexHighPurBJetTags',
+          'pfCombinedSecondaryVertexV2BJetTags',
+          'pfCombinedInclusiveSecondaryVertexV2BJetTags',
+          'pfCombinedMVAV2BJetTags',
+          'pfDeepCSVJetTags:probb',
+          'pfDeepCSVJetTags:probbb',
+          'pfDeepCSVJetTags:probc',
+          'pfDeepCSVJetTags:probcc'
+      ]
+
+      from PhysicsTools.PatAlgos.tools.jetTools import *
+      ## Update the slimmedJets in miniAOD: corrections from the chosen Global Tag are applied and the b-tag discriminators are re-evaluated
+      updateJetCollection(
+          process,
+          jetSource = cms.InputTag('slimmedJets'),
+          jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
+          btagDiscriminators = bTagDiscriminators
+      )
+
 ##-------------------- Define the source  ----------------------------
 
 

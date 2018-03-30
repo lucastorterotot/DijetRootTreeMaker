@@ -696,7 +696,10 @@ void DijetTreeProducer::beginJob()
   neMultAK4_         = new std::vector<int>;
   phoMultAK4_        = new std::vector<int>;
   hadronflavour_     = new std::vector<int>;  
-  deepcsvAK4_        = new std::vector<float>; 
+  deepcsv_probb_AK4_        = new std::vector<float>; 
+  deepcsv_probbb_AK4_       = new std::vector<float>;
+  deepcsv_probc_AK4_        = new std::vector<float>;
+  deepcsv_probcc_AK4_       = new std::vector<float>;
 
   outTree_->Branch("jetPtAK4"                ,"vector<float>"     ,&ptAK4_);
   outTree_->Branch("jetJecAK4"               ,"vector<float>"     ,&jecAK4_);
@@ -730,8 +733,10 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("neMultAK4"              ,"vector<int>"      ,&neMultAK4_);   
   outTree_->Branch("phoMultAK4"             ,"vector<int>"      ,&phoMultAK4_);   
   outTree_->Branch("hadronflavour"          ,"vector<int>"      ,&hadronflavour_);
-  outTree_->Branch("deepcsvAK4"               ,"vector<float>"    ,&deepcsvAK4_);   
-  
+  outTree_->Branch("deepcsv_probb_AK4"               ,"vector<float>"    ,&deepcsv_probb_AK4_);   
+  outTree_->Branch("deepcsv_probbb_AK4"              ,"vector<float>"    ,&deepcsv_probbb_AK4_);   
+  outTree_->Branch("deepcsv_probc_AK4"               ,"vector<float>"    ,&deepcsv_probc_AK4_);   
+  outTree_->Branch("deepcsv_probcc_AK4"              ,"vector<float>"    ,&deepcsv_probcc_AK4_);     
   //-------Jet PUPPI-----------------
   ptPUPPI_             = new std::vector<float>;
   jecPUPPI_            = new std::vector<float>;
@@ -1017,8 +1022,12 @@ void DijetTreeProducer::endJob()
   delete neMultAK4_    ;
   delete phoMultAK4_   ;
   delete hadronflavour_;
-  delete deepcsvAK4_   ;
-
+  delete deepcsv_probb_AK4_   ;
+  delete deepcsv_probbb_AK4_  ; 
+  delete deepcsv_probc_AK4_   ;
+  delete deepcsv_probcc_AK4_  ;  
+  
+  
  delete ptPUPPI_;
  delete jecPUPPI_;
   delete etaPUPPI_;
@@ -2288,8 +2297,13 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       areaAK4_          ->push_back(ijet->jetArea());
       csvAK4_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
       qgdAK4_           ->push_back((*qgHandle)[jetReftmp]);
-      deepcsvAK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags")); 
-
+      deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")); 
+      deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probbb")); 
+      deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probc")); 
+      deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probcc")); 
+      
+      
+      
       idLAK4_           ->push_back(idL);
       idTAK4_           ->push_back(idT);
       chHadMultAK4_     ->push_back(chHadMult);
@@ -2681,7 +2695,10 @@ void DijetTreeProducer::initialize()
   neMultAK4_        ->clear();
   phoMultAK4_        ->clear();
   hadronflavour_     ->clear();
-  deepcsvAK4_        ->clear();
+  deepcsv_probb_AK4_    ->clear();
+  deepcsv_probbb_AK4_   ->clear(); 
+  deepcsv_probc_AK4_    ->clear();
+  deepcsv_probcc_AK4_   ->clear();
  
   nJetsPUPPI_ = -999;
  
