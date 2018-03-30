@@ -695,8 +695,8 @@ void DijetTreeProducer::beginJob()
   neHadMultAK4_      = new std::vector<int>;
   neMultAK4_         = new std::vector<int>;
   phoMultAK4_        = new std::vector<int>;
-  hadronflavour_ = new std::vector<int>;  
-
+  hadronflavour_     = new std::vector<int>;  
+  deepcsvAK4_        = new std::vector<float>; 
 
   outTree_->Branch("jetPtAK4"                ,"vector<float>"     ,&ptAK4_);
   outTree_->Branch("jetJecAK4"               ,"vector<float>"     ,&jecAK4_);
@@ -729,7 +729,8 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("neHadMultAK4"           ,"vector<int>"      ,&neHadMultAK4_);   
   outTree_->Branch("neMultAK4"              ,"vector<int>"      ,&neMultAK4_);   
   outTree_->Branch("phoMultAK4"             ,"vector<int>"      ,&phoMultAK4_);   
-  outTree_->Branch("hadronflavour"          ,"vector<int>"      ,&hadronflavour_);   
+  outTree_->Branch("hadronflavour"          ,"vector<int>"      ,&hadronflavour_);
+  outTree_->Branch("deepcsvAK4"               ,"vector<float>"    ,&deepcsvAK4_);   
   
   //-------Jet PUPPI-----------------
   ptPUPPI_             = new std::vector<float>;
@@ -1016,6 +1017,7 @@ void DijetTreeProducer::endJob()
   delete neMultAK4_    ;
   delete phoMultAK4_   ;
   delete hadronflavour_;
+  delete deepcsvAK4_   ;
 
  delete ptPUPPI_;
  delete jecPUPPI_;
@@ -1606,7 +1608,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
            PhotonT_vec.push_back((*iphoton));
          // std::cout<<" photon pt in the event "  <<    iphoton->pt() <<" eta : "<<iphoton->eta()<<" photon n° "<< nPhotons_<<std::endl;
          pat::PhotonRef PhotonReftmp(photons, index);
-          std::cout<<" Photon eta "<<fabs(iphoton->eta())<<" ES energy "<<iphoton->superCluster()->preshowerEnergy()<<" eseff "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;	    
+        //  std::cout<<" Photon eta "<<fabs(iphoton->eta())<<" ES energy "<<iphoton->superCluster()->preshowerEnergy()<<" eseff "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;	    
           if(!RunEndcapPhoton_){ 
           
 	   if (fabs(iphoton->eta()) <= 1.3 ) 
@@ -2005,13 +2007,13 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
   double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy) ;
   double FootprintMEpt74 = sqrt(FootprintMEx74 * FootprintMEx74 + FootprintMEy74 * FootprintMEy74) ;
   
-  if(/*PhotonT.pt() > 300. && fabs(PhotonT.pt() - Photonuncorr.pt()) > 20. &&*//* PhotonT.userInt("hasGainSwitchFlag") == 1 && */nPhotonsTight_ == 0){
+  /*if(PhotonT.pt() > 300. && fabs(PhotonT.pt() - Photonuncorr.pt()) > 20. &&*//* PhotonT.userInt("hasGainSwitchFlag") == 1 && nPhotonsTight_ == 0){
   std::cout<<" Met CHS  74X : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< FootprintMEPt << std::endl;
   std::cout<<" Met CHS  80X : MEx : "<<FootprintMEx74<< " MEy : "<<FootprintMEy74<< " MET : "<< FootprintMEpt74 << std::endl;
   
   std::cout<<" Met 74x -80X : MEx : "<<FootprintMEx - FootprintMEx74<< " MEy : "<<FootprintMEy - FootprintMEy74<< " MET : "<< FootprintMEPt - FootprintMEpt74 << std::endl;
   std::cout<<" Phot 74x-80X : MEx : "<<PhotonT.px() - PhotonTOoB.px()<< " MEy : "<<PhotonT.py() - PhotonTOoB.py()<< " MET : "<< PhotonT.pt() - PhotonTOoB.pt() << std::endl;
-  }
+  }*/
   
   
 rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
@@ -2286,7 +2288,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       areaAK4_          ->push_back(ijet->jetArea());
       csvAK4_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
       qgdAK4_           ->push_back((*qgHandle)[jetReftmp]);
-      
+      deepcsvAK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags")); 
 
       idLAK4_           ->push_back(idL);
       idTAK4_           ->push_back(idT);
@@ -2296,6 +2298,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       neMultAK4_        ->push_back(neMult);
       phoMultAK4_       ->push_back(phoMult); 
       hadronflavour_    ->push_back(ijet->hadronFlavour());
+      
     }
 
   }// jet loop  
@@ -2463,7 +2466,7 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
     isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.202;
-    std::cout<<" charge iso :  "<<getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)<< " istrue "<<isValid<<std::endl;
+   // std::cout<<" charge iso :  "<<getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)<< " istrue "<<isValid<<std::endl;
     isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (0.264 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
     isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (2.362+0.0047*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
@@ -2678,6 +2681,7 @@ void DijetTreeProducer::initialize()
   neMultAK4_        ->clear();
   phoMultAK4_        ->clear();
   hadronflavour_     ->clear();
+  deepcsvAK4_        ->clear();
  
   nJetsPUPPI_ = -999;
  
