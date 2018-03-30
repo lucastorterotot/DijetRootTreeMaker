@@ -272,12 +272,12 @@ if runOnData:
       process.calibratedPatPhotons.isMC = cms.bool(False)
 else: 
       process.calibratedPatPhotons.isMC = cms.bool(True)
-      
+    #  process.calibratedPatPhotons.correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele")
 
 
 if runOnLegacy:
         process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-              src = cms.InputTag('calibratedPatPhotons'),
+              src = cms.InputTag('slimmedPhotons'),
               cut = cms.string('pt>5 && abs(eta)'))
 else:
         process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
