@@ -2297,11 +2297,19 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       areaAK4_          ->push_back(ijet->jetArea());
       csvAK4_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
       qgdAK4_           ->push_back((*qgHandle)[jetReftmp]);
-      deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")); 
-      deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probbb")); 
-      deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probc")); 
-      deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probcc")); 
+      if(iEvent.isRealData()){
+         deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")); 
+         deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probbb")); 
+         deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probc")); 
+         deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probcc")); 
+      }else{
       
+         deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probb")); 
+         deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probbb")); 
+         deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probc")); 
+         deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probcc")); 
+         
+      }
       
       
       idLAK4_           ->push_back(idL);

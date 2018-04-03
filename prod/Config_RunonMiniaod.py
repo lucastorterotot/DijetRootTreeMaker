@@ -227,10 +227,10 @@ if not runOnData:
           'pfCombinedSecondaryVertexV2BJetTags',
           'pfCombinedInclusiveSecondaryVertexV2BJetTags',
           'pfCombinedMVAV2BJetTags',
-          'pfDeepCSVJetTags:probb',
-          'pfDeepCSVJetTags:probbb',
-          'pfDeepCSVJetTags:probc',
-          'pfDeepCSVJetTags:probcc'
+          'deepFlavourJetTags:probb',
+          'deepFlavourJetTags:probbb',
+          'deepFlavourJetTags:probc',
+          'deepFlavourJetTags:probcc'
       ]
 
       from PhysicsTools.PatAlgos.tools.jetTools import *
