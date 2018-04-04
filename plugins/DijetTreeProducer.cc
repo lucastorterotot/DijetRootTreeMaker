@@ -436,6 +436,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("metSig"               ,&metSig_            ,"metSig_/F");
   outTree_->Branch("metTypeI"             ,&metcorrected_      ,"metcorrected_/F");
   outTree_->Branch("goodPVtx"             ,&goodPVtx_      ,"goodPVtx_/B");
+  outTree_->Branch("NgoodPV"             ,&NgoodPV_      ,"NgoodPV_/I");
   
   
   
@@ -1184,6 +1185,15 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   Handle<reco::VertexCollection> recVtxs;
   iEvent.getByToken(srcVrtx_,recVtxs);
   if(!recVtxs.isValid() || recVtxs->size() == 0 ||  recVtxs->front().isFake()) goodPVtx_ = false ;
+  
+  NgoodPV_ = 0;
+  for(reco::VertexCollection::const_iterator ivec = recVtxs->begin(); ivec != recVtxs->end() ; ++ivec ){
+  
+  if(!ivec->isFake() && ivec->ndof() > 4 && ivec->z() <= 24 && ivec->position().rho() <= 2)NgoodPV_ ++;
+  //pv_rho[i] <= 2 && pv_z[i] <= 24 && pv_ndof[i] > 4
+  }
+  
+  
   
   const reco::Vertex& primaryVertex = recVtxs->at(0);
   
@@ -2928,6 +2938,7 @@ void DijetTreeProducer::initialize()
   metPt_          = -999;
   metPhi_         = -999;
   goodPVtx_       = true;
+  NgoodPV_        = -999;
   
   metEnergypuppi_      = -999;
   metEtapuppi_         = -999;

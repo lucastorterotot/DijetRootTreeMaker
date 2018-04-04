@@ -187,7 +187,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     TH1F *triggerPassHisto_,*triggerNamesHisto_,*puHisto_;
     //---- output TREE variables ------
     //---- global event variables -----
-    int   run_,evt_,nVtx_,lumi_,BXnumber_;
+    int   run_,evt_,nVtx_,lumi_,BXnumber_, NgoodPV_;
     int   nJetsAK4_,nJetsPUPPI_, nJetsAK8_, nGenJetsAK4_, nGenJetsAK8_;
     int   nPhotons_, nPhotonsLoose_,nPhotonsMedium_,nPhotonsTight_, nGenphotons_;
     int   nMuonsLoose_;
