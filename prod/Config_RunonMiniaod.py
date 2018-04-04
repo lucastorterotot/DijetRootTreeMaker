@@ -209,6 +209,38 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 
 
+
+
+##-------------------- Define the source  ----------------------------
+
+
+
+# Note: for grid running it does not matter what's here, as input data is
+# handled separately there.
+
+
+if runOnData:
+        if runOnLegacy: 
+           process.source = cms.Source("PoolSource",
+           fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
+           )
+        else:
+             process.source = cms.Source("PoolSource",
+             fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root")
+             )
+else:
+       process.source = cms.Source("PoolSource",
+           fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")#"/store/mc/RunIISummer16MiniAODv2/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/120000/EA64EA90-D7B6-E611-91F8-0CC47A4D7606.root")##"/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")
+           )
+#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
+
+
+
+
+
+
+
+
 if not runOnData:
       #################################################
       ## Update PAT jets
@@ -242,28 +274,15 @@ if not runOnData:
           btagDiscriminators = bTagDiscriminators
       )
 
-##-------------------- Define the source  ----------------------------
 
 
 
-# Note: for grid running it does not matter what's here, as input data is
-# handled separately there.
 
 
-if runOnData:
-        if runOnLegacy: 
-           process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
-           )
-        else:
-             process.source = cms.Source("PoolSource",
-             fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root")
-             )
-else:
-       process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")#"/store/mc/RunIISummer16MiniAODv2/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/120000/EA64EA90-D7B6-E611-91F8-0CC47A4D7606.root")##"/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")
-           )
-#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
+
+
+
+
 
 if not runOnData:
      ##Photon Energy smearer------------------------------------------
@@ -329,8 +348,6 @@ process.egmPhotonIsolation.srcToIsolate = cms.InputTag(srcViD)
 process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
 process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
 process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
-
-
 
 
 
@@ -437,7 +454,7 @@ if not runOnLegacy and not runOnData:
 
 
 process.load('RecoJets.JetProducers.QGTagger_cfi')
-process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
+process.QGTagger.srcJets          = cms.InputTag("selectedUpdatedPatJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
 process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
 
@@ -464,7 +481,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   isreMiniAOD     = cms.bool(False) if runOnLegacy else cms.bool(True),
   Endcaps_photon  = cms.bool(True) if runOnEndcaps else cms.bool(False),
   ## JETS/MET ########################################
-  jetsAK4             = cms.InputTag('slimmedJets'), 
+  jetsAK4             = cms.InputTag('selectedUpdatedPatJets'), #selectedUpdatedPatJets
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
