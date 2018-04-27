@@ -13,7 +13,7 @@ config.Data.inputDataset = '/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20
 config.Data.splitting = 'EventAwareLumiBased'
 config.Data.unitsPerJob = 500000
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/user/hlattaud/GammaJet/'
+config.Data.outLFNDirBase = '/store/group/phys_jetmet/hlattaud/GammaJet/'
 
-config.Site.storageSite = 'T3_FR_IPNL'
+config.Site.storageSite = 'T2_CH_CERN'
 
