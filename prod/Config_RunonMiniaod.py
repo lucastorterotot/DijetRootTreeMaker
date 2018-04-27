@@ -222,7 +222,7 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 if runOnData:
         if runOnLegacy: 
            process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
+           fileNames = cms.untracked.vstring("/store/data/Run2016F/SinglePhoton/MINIAOD/07Aug17-v1/10000/0A7D67BE-B69E-E711-B475-7CD30ACE15D0.root")
            )
         else:
              process.source = cms.Source("PoolSource",
@@ -454,7 +454,7 @@ if not runOnLegacy and not runOnData:
 
 
 process.load('RecoJets.JetProducers.QGTagger_cfi')
-process.QGTagger.srcJets          = cms.InputTag("selectedUpdatedPatJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
+process.QGTagger.srcJets          = cms.InputTag('slimmedJets') if runOnData else cms.InputTag('selectedUpdatedPatJets')       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
 process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
 
@@ -481,7 +481,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   isreMiniAOD     = cms.bool(False) if runOnLegacy else cms.bool(True),
   Endcaps_photon  = cms.bool(True) if runOnEndcaps else cms.bool(False),
   ## JETS/MET ########################################
-  jetsAK4             = cms.InputTag('selectedUpdatedPatJets'), #selectedUpdatedPatJets
+  jetsAK4             = cms.InputTag('slimmedJets') if runOnData else cms.InputTag('selectedUpdatedPatJets'), 
   jetsAK8             = cms.InputTag('slimmedJetsAK8'),
   jetsPUPPI           = cms.InputTag("slimmedJetsPuppi"),     
   rho              = cms.InputTag('fixedGridRhoFastjetAll'),
