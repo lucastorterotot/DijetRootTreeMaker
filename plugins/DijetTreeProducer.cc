@@ -771,7 +771,7 @@ void DijetTreeProducer::beginJob()
   neHadMultPUPPI_      = new std::vector<int>;
   neMultPUPPI_         = new std::vector<int>;
   phoMultPUPPI_        = new std::vector<int>;
-  
+  /*
   outTree_->Branch("jetPtPUPPI"                ,"vector<float>"     ,&ptPUPPI_);  
   outTree_->Branch("jetJecPUPPI"               ,"vector<float>"     ,&jecPUPPI_);
   outTree_->Branch("jetEtaPUPPI"               ,"vector<float>"     ,&etaPUPPI_);
@@ -805,7 +805,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("phoMultPUPPI"             ,"vector<int>"      ,&phoMultPUPPI_); 
   
   
-  
+  */ 
   //----------end PUPPI----------------
 
   ptAK8_             = new std::vector<float>;
@@ -842,7 +842,7 @@ void DijetTreeProducer::beginJob()
   neMultAK8_         = new std::vector<int>;
   phoMultAK8_        = new std::vector<int>;
  
-  
+  /*
   outTree_->Branch("jetPtAK8"                ,"vector<float>"     ,&ptAK8_);
   outTree_->Branch("jetJecAK8"               ,"vector<float>"     ,&jecAK8_);
   outTree_->Branch("jetEtaAK8"               ,"vector<float>"     ,&etaAK8_);
@@ -875,7 +875,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("neMultAK8"              ,"vector<int>"      ,&neMultAK8_);   
   outTree_->Branch("phoMultAK8"             ,"vector<int>"      ,&phoMultAK8_);   
  
-  
+  */
 
 
 
@@ -939,26 +939,26 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("jetMassGenAK4"              ,"vector<float>"     ,&massGenAK4_);
   outTree_->Branch("jetEnergyGenAK4"            ,"vector<float>"     ,&energyGenAK4_);
   outTree_->Branch("jetpdgIDGenAK4"             ,"vector<int>"     ,&pdgIDGenAK4_);
-  outTree_->Branch("jetPtGenAK8"                ,"vector<float>"     ,&ptGenAK8_);
+/*  outTree_->Branch("jetPtGenAK8"                ,"vector<float>"     ,&ptGenAK8_);
   outTree_->Branch("jetEtaGenAK8"               ,"vector<float>"     ,&etaGenAK8_);
   outTree_->Branch("jetPhiGenAK8"               ,"vector<float>"     ,&phiGenAK8_);
   outTree_->Branch("jetMassGenAK8"              ,"vector<float>"     ,&massGenAK8_);
   outTree_->Branch("jetEnergyGenAK8"            ,"vector<float>"     ,&energyGenAK8_);
-  
+  */ 
   ptGenPUPPI_             = new std::vector<float>;
   etaGenPUPPI_            = new std::vector<float>;
   phiGenPUPPI_            = new std::vector<float>;
   massGenPUPPI_           = new std::vector<float>;
   pdgIDGenPUPPI_          = new std::vector<int>;
   energyGenPUPPI_         = new std::vector<float>;
-
+/*
   outTree_->Branch("jetPtGenPUPPI"                ,"vector<float>"     ,&ptGenPUPPI_);
   outTree_->Branch("jetEtaGenPUPPI"               ,"vector<float>"     ,&etaGenPUPPI_);
   outTree_->Branch("jetPhiGenPUPPI"               ,"vector<float>"     ,&phiGenPUPPI_);
   outTree_->Branch("jetMassGenPUPPI"              ,"vector<float>"     ,&massGenPUPPI_);
   outTree_->Branch("jetEnergyGenPUPPI"            ,"vector<float>"     ,&energyGenPUPPI_);
   outTree_->Branch("jetpdgIDGenPUPPI"             ,"vector<int>"     ,&pdgIDGenPUPPI_);
-  
+  */
   
      
 
@@ -1028,7 +1028,7 @@ void DijetTreeProducer::endJob()
   delete deepcsv_probcc_AK4_  ;  
   
   
- delete ptPUPPI_;
+/* delete ptPUPPI_;
  delete jecPUPPI_;
   delete etaPUPPI_;
   delete phiPUPPI_;
@@ -1093,6 +1093,7 @@ void DijetTreeProducer::endJob()
   delete neHadMultAK8_ ;
   delete neMultAK8_    ;
   delete phoMultAK8_   ;
+  */
   
   delete ptphoton_         ;
   delete ptsmearedphoton_  ;
@@ -1186,7 +1187,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   double generatorWeight = 1.;
   initialize();
  
-  
+  bool Iseventselected = false;
   Handle<pat::JetCollection> jetsAK4;
   iEvent.getByToken(srcJetsAK4_,jetsAK4);
   pat::JetCollection jetrawRC = *jetsAK4;
@@ -1620,7 +1621,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
         //  std::cout<<" Photon eta "<<fabs(iphoton->eta())<<" ES energy "<<iphoton->superCluster()->preshowerEnergy()<<" eseff "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;	    
           if(!RunEndcapPhoton_){ 
           
-	   if (fabs(iphoton->eta()) <= 1.3 ) 
+	   if (fabs(iphoton->eta()) <= 1.4442 || (fabs(iphoton->eta())>= 1.566 && fabs(iphoton->eta())<= 2.5) )
 	   {               
 	      // pat::PhotonRef PhotonReftmp(photons, index);
 		if (nPhotons_ == 1 ) 
@@ -1691,7 +1692,8 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		  
 	//	  std::cout<<" MVA variable : r9 "<<  iphoton->full5x5_r9()<<" etawidth "<<iphoton->superCluster()->etaWidth()<<" phiwidth " <<  iphoton->superCluster()->phiWidth() << " ietaiphi "<<(*phoFull5x5SigmaIEtaIPhiMap)[PhotonReftmp]<<" 2*2 "<<(*phoFull5x5E2x2Map)[PhotonReftmp]<<" 5*5 "<<(*phoFull5x5E5x5Map)[PhotonReftmp]<<" ES/raw "<<iphoton->superCluster()->preshowerEnergy() <<" sigmarr "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;
 		  
-		  nPhotonsLoose_++;                           
+		  nPhotonsLoose_++;
+		  Iseventselected = true;                           
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
@@ -2126,7 +2128,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
   std::vector<double> jecFactorsAK4;
   std::vector<unsigned> sortedAK4JetIdx;
 
-
+  if(Iseventselected){
   uint32_t indexjet = 0;
   if(redoJECs_)
     {
@@ -2326,10 +2328,10 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
   }// jet loop  
   htAK4_     = htAK4;
   
-
+}
     
   //---- Fill Tree --- 
-  outTree_->Fill();     
+  if(Iseventselected)outTree_->Fill();     
   //------------------
   
   
@@ -2345,13 +2347,17 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.3;
+    isValid &= photonRef->hadronicOverEm() < 0.1;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-   // isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01031; //Official    
-  //  if (! isValid)
-   // return false;
+    if(photonRef->eta() <= 1.479){
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01031; //Official
+    }else{
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.03; //Official
+    }   
+    if (! isValid)
+    return false;
     
     
     
@@ -2365,9 +2371,9 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 15. ;
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 10. ;
   //  isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < 30 ;
-     isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < 30;
+     isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < 15;
     if (! isValid)
     return false;
     
