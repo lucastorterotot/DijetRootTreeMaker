@@ -1620,7 +1620,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
         //  std::cout<<" Photon eta "<<fabs(iphoton->eta())<<" ES energy "<<iphoton->superCluster()->preshowerEnergy()<<" eseff "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;	    
           if(!RunEndcapPhoton_){ 
           
-	   if (fabs(iphoton->eta()) <= 1.4442 || (fabs(iphoton->eta())>= 1.566 && fabs(iphoton->eta())<= 2.5) ) 
+	   if (fabs(iphoton->eta()) <= 1.4442 || ( fabs(iphoton->eta())>= 1.566 && fabs (iphoton->eta())<= 2.5) ) 
 	   {               
 	      // pat::PhotonRef PhotonReftmp(photons, index);
 		if (nPhotons_ == 1 ) 
@@ -1689,7 +1689,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		  
 		  
 		  
-	//	  std::cout<<" MVA variable : r9 "<<  iphoton->full5x5_r9()<<" etawidth "<<iphoton->superCluster()->etaWidth()<<" phiwidth " <<  iphoton->superCluster()->phiWidth() << " ietaiphi "<<(*phoFull5x5SigmaIEtaIPhiMap)[PhotonReftmp]<<" 2*2 "<<(*phoFull5x5E2x2Map)[PhotonReftmp]<<" 5*5 "<<(*phoFull5x5E5x5Map)[PhotonReftmp]<<" ES/raw "<<iphoton->superCluster()->preshowerEnergy() <<" sigmarr "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;
+	
 		  
 		  nPhotonsLoose_++;
 		  Iseventselected = true;                           
@@ -1782,7 +1782,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		 }
 		 
 		}
-          if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) &&fabs(iphoton->eta()) <= 1.3 ) 
+          if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) && (fabs(iphoton->eta()) <= 1.4442 || ( fabs(iphoton->eta())>= 1.566 && fabs (iphoton->eta())<= 2.5))) 
 		{
 		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
 		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
@@ -2300,10 +2300,19 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       areaAK4_          ->push_back(ijet->jetArea());
       csvAK4_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
       qgdAK4_           ->push_back((*qgHandle)[jetReftmp]);
-      deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")); 
-      deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probbb")); 
-      deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probc")); 
-      deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probcc")); 
+      if(iEvent.isRealData()){
+         deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")); 
+         deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probbb")); 
+         deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probc")); 
+         deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probcc")); 
+      }else{
+      
+         deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probb")); 
+         deepcsv_probbb_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probbb")); 
+         deepcsv_probc_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probc")); 
+         deepcsv_probcc_AK4_       ->push_back(ijet->bDiscriminator("deepFlavourJetTags:probcc")); 
+         
+      }
       
       
       
@@ -2340,14 +2349,18 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.1;
+    
+    //#2: sigma ietaieta
+    if(fabs(photonRef->eta()) <= 1.479){
+    isValid &= photonRef->hadronicOverEm() < 0.08;
     if (! isValid)
     return false;
-    //#2: sigma ietaieta
-    if(photonRef->eta() <= 1.479){
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01031; //Official
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.012; //Official
     }else{
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.03; //Official
+    isValid &= photonRef->hadronicOverEm() < 0.05;
+    if (! isValid)
+    return false;
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.027; //Official
     }   
     if (! isValid)
     return false;
@@ -2364,7 +2377,7 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 10. ;
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 15. ;
   //  isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < 30 ;
      isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < 15;
     if (! isValid)
@@ -2467,6 +2480,9 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     event.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
     //if (!isData_ && !photonRef->genPhoton())   
    // return false;
+   
+   //is barrel or Endcap :
+   if(fabs(photonRef->eta()) <= 1.4442 ){
    // #1: H/E
     isValid &= photonRef->hadronicOverEm() < 0.0269;
     if (! isValid)
@@ -2497,6 +2513,43 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     if (! isValid)
     return false;
     return isValid;
+    }else if(( fabs(photonRef->eta())>= 1.566 && fabs (photonRef->eta())<= 2.5)){
+    
+    // #1: H/E
+    isValid &= photonRef->hadronicOverEm() < 0.0219;
+    if (! isValid)
+    return false;
+    //#2: sigma ietaieta
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.03001; //Official    
+    if (! isValid)
+    return false;
+    
+    edm::Handle<double> rhos;
+    event.getByToken( srcRho_, rhos);
+    double rho = *rhos;
+    edm::Handle<edm::ValueMap<float> > phoChargedIsolationMap;
+    event.getByToken(phoChargedIsolationToken_, phoChargedIsolationMap);
+    edm::Handle<edm::ValueMap<float> > phoNeutralHadronIsolationMap;
+    event.getByToken(phoNeutralHadronIsolationToken_, phoNeutralHadronIsolationMap);
+    edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
+    event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
+    
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.442;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (1.715 + 0.0163*photonRef->pt()+0.000014*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (3.863 + 0.0034*photonRef->pt());
+    isValid &= photonRef->passElectronVeto();
+    if (! isValid)
+    return false;
+    isValid &= photonRef->r9() >0.90;
+    if (! isValid)
+    return false;
+    return isValid;
+    
+    }else {
+    
+    return false;
+    
+    }
     
     
 }
