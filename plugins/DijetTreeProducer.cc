@@ -1187,7 +1187,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   double generatorWeight = 1.;
   initialize();
  
-  bool Iseventselected = false;
+  
   Handle<pat::JetCollection> jetsAK4;
   iEvent.getByToken(srcJetsAK4_,jetsAK4);
   pat::JetCollection jetrawRC = *jetsAK4;
@@ -1554,7 +1554,8 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       uint32_t index = 0;
       edm::Handle<pat::PackedCandidateCollection> pfs;
       iEvent.getByToken(srcPfCands_, pfs);
-      
+      //event storer booleen
+     // std::cout<<" is selected 0"<<isSelected<<std::endl;
       pat::PhotonCollection::const_iterator iphoton = photons->begin();
       pat::PhotonCollection::const_iterator iphotonsmear= photonssmear->begin();
       pat::PhotonCollection::const_iterator iphotonsuncorr= photonsUncorr->begin();
@@ -1607,8 +1608,8 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
       for(std::multimap<double, unsigned>::const_reverse_iterator it = sortedPhoton.rbegin(); it != sortedPhoton.rend(); ++it)
         sortedPhotonIdx.push_back(it->second);
 
-//std::cout<<" event "<< std::endl;
-
+      
+      
       for(std::vector<unsigned>::const_iterator i = sortedPhotonIdx.begin(); i != sortedPhotonIdx.end(); ++i) {
 
       pat::PhotonCollection::const_iterator iphoton = (photons->begin() + *i);
@@ -1616,35 +1617,23 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
            nPhotons_++;
            pho =*iphoton;
            PhotonT_vec.push_back((*iphoton));
-         // std::cout<<" photon pt in the event "  <<    iphoton->pt() <<" eta : "<<iphoton->eta()<<" photon n° "<< nPhotons_<<std::endl;
-         pat::PhotonRef PhotonReftmp(photons, index);
-        //  std::cout<<" Photon eta "<<fabs(iphoton->eta())<<" ES energy "<<iphoton->superCluster()->preshowerEnergy()<<" eseff "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;	    
-          if(!RunEndcapPhoton_){ 
+           pat::PhotonRef PhotonReftmp(photons, index);
+
+          if(isSelected) isSelected=false;
           
-	   if (fabs(iphoton->eta()) <= 1.4442 || (fabs(iphoton->eta())>= 1.566 && fabs(iphoton->eta())<= 2.5) )
+	   if (fabs(iphoton->eta()) <= 1.4442 || ( fabs(iphoton->eta())>= 1.566 && fabs (iphoton->eta())<= 2.5) ) 
 	   {               
 	      // pat::PhotonRef PhotonReftmp(photons, index);
+	      
 		if (nPhotons_ == 1 ) 
 	        {
+
 	        if (isValidPhotonLoose_Datadrivenpresel(PhotonReftmp, iEvent, generatorWeight)) 
 		{			
 		  
-		  Double_t Sum_pt_pfphotoncandidate = 0.;
-		  Double_t Sum_pt_pfphotoncandidate_charged = 0.;
+		  
 		  Double_t Sum_pt_genparticle = 0. ;
-		/*  for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
-		   const pat::PackedCandidate &pf = (*pfs)[i];
-
-		   if(std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))  < 0.4  && pf.pdgId() == 22 && std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi())) > 0.0001 && fabs( (iphoton->pt() - pf.pt())/iphoton->pt()) > 0.80 ){
-		   		
-		     Sum_pt_pfphotoncandidate += pf.pt();
-		     }
-		   if(std::hypot((iphoton->eta()-pf.eta()),(iphoton->phi()-pf.phi()))  < 0.4  && pf.charge() != 0){
-		     Sum_pt_pfphotoncandidate_charged += pf.pt();
-		     }
-		   }*/
-		  
-		  
+		
 		  //is fake photon ?
 		  bool isfake_photon = true ;
 		  if(!iEvent.isRealData() &&  iphoton->genPhoton() && fabs(iphoton->pt() - iphoton->genPhoton()->pt())/iphoton->genPhoton()->pt() < 0.2 ){
@@ -1652,16 +1641,13 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		   isfake_photon = false ;
 		
 		   }
-		//  if(Sum_pt_pfphotoncandidate > 15.) continue; 
-		 // if(Sum_pt_pfphotoncandidate_charged > 15.) continue;
-		  
-		  
+		
 		  if(!isfake_photon ){
 		  if( !iEvent.isRealData() && prunedGenParticles.isValid() ) {
 
                    for( pat::PackedGenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
 		  
-		  if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.01 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5){ 
+		  if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.01 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5)              { 
 		  
 		  Sum_pt_genparticle  += it->pt();
 		  
@@ -1690,10 +1676,11 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		  
 		  
 		  
-	//	  std::cout<<" MVA variable : r9 "<<  iphoton->full5x5_r9()<<" etawidth "<<iphoton->superCluster()->etaWidth()<<" phiwidth " <<  iphoton->superCluster()->phiWidth() << " ietaiphi "<<(*phoFull5x5SigmaIEtaIPhiMap)[PhotonReftmp]<<" 2*2 "<<(*phoFull5x5E2x2Map)[PhotonReftmp]<<" 5*5 "<<(*phoFull5x5E5x5Map)[PhotonReftmp]<<" ES/raw "<<iphoton->superCluster()->preshowerEnergy() <<" sigmarr "<<(*phoESEffSigmaRRMap)[PhotonReftmp]<<std::endl;
+	
 		  
 		  nPhotonsLoose_++;
-		  Iseventselected = true;                           
+
+		  isSelected = true;                          
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
@@ -1728,7 +1715,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		 ES_energy_                           ->push_back(iphoton->superCluster()->preshowerEnergy());
 		 phoFull5x5E2x5Tokenphoton_           ->push_back((*phoFull5x5E2x5Map)[PhotonReftmp]);
                  phoFull5x5E1x3Tokenphoton_           ->push_back((*phoFull5x5E1x3Map)[PhotonReftmp]);
-                 phoWorstChargedIsolationTokenphoton_ ->push_back((*phoWorstChargedIsolationMap)[PhotonReftmp]);
+                  phoWorstChargedIsolationTokenphoton_ ->push_back((*phoWorstChargedIsolationMap)[PhotonReftmp]);
 		  
 		     //photons for met calibration
 		     PhotonT = (*iphoton);
@@ -1752,7 +1739,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
                   		isGenMatch_      ->push_back(false);
 	          	}
 		  }
-		  
+		   
                 }
 		
 		if (isValidPhotonLoose(PhotonReftmp, iEvent, generatorWeight) && !isValidPhotonMedium(PhotonReftmp, iEvent, generatorWeight) ) 
@@ -1783,8 +1770,10 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		 }
 		 
 		}
-          if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) &&fabs(iphoton->eta()) <= 1.3 ) 
+
+          if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) && isSelected) 
 		{
+
 		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
 		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
 		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
@@ -1792,96 +1781,11 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		 } 
 		              
           }
+
           
           
           
-          }else{
-             if (fabs(iphoton->eta()) >= 1.305 && fabs(iphoton->eta()) <= 2.5) 
-	   {               
-	    //   pat::PhotonRef PhotonReftmp(photons, index);	      
-	        if (isValidEndcapPhotonLoose(PhotonReftmp, iEvent, generatorWeight)) 
-		{			
-		  
-		         
-		  nPhotonsLoose_++;                           
-                  ptphoton_             ->push_back( iphoton->pt()         );
-		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
-                  phiphoton_            ->push_back( iphoton->phi()        );
-		  phiphotonSC_          ->push_back( iphoton->superCluster()->phi());
-
-
-                  etaphoton_            ->push_back( iphoton->eta()        );
-		  etaphotonSC_          ->push_back( iphoton->superCluster()->eta());
-
-                  energyphoton_         ->push_back( iphoton->energy() );
-		  energyphotonSC_       ->push_back( iphoton->superCluster()->rawEnergy() );
-
-		  full5x5SigmaIEtaIEtaMapTokenphoton_   ->push_back((*full5x5SigmaIEtaIEtaMap)[PhotonReftmp]);
-		  phoChargedIsolationTokenphoton_       ->push_back(getCorrectedPFIsolation((*phoChargedIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::CHARGED_HADRONS));
-		  phoNeutralHadronIsolationTokenphoton_ ->push_back(getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::NEUTRAL_HADRONS));
-		  phoPhotonIsolationTokenphoton_        ->push_back(getCorrectedPFIsolation((*phoPhotonIsolationMap)[PhotonReftmp], rhod, PhotonReftmp->eta(), IsolationType::PHOTONS));
-		  
-		  isPhotonLoose_        ->push_back( true) ;
-		  HaspixelSeed_         ->push_back(iphoton->hasPixelSeed());
-		  hadTowOverEm_         ->push_back(iphoton->hadronicOverEm());
-		  electronconvVeto_     ->push_back(iphoton->passElectronVeto());		  				  
-		  double Ecorr=1;
-		  Ecorrbump_            ->push_back( Ecorr                 );
-		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
-		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
-		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
-		  energysmearedphoton_  ->push_back( iphotonsmear->energy());		  
-		  if (!iEvent.isRealData() ) {
-		  	if(iphoton->genPhoton()){
-		  		ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
-                  		phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
-                  		etaGenphoton_    ->push_back( iphoton->genPhoton()->eta() );
-                  		energyGenphoton_ ->push_back( iphoton->genPhoton()->energy());
-                  		isGenMatch_      ->push_back(true);
-	          		nGenphotons_++;
-	          	}else{
-	          		ptGenphoton_     ->push_back( -999 );
-                  		phiGenphoton_    ->push_back( -999 );
-                  		etaGenphoton_    ->push_back( -999 );
-                  		energyGenphoton_ ->push_back( -999 );
-                  		isGenMatch_      ->push_back(false);
-	          	}
-		  }
-		  
-                }
-		
-		if (isValidEndcapPhotonLoose(PhotonReftmp, iEvent, generatorWeight) && !isValidEndcapPhotonMedium(PhotonReftmp, iEvent, generatorWeight) ) 
-		{ 
-		  isPhotonMedium_     ->push_back(0);
-		}
-		
-	       if (isValidEndcapPhotonLoose(PhotonReftmp, iEvent, generatorWeight) && !isValidEndcapPhotonTight(PhotonReftmp, iEvent, generatorWeight) ) 
-		{ 
-		  isPhotonTight_     ->push_back(0);
-		}
-		
-		
-		if (isValidEndcapPhotonMedium(PhotonReftmp, iEvent, generatorWeight) ) 
-		{
-		    nPhotonsMedium_++;
-		    isPhotonMedium_     ->push_back(true);
-		    
-		    
-		 }
-
-
-		if (isValidEndcapPhotonTight(PhotonReftmp, iEvent, generatorWeight)) 
-		{
-		     nPhotonsTight_++;
-		     PhotonT = (*iphoton);
-		     PhotonTOoB = (*iphotonsmear);
-		     PhotonT_vec.push_back((*iphoton));
-                     PhotonTOoB_vec.push_back((*iphotonsmear)); 
-		     isPhotonTight_   ->push_back(true);
-		    
-		 }
           
-          }}
       }//end loop over photon collection
   
       Handle<vector<pat::MET> > met;
@@ -2128,7 +2032,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
   std::vector<double> jecFactorsAK4;
   std::vector<unsigned> sortedAK4JetIdx;
 
-  if(Iseventselected){
+  if(isSelected){
   uint32_t indexjet = 0;
   if(redoJECs_)
     {
@@ -2331,7 +2235,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 }
     
   //---- Fill Tree --- 
-  if(Iseventselected)outTree_->Fill();     
+  if(isSelected)outTree_->Fill();     
   //------------------
   
   
@@ -2347,17 +2251,28 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.1;
-    if (! isValid)
-    return false;
+    
     //#2: sigma ietaieta
-    if(photonRef->eta() <= 1.479){
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.01031; //Official
-    }else{
-    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.03; //Official
-    }   
-    if (! isValid)
+    if(fabs(photonRef->eta()) <= 1.479){
+    isValid &= photonRef->hadronicOverEm() < 0.08;
+    if (! isValid){
+
     return false;
+    }
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.012; //Official
+    }else{
+    isValid &= photonRef->hadronicOverEm() < 0.05;
+    if (! isValid){
+
+    return false;
+    }
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.027; //Official
+    if (! isValid){
+
+    return false;
+    }
+    }   
+
     
     
     
@@ -2371,17 +2286,22 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 10. ;
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 15. ;
   //  isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < 30 ;
      isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < 15;
-    if (! isValid)
+    if (! isValid){
+
     return false;
+    }
     
     
     
     isValid &= photonRef->passElectronVeto();
-    if (! isValid)
+    if (! isValid){
+
     return false;
+    }
+
     return isValid;
     
     
@@ -2474,6 +2394,9 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     event.getByToken(full5x5SigmaIEtaIEtaMapToken_, full5x5SigmaIEtaIEtaMap);
     //if (!isData_ && !photonRef->genPhoton())   
    // return false;
+   
+   //is barrel or Endcap :
+   if(fabs(photonRef->eta()) <= 1.4442 ){
    // #1: H/E
     isValid &= photonRef->hadronicOverEm() < 0.0269;
     if (! isValid)
@@ -2504,6 +2427,43 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     if (! isValid)
     return false;
     return isValid;
+    }else if(( fabs(photonRef->eta())>= 1.566 && fabs (photonRef->eta())<= 2.5)){
+    
+    // #1: H/E
+    isValid &= photonRef->hadronicOverEm() < 0.0219;
+    if (! isValid)
+    return false;
+    //#2: sigma ietaieta
+    isValid &= (*full5x5SigmaIEtaIEtaMap)[photonRef] < 0.03001; //Official    
+    if (! isValid)
+    return false;
+    
+    edm::Handle<double> rhos;
+    event.getByToken( srcRho_, rhos);
+    double rho = *rhos;
+    edm::Handle<edm::ValueMap<float> > phoChargedIsolationMap;
+    event.getByToken(phoChargedIsolationToken_, phoChargedIsolationMap);
+    edm::Handle<edm::ValueMap<float> > phoNeutralHadronIsolationMap;
+    event.getByToken(phoNeutralHadronIsolationToken_, phoNeutralHadronIsolationMap);
+    edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
+    event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
+    
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.442;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (1.715 + 0.0163*photonRef->pt()+0.000014*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (3.863 + 0.0034*photonRef->pt());
+    isValid &= photonRef->passElectronVeto();
+    if (! isValid)
+    return false;
+    isValid &= photonRef->r9() >0.90;
+    if (! isValid)
+    return false;
+    return isValid;
+    
+    }else {
+    
+    return false;
+    
+    }
     
     
 }
@@ -2642,6 +2602,7 @@ void DijetTreeProducer::initialize()
   metPt_          = -999;
   metPhi_         = -999;
   goodPVtx_       = true;
+  isSelected      = false;
   
   metEnergypuppi_      = -999;
   metEtapuppi_         = -999;
