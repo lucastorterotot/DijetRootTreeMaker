@@ -118,6 +118,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     bool isReminiAOD_;
     bool RunEndcapPhoton_;
     bool goodPVtx_;
+    bool isSelected ;
     
     
     // Migrate to consumes-system for running in 80X
