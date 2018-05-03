@@ -508,8 +508,8 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("nJetsPUPPI"           ,&nJetsPUPPI_          ,"nJetsPUPPI_/I"		);
   outTree_->Branch("htAK4"              ,&htAK4_             ,"htAK4_/F"		);
   
-  //outTree_->Branch("nJetsAK8"           ,&nJetsAK8_          ,"nJetsAK8_/I"		);
-//  outTree_->Branch("htAK8"              ,&htAK8_             ,"htAK8_/F"		);   
+  outTree_->Branch("nJetsAK8"           ,&nJetsAK8_          ,"nJetsAK8_/I"		);
+  outTree_->Branch("htAK8"              ,&htAK8_             ,"htAK8_/F"		);   
   outTree_->Branch("nPhoton"                  ,&nPhotons_                ,"nPhotons_/I");
   outTree_->Branch("nPhotonLoose"             ,&nPhotonsLoose_           ,"nPhotonsLoose_/I");
   outTree_->Branch("nPhotonMedium"            ,&nPhotonsMedium_          ,"nPhotonsMedium_/I");
@@ -700,6 +700,8 @@ void DijetTreeProducer::beginJob()
   deepcsv_probbb_AK4_       = new std::vector<float>;
   deepcsv_probc_AK4_        = new std::vector<float>;
   deepcsv_probcc_AK4_       = new std::vector<float>;
+  CvsB_taggerAK4_           = new std::vector<float>;
+  CvsL_taggerAK4_           = new std::vector<float>;
 
   outTree_->Branch("jetPtAK4"                ,"vector<float>"     ,&ptAK4_);
   outTree_->Branch("jetJecAK4"               ,"vector<float>"     ,&jecAK4_);
@@ -736,7 +738,10 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("deepcsv_probb_AK4"               ,"vector<float>"    ,&deepcsv_probb_AK4_);   
   outTree_->Branch("deepcsv_probbb_AK4"              ,"vector<float>"    ,&deepcsv_probbb_AK4_);   
   outTree_->Branch("deepcsv_probc_AK4"               ,"vector<float>"    ,&deepcsv_probc_AK4_);   
-  outTree_->Branch("deepcsv_probcc_AK4"              ,"vector<float>"    ,&deepcsv_probcc_AK4_);     
+  outTree_->Branch("deepcsv_probcc_AK4"              ,"vector<float>"    ,&deepcsv_probcc_AK4_);
+  outTree_->Branch("CvsB_taggerAK4"              ,"vector<float>"    ,&CvsB_taggerAK4_);
+  outTree_->Branch("CvsL_taggerAK4"              ,"vector<float>"    ,&CvsL_taggerAK4_);
+       
   //-------Jet PUPPI-----------------
   ptPUPPI_             = new std::vector<float>;
   jecPUPPI_            = new std::vector<float>;
@@ -805,7 +810,6 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("phoMultPUPPI"             ,"vector<int>"      ,&phoMultPUPPI_); 
   
   
-
   */ 
   //----------end PUPPI----------------
 
@@ -945,7 +949,6 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("jetPhiGenAK8"               ,"vector<float>"     ,&phiGenAK8_);
   outTree_->Branch("jetMassGenAK8"              ,"vector<float>"     ,&massGenAK8_);
   outTree_->Branch("jetEnergyGenAK8"            ,"vector<float>"     ,&energyGenAK8_);
-
   */ 
   ptGenPUPPI_             = new std::vector<float>;
   etaGenPUPPI_            = new std::vector<float>;
@@ -1028,7 +1031,8 @@ void DijetTreeProducer::endJob()
   delete deepcsv_probbb_AK4_  ; 
   delete deepcsv_probc_AK4_   ;
   delete deepcsv_probcc_AK4_  ;  
-  
+  delete CvsB_taggerAK4_;
+  delete CvsL_taggerAK4_;
   
 /* delete ptPUPPI_;
  delete jecPUPPI_;
@@ -1096,7 +1100,7 @@ void DijetTreeProducer::endJob()
   delete neMultAK8_    ;
   delete phoMultAK8_   ;
   */
-
+  
   delete ptphoton_         ;
   delete ptsmearedphoton_  ;
   delete ptphotonSC_       ;
@@ -1189,7 +1193,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   double generatorWeight = 1.;
   initialize();
  
-  bool Iseventselected = false;
+  
   Handle<pat::JetCollection> jetsAK4;
   iEvent.getByToken(srcJetsAK4_,jetsAK4);
   pat::JetCollection jetrawRC = *jetsAK4;
@@ -1682,7 +1686,6 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		  
 		  nPhotonsLoose_++;
 
-
 		  isSelected = true;                          
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
@@ -1773,7 +1776,6 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		 }
 		 
 		}
-
 
           if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) && isSelected) 
 		{
@@ -2038,8 +2040,6 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 
   if(isSelected){
   uint32_t indexjet = 0;
-  
-  if(Iseventselected){
   if(redoJECs_)
     {
       // sort AK4 jets by increasing pT
@@ -2208,6 +2208,8 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       
       areaAK4_          ->push_back(ijet->jetArea());
       csvAK4_           ->push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
+      CvsB_taggerAK4_    ->push_back(ijet->bDiscriminator("pfCombinedCvsBJetTags"));
+      CvsL_taggerAK4_    ->push_back(ijet->bDiscriminator("pfCombinedCvsLJetTags"));
       qgdAK4_           ->push_back((*qgHandle)[jetReftmp]);
       if(iEvent.isRealData()){
          deepcsv_probb_AK4_       ->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")); 
@@ -2279,7 +2281,6 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
     }
     }   
 
-
     
     
     
@@ -2296,7 +2297,6 @@ bool DijetTreeProducer::isValidPhotonLoose_Datadrivenpresel(const pat::PhotonRef
     isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 15. ;
   //  isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < 30 ;
      isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < 15;
-
     if (! isValid){
 
     return false;
@@ -2682,7 +2682,8 @@ void DijetTreeProducer::initialize()
   deepcsv_probbb_AK4_   ->clear(); 
   deepcsv_probc_AK4_    ->clear();
   deepcsv_probcc_AK4_   ->clear();
- 
+  CvsL_taggerAK4_       ->clear();
+  CvsB_taggerAK4_       ->clear();
   nJetsPUPPI_ = -999;
  
   ptPUPPI_             ->clear();
@@ -2902,4 +2903,3 @@ DijetTreeProducer::~DijetTreeProducer()
 }
 
 DEFINE_FWK_MODULE(DijetTreeProducer);
-

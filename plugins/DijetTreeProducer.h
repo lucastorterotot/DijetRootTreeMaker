@@ -240,7 +240,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
   //  FactorizedJetCorrector *jetCorrectorForTypeI;
     
     //---- jet and genJet variables --------------
-    std::vector<float> *ptAK4_,*jecAK4_,*etaAK4_,*phiAK4_,*massAK4_,*energyAK4_,*areaAK4_,*csvAK4_,*qgdAK4_, *deepcsv_probb_AK4_, *deepcsv_probbb_AK4_, *deepcsv_probc_AK4_, *deepcsv_probcc_AK4_,*chfAK4_,*nhfAK4_,*phfAK4_,*elfAK4_,*mufAK4_,*nemfAK4_,*cemfAK4_;
+    std::vector<float> *ptAK4_,*jecAK4_,*etaAK4_,*phiAK4_,*massAK4_,*energyAK4_,*areaAK4_,*csvAK4_,*qgdAK4_, *deepcsv_probb_AK4_, *deepcsv_probbb_AK4_, *deepcsv_probc_AK4_, *deepcsv_probcc_AK4_,*chfAK4_,*nhfAK4_,*phfAK4_,*elfAK4_,*mufAK4_,*nemfAK4_,*cemfAK4_, *CvsL_taggerAK4_, *CvsB_taggerAK4_ ;
     std::vector<float> *ptAK4raw_,*etaAK4raw_,*phiAK4raw_,*massAK4raw_,*energyAK4raw_;
     
     std::vector<int> *idLAK4_,*idTAK4_, *chHadMultAK4_, *chMultAK4_, *neHadMultAK4_, *neMultAK4_, *phoMultAK4_,*pdgIDGenAK4_, *hadronflavour_;
