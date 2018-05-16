@@ -76,7 +76,8 @@ DijetTreeProducer::DijetTreeProducer(edm::ParameterSet const&cfg):srcJetsAK4View
   phoESEffSigmaRRToken_            =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("esEffSigmaRRMap")));
   phoFull5x5E2x5Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E2x5MaxMap")));
   phoFull5x5E1x3Token_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("full5x5E1x3Map")));
-  phoWorstChargedIsolationToken_             =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoWorstChargedIsolation"))); 
+  phoWorstChargedIsolationToken_   =   (consumes <edm::ValueMap<float> >(cfg.getParameter<edm::InputTag>("phoWorstChargedIsolation")));
+  phoMediumIdBoolMapToken_         =   (consumes <edm::ValueMap<bool> >(cfg.getParameter<edm::InputTag>("phoMediumIdBoolMap")));
   
  // srcebrechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("eb")));  
  // srceerechit_ = (consumes< EcalRecHitCollection>(cfg.getParameter<InputTag>("ee")));
@@ -543,6 +544,7 @@ void DijetTreeProducer::beginJob()
   isMatch165_       = new std::vector<bool>;
   isGenMatch_       = new std::vector<bool>;
   isFakephoton_     = new std::vector<bool>;
+  isPhotonMedium_EG_MVA_     = new std::vector<bool>;
   
   outTree_->Branch("isMatch30"                                 ,"vector<bool>"   ,&isMatch30_);
   outTree_->Branch("isMatch50"                                 ,"vector<bool>"   ,&isMatch50_);
@@ -551,6 +553,7 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("isMatch120"                                ,"vector<bool>"   ,&isMatch120_);
   outTree_->Branch("isMatch165"                                ,"vector<bool>"   ,&isMatch165_);
   outTree_->Branch("isGenMatch"                                ,"vector<bool>"   ,&isGenMatch_);
+  outTree_->Branch("isPhotonMedium_EG_MVA"                                ,"vector<bool>"   ,&isPhotonMedium_EG_MVA_);
   
   
         
@@ -1175,6 +1178,7 @@ void DijetTreeProducer::endJob()
  delete phoFull5x5E2x5Tokenphoton_           ;
  delete phoFull5x5E1x3Tokenphoton_           ;
  delete phoWorstChargedIsolationTokenphoton_ ;
+ delete isPhotonMedium_EG_MVA_               ;
  
 // delete ptphotonnofix_;
   
@@ -1265,7 +1269,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   rho_    = *rho;
 
 
-  nVtx_   = recVtxs->size();
+  nVtx_   = recVtxs->size();// to be change to match the number of true vertices
   run_    = iEvent.id().run();
   evt_    = iEvent.id().event();
   lumi_   = iEvent.id().luminosityBlock();
@@ -1588,6 +1592,9 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
       edm::Handle<edm::ValueMap<float> > phoESEffSigmaRRMap;
       iEvent.getByToken(phoESEffSigmaRRToken_, phoESEffSigmaRRMap);
       
+      edm::Handle<edm::ValueMap<bool> > medium_id_decisions;
+      iEvent.getByToken(phoMediumIdBoolMapToken_,medium_id_decisions);
+      
       edm::Handle<edm::ValueMap<float> > phoFull5x5E2x5Map;
       iEvent.getByToken(phoFull5x5E2x5Token_, phoFull5x5E2x5Map);
       edm::Handle<edm::ValueMap<float> > phoFull5x5E1x3Map;
@@ -1691,8 +1698,8 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
 		  phiphotonSC_          ->push_back( iphoton->superCluster()->phi());
-
-
+                  isPhotonMedium_EG_MVA_ ->push_back((*medium_id_decisions)[PhotonReftmp] );
+ 
                   etaphoton_            ->push_back( iphoton->eta()        );
 		  etaphotonSC_          ->push_back( iphoton->superCluster()->eta());
 
@@ -2893,6 +2900,7 @@ void DijetTreeProducer::initialize()
   phoFull5x5E2x5Tokenphoton_           ->clear();
   phoFull5x5E1x3Tokenphoton_           ->clear();
   phoWorstChargedIsolationTokenphoton_ ->clear();
+  isPhotonMedium_EG_MVA_               ->clear();
   
  // ptphotonnofix_ ->clear();
   

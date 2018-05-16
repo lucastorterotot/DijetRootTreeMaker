@@ -305,7 +305,7 @@ from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
 dataFormat = DataFormat.MiniAOD
 switchOnVIDPhotonIdProducer(process, dataFormat)
-my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
+my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff','RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring16_nonTrig_V1_cff']
 for idmod in my_id_modules:
          setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
 
@@ -514,6 +514,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons') if runOnLegacy else cms.InputTag('selectedPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
+  phoMediumIdBoolMap = cms.InputTag("egmPhotonIDs:mvaPhoID-Spring16-nonTrig-V1-wp90"),
   
   ## MC ########################################
   pu                        = cms.untracked.InputTag('slimmedAddPileupInfo'), # Updated from untracked to 80X by Juska
@@ -536,7 +537,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ##### For 0T data  #####
   #triggerAlias     = cms.vstring('L1Jet68','L1Jet36','L1Jet16','L1EG20','L1EG5'),
   ##### For JetHT PD ##### 
-  triggerAlias     = cms.vstring('HLTPhoton30','HLTPhoton50','HLTPhoton75','HLTPhoton90','HLTPhoton120','HLTPhoton165'),                                
+  triggerAlias     = cms.vstring('HLTPhoton30','HLTPhoton50','HLTPhoton75','HLTPhoton90','HLTPhoton120','HLTPhoton165','HLTJetHT40','HLTJetHT60','HLTJetHT80','HLTJetHT140','HLTJetHT200','HLTJetHT260','HLTJetHT320','HLTJetHT400','HLTJetHT450','HLTJetHT500'),                                
   triggerSelection = cms.vstring(
 
      
@@ -547,6 +548,16 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
      'HLT_Photon90_v*',
      'HLT_Photon120_v*',
      'HLT_Photon175_v*',
+     'HLT_PFJet40_v*',
+     'HLT_PFJet60_v*',
+     'HLT_PFJet80_v*',
+     'HLT_PFJet140_v*',
+     'HLT_PFJet200_v*',
+     'HLT_PFJet260_v*',
+     'HLT_PFJet320_v*',
+     'HLT_PFJet400_v*',
+     'HLT_PFJet450_v*',
+     'HLT_PFJet500_v*'
      
   ),
   
@@ -565,7 +576,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
   triggerObjects = cms.InputTag('selectedPatTrigger'),
   filters = cms.vstring(
-        'hltEG30HEFilter','hltEG50HEFilter', 'hltEG75HEFilter','hltEG90HEFilter','hltEG120HEFilter','hltEG175HEFilter'),
+        'hltEG30HEFilter','hltEG50HEFilter', 'hltEG75HEFilter','hltEG90HEFilter','hltEG120HEFilter','hltEG175HEFilter','hltSinglePFJet40','hltSinglePFJet60','hltSinglePFJet80','hltSinglePFJet140','hltSinglePFJet200','hltSinglePFJet260','hltSinglePFJet320','hltSinglePFJet400','hltSinglePFJet450','hltSinglePFJet500'),
   ## JECs ################
   redoJECs  = cms.bool(True),
 
