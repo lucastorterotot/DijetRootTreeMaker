@@ -8,7 +8,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process('jetToolbox')
 
 process.load('FWCore.MessageService.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 
@@ -222,7 +222,7 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 if runOnData:
         if runOnLegacy: 
            process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/data/Run2016F/SinglePhoton/MINIAOD/07Aug17-v1/10000/0A7D67BE-B69E-E711-B475-7CD30ACE15D0.root")
+           fileNames = cms.untracked.vstring("/store/data/Run2016C/JetHT/MINIAOD/07Aug17-v1/110000/14CB0130-1F7D-E711-A6DE-0025905B8580.root","/store/data/Run2016G/SinglePhoton/MINIAOD/07Aug17-v1/00000/B00E3DDF-BFB2-E711-907C-FA163ECB94A6.root","/store/data/Run2016F/SinglePhoton/MINIAOD/07Aug17-v1/10000/0A7D67BE-B69E-E711-B475-7CD30ACE15D0.root")
            )
         else:
              process.source = cms.Source("PoolSource",

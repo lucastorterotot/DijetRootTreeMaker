@@ -15,6 +15,6 @@ config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Coll
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 250
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/user/hlattaud/GammaJet/File_gamma_HFjets/'
+config.Data.outLFNDirBase = '/store/group/phys_smp/hlattaud/Gjets_HF/'
 
-config.Site.storageSite = 'T3_FR_IPNL'
+config.Site.storageSite = 'T2_CH_CERN'

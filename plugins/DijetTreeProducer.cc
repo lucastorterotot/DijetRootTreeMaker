@@ -705,6 +705,21 @@ void DijetTreeProducer::beginJob()
   deepcsv_probcc_AK4_       = new std::vector<float>;
   CvsB_taggerAK4_           = new std::vector<float>;
   CvsL_taggerAK4_           = new std::vector<float>;
+  
+  isMatch_jet40_             = new std::vector<bool>;
+  isMatch_jet60_             = new std::vector<bool>;
+  isMatch_jet80_             = new std::vector<bool>;
+  isMatch_jet140_            = new std::vector<bool>;
+  isMatch_jet200_            = new std::vector<bool>;
+  isMatch_jet260_            = new std::vector<bool>;
+  isMatch_jet320_            = new std::vector<bool>;
+  isMatch_jet400_            = new std::vector<bool>;
+  isMatch_jet450_            = new std::vector<bool>;
+  isMatch_jet500_            = new std::vector<bool>;
+  
+  
+  
+  
 
   outTree_->Branch("jetPtAK4"                ,"vector<float>"     ,&ptAK4_);
   outTree_->Branch("jetJecAK4"               ,"vector<float>"     ,&jecAK4_);
@@ -744,6 +759,18 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("deepcsv_probcc_AK4"              ,"vector<float>"    ,&deepcsv_probcc_AK4_);
   outTree_->Branch("CvsB_taggerAK4"              ,"vector<float>"    ,&CvsB_taggerAK4_);
   outTree_->Branch("CvsL_taggerAK4"              ,"vector<float>"    ,&CvsL_taggerAK4_);
+  outTree_->Branch("isMatch_jet40"              ,"vector<bool>"    ,&isMatch_jet40_);
+  outTree_->Branch("isMatch_jet60"              ,"vector<bool>"    ,&isMatch_jet60_);
+  outTree_->Branch("isMatch_jet80"              ,"vector<bool>"    ,&isMatch_jet80_);
+  outTree_->Branch("isMatch_jet140"              ,"vector<bool>"    ,&isMatch_jet140_);
+  outTree_->Branch("isMatch_jet200"              ,"vector<bool>"    ,&isMatch_jet200_);
+  outTree_->Branch("isMatch_jet260"              ,"vector<bool>"    ,&isMatch_jet260_);
+  outTree_->Branch("isMatch_jet320"              ,"vector<bool>"    ,&isMatch_jet320_);
+  outTree_->Branch("isMatch_jet400"              ,"vector<bool>"    ,&isMatch_jet400_);
+  outTree_->Branch("isMatch_jet450"              ,"vector<bool>"    ,&isMatch_jet450_);
+  outTree_->Branch("isMatch_jet500"              ,"vector<bool>"    ,&isMatch_jet500_);
+  
+ 
        
   //-------Jet PUPPI-----------------
   ptPUPPI_             = new std::vector<float>;
@@ -1037,6 +1064,17 @@ void DijetTreeProducer::endJob()
   delete CvsB_taggerAK4_;
   delete CvsL_taggerAK4_;
   
+  delete isMatch_jet40_  ;
+  delete isMatch_jet60_  ;       
+  delete isMatch_jet80_  ;  
+  delete isMatch_jet140_ ;  
+  delete isMatch_jet200_ ; 
+  delete isMatch_jet260_ ;
+  delete isMatch_jet320_ ;
+  delete isMatch_jet400_ ; 
+  delete isMatch_jet450_ ;  
+  delete isMatch_jet500_ ;   
+  
 /* delete ptPUPPI_;
  delete jecPUPPI_;
   delete etaPUPPI_;
@@ -1263,7 +1301,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   
   edm::Handle< EcalRecHitCollection> _eerechits;
   iEvent.getByToken(srceerechit_,_eerechits);
-  
+ // std::cout<<"start event"<<std::endl;
   
   //-------------- Event Info -----------------------------------
   rho_    = *rho;
@@ -1452,48 +1490,45 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
    std::vector<TLorentzVector> candhlt120;
    std::vector<TLorentzVector> candhlt165;
    
+   
+      std::vector<TLorentzVector> candhlt_jetHT_40;
+      std::vector<TLorentzVector> candhlt_jetHT_60;
+      std::vector<TLorentzVector> candhlt_jetHT_80;
+      std::vector<TLorentzVector> candhlt_jetHT_140;
+      std::vector<TLorentzVector> candhlt_jetHT_200;
+      std::vector<TLorentzVector> candhlt_jetHT_260;
+      std::vector<TLorentzVector> candhlt_jetHT_320;
+      std::vector<TLorentzVector> candhlt_jetHT_400;
+      std::vector<TLorentzVector> candhlt_jetHT_450;
+      std::vector<TLorentzVector> candhlt_jetHT_500;
+   
    for (auto const &obj: *triggerObjects)
     {
         TLorentzVector cand;
         cand.SetPtEtaPhiE(obj.pt(),obj.eta(),obj.phi(),obj.energy());
         
-        //std::cout<<" test size filter "<<filters_name.size()<<std::endl;
-        
-
-        if(obj.hasFilterLabel(filters_name.at(0)))
-        {
-        	candhlt30.push_back(cand);
-        //	std::cout<<" test  filter in "<<filters_name.at(0)<<std::endl;
-
-        }
-        
-        if(obj.hasFilterLabel(filters_name.at(1)))
-        {
-        	candhlt50.push_back(cand);
-        //	std::cout<<" test  filter in "<<filters_name.at(1)<<std::endl;
-        }
-        if(obj.hasFilterLabel(filters_name.at(2)))
-        {
-        	candhlt75.push_back(cand);
-        //	std::cout<<" test  filter in "<<filters_name.at(2)<<std::endl;
-        }
-        if(obj.hasFilterLabel(filters_name.at(3)))
-        {
-        	candhlt90.push_back(cand);
-        //	std::cout<<" test  filter in "<<filters_name.at(3)<<std::endl;
-        }
-        if(obj.hasFilterLabel(filters_name.at(4)))
-        {
-        	candhlt120.push_back(cand);
-        //	std::cout<<" test  filter in "<<filters_name.at(4)<<std::endl;
-        }
-        if(obj.hasFilterLabel(filters_name.at(5)))
-        {
-        	candhlt165.push_back(cand);
-        //	        	std::cout<<" test  filter in "<<filters_name.at(5)<<std::endl;
-        }
-       // std::cout<<" test size filter "<<candhlt165.size()<<std::endl;
-     
+       //photon trigger 
+       if(obj.hasFilterLabel(filters_name.at(0))) candhlt30.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(1))) candhlt50.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(2))) candhlt75.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(3))) candhlt90.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(4))) candhlt120.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(5))) candhlt165.push_back(cand);
+       
+       //Jet trigger
+       if(obj.hasFilterLabel(filters_name.at(6))) candhlt_jetHT_40.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(7))) candhlt_jetHT_60.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(8))) candhlt_jetHT_80.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(9))) candhlt_jetHT_140.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(10))) candhlt_jetHT_200.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(11))) candhlt_jetHT_260.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(12))) candhlt_jetHT_320.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(13))) {
+       candhlt_jetHT_400.push_back(cand);
+     //  std::cout<<"test of filter matching : trigger object JetHT 400 : "<<cand.Pt()<< std::endl;
+       }
+       if(obj.hasFilterLabel(filters_name.at(14))) candhlt_jetHT_450.push_back(cand);
+       if(obj.hasFilterLabel(filters_name.at(15))) candhlt_jetHT_500.push_back(cand);
 }
   
   
@@ -1638,8 +1673,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 	   {               
 	      // pat::PhotonRef PhotonReftmp(photons, index);
 	      
-		if (nPhotons_ == 1 ) 
-	        {
+		
 
 	        if (isValidPhotonLoose_Datadrivenpresel(PhotonReftmp, iEvent, generatorWeight)) 
 		{			
@@ -1656,41 +1690,35 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		   }
 		
 		  if(!isfake_photon ){
-		  if( !iEvent.isRealData() && prunedGenParticles.isValid() ) {
+		    if( !iEvent.isRealData() && prunedGenParticles.isValid() ) {
 
-                   for( pat::PackedGenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
+                     for( pat::PackedGenParticleCollection::const_iterator it = prunedGenParticles->begin(); it != prunedGenParticles->end(); ++it ) {
 		  
-		  if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.01 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5)              { 
+		       if(std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi()))  < 0.4 && std::hypot((iphoton->eta()-it->eta()),(iphoton->phi()-it->phi())) > 0.01 &&  (iphoton->pt() - it->pt())/iphoton->pt() > 0.5)                 { 
 		  
-		  Sum_pt_genparticle  += it->pt();
-		  
-		
-		  
-		  }
-		  }
+		         Sum_pt_genparticle  += it->pt();
+				  
+	  	       }
+		    }
 
 		  
 		  if( Sum_pt_genparticle < 5. ){ 
-		  isFakephoton_             ->push_back(false);
+		    isFakephoton_             ->push_back(false);
 
 		  }else{
-		   isFakephoton_             ->push_back(true);
+		    isFakephoton_             ->push_back(true);
 		  }
 		  
 		  }else{
 		  
-		  isFakephoton_             ->push_back(true);
+		    isFakephoton_             ->push_back(true);
 		  }
 		  
 		  }else{
 		     
-		  isFakephoton_             ->push_back(true);
+		    isFakephoton_             ->push_back(true);
 		  }
-		  
-		  
-		  
-	
-		  
+		 		  
 		  nPhotonsLoose_++;
 
 		  isSelected = true;                          
@@ -1728,15 +1756,15 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		 ES_energy_                           ->push_back(iphoton->superCluster()->preshowerEnergy());
 		 phoFull5x5E2x5Tokenphoton_           ->push_back((*phoFull5x5E2x5Map)[PhotonReftmp]);
                  phoFull5x5E1x3Tokenphoton_           ->push_back((*phoFull5x5E1x3Map)[PhotonReftmp]);
-                  phoWorstChargedIsolationTokenphoton_ ->push_back((*phoWorstChargedIsolationMap)[PhotonReftmp]);
+                 phoWorstChargedIsolationTokenphoton_ ->push_back((*phoWorstChargedIsolationMap)[PhotonReftmp]);
 		  
-		     //photons for met calibration
-		     PhotonT = (*iphoton);
-		     PhotonTOoB = (*iphotonsmear);
-		     PhotonT_vec.push_back((*iphoton));
-                     PhotonTOoB_vec.push_back((*iphotonsmear));
+		 //photons for met calibration
+		 if(nPhotons_ == 1) PhotonT = (*iphoton);
+                 PhotonTOoB = (*iphotonsmear);
+		 PhotonT_vec.push_back((*iphoton));
+                 PhotonTOoB_vec.push_back((*iphotonsmear));
 		  		  
-		  if (!iEvent.isRealData() ) {
+		 if (!iEvent.isRealData() ) {
 		  	if(iphoton->genPhoton()){
 		  		ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
                   		phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
@@ -1782,7 +1810,7 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 		     isPhotonTight_   ->push_back(true); 
 		 }
 		 
-		}
+		
 
           if (isValidPhotonTight(PhotonReftmp, iEvent, generatorWeight) && isSelected) 
 		{
@@ -1814,8 +1842,8 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
       iEvent.getByToken(srcMETEGcleaned_, metEGcleaned);
       
   
-     Handle<vector<pat::MET> > metpuppi;
-     iEvent.getByToken(srcMETpuppi_,metpuppi);
+      Handle<vector<pat::MET> > metpuppi;
+      iEvent.getByToken(srcMETpuppi_,metpuppi);
      
      
      pat::MET Met = (*met)[0];
@@ -1838,11 +1866,9 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
       
       if(nPhotonsLoose_ == 1){
       double deltar = 0 ;
-      //float photonuncopx = 0;
-     // float photonuncopy = 0;
       int nlim = 0 ;
       pat::Photon Photonuncorr ;
-           for(;iphotonsuncorr != photonsUncorr->end(); ++iphotonsuncorr/*, ++iphotonnofix*/){
+           for(;iphotonsuncorr != photonsUncorr->end(); ++iphotonsuncorr){
             
             
             deltar = std::hypot((PhotonT.eta()-iphotonsuncorr->eta()),(PhotonT.phi()-iphotonsuncorr->phi())   );
@@ -1853,8 +1879,6 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
       
       
           }
-      
-      
       
       
        float FootprintMEx = 0;
@@ -1871,18 +1895,12 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
 
   for (unsigned int i = 0, n = Photonuncorr.numberOfSourceCandidatePtrs(); i < n; ++i) {
     footprint.push_back(Photonuncorr.sourceCandidatePtr(i) );
-   // std::cout<<" source tight px : "<< PhotonT.sourceCandidatePtr(i).px() <<" py : "<<PhotonT.sourceCandidatePtr(i).py()<<std::endl;
   }
- // std::cout<<" test bad alloc 5"<<std::endl;
-  
-  
-  
-  
+   
   std::vector<reco::CandidatePtr> footprint_rereco;
 
   for (unsigned int i = 0, n = PhotonTOoB.numberOfSourceCandidatePtrs(); i < n; ++i) {
     footprint_rereco.push_back(PhotonTOoB.sourceCandidatePtr(i) );
-     //   std::cout<<" source tight  : "<< i<<std::endl;
   }
 
   for (unsigned int i = 0, n = pfs->size(); i < n; ++i) {
@@ -1913,7 +1931,6 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
       
   }// loop over pfCand
   
- // std::cout<<" Met CHS no footprint candidate : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy)  << std::endl;
   
   // Re-adding  photon but reco 
   if(footprint.size() > 0 ){
@@ -1925,32 +1942,22 @@ for(pat::PhotonCollection::const_iterator iphoton = photons->begin();iphoton != 
   }
 
   // slew rate mitigation fix
-  if (iEvent.isRealData() && isReminiAOD_){
- // FootprintMEx += (-1*Met.px() + EGcleanedMet.px());
- // FootprintMEy += (-1*Met.py() + EGcleanedMet.py());
- 
+  if(iEvent.isRealData() && isReminiAOD_){
+    FootprintMEx += (-1*Met.px() + EGcleanedMet.px());
+    FootprintMEy += (-1*Met.py() + EGcleanedMet.py());
   }
 
   
   double FootprintMEPt = sqrt(FootprintMEx * FootprintMEx + FootprintMEy * FootprintMEy) ;
   double FootprintMEpt74 = sqrt(FootprintMEx74 * FootprintMEx74 + FootprintMEy74 * FootprintMEy74) ;
-  
-  /*if(PhotonT.pt() > 300. && fabs(PhotonT.pt() - Photonuncorr.pt()) > 20. &&*//* PhotonT.userInt("hasGainSwitchFlag") == 1 && nPhotonsTight_ == 0){
-  std::cout<<" Met CHS  74X : MEx : "<<FootprintMEx<< " MEy : "<<FootprintMEy<< " MET : "<< FootprintMEPt << std::endl;
-  std::cout<<" Met CHS  80X : MEx : "<<FootprintMEx74<< " MEy : "<<FootprintMEy74<< " MET : "<< FootprintMEpt74 << std::endl;
-  
-  std::cout<<" Met 74x -80X : MEx : "<<FootprintMEx - FootprintMEx74<< " MEy : "<<FootprintMEy - FootprintMEy74<< " MET : "<< FootprintMEPt - FootprintMEpt74 << std::endl;
-  std::cout<<" Phot 74x-80X : MEx : "<<PhotonT.px() - PhotonTOoB.px()<< " MEy : "<<PhotonT.py() - PhotonTOoB.py()<< " MET : "<< PhotonT.pt() - PhotonTOoB.pt() << std::endl;
-  }*/
-  
-  
-rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
-rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0., FootprintMEpt74));
+ 
+  rawMet.setP4(reco::Candidate::LorentzVector(FootprintMEx, FootprintMEy, 0., FootprintMEPt));
+  rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0., FootprintMEpt74));
    
-  metEnergy_    = rawMet.energy();//EGcleanedMet.energy();//
-  metEta_       = rawMet.eta(); //EGcleanedMet.eta();// 
-  metPhi_       = rawMet.phi();//EGcleanedMet.phi();//
-  metPt_        = rawMet.pt();//EGcleanedMet.pt();//
+  metEnergy_    = rawMet.energy();
+  metEta_       = rawMet.eta(); 
+  metPhi_       = rawMet.phi();
+  metPt_        = rawMet.pt();
   
   deltaNHfootprintX_ = FootprintfromNHMEx;
   deltaNHfootprintY_ = FootprintfromNHMEy;
@@ -2046,6 +2053,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
   std::vector<unsigned> sortedAK4JetIdx;
 
   if(isSelected){
+  //std::cout<<"is selected"<<std::endl;
   uint32_t indexjet = 0;
   if(redoJECs_)
     {
@@ -2090,6 +2098,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     }
     
   pat::Jet firstJet ;
+  pat::Jet Tmp_Jet_formatching;
   nJetsAK4_ = 0;
   float htAK4(0.0);
   int jetotresp =  0 ;
@@ -2102,6 +2111,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     jetotresp ++;
     if (jetotresp == 1 ){
     firstJet = (*ijet);}
+    Tmp_Jet_formatching = (*ijet);
     
     edm::View<pat::Jet>::const_iterator ijetview = (jetsview->begin() + *i);
     double chf = ijet->chargedHadronEnergyFraction();
@@ -2242,12 +2252,121 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       phoMultAK4_       ->push_back(phoMult); 
       hadronflavour_    ->push_back(ijet->hadronFlavour());
       
+      
+      //matching to trigger object
+     if(candhlt_jetHT_40.size() != 0 || candhlt_jetHT_60.size() != 0 || candhlt_jetHT_80.size() != 0 || candhlt_jetHT_140.size() != 0 || candhlt_jetHT_200.size() != 0 || candhlt_jetHT_260.size() != 0|| candhlt_jetHT_320.size() != 0|| candhlt_jetHT_400.size() != 0|| candhlt_jetHT_450.size() != 0|| candhlt_jetHT_500.size() != 0){
+     
+    for(size_t itrig = 0 ; itrig < candhlt_jetHT_40.size(); ++itrig ){
+    
+  //  std::cout<<" enter the loop , test condition : dr : "<< std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_400.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_400.at(itrig).Phi()))<<" Erel : "<<candhlt_jetHT_400.at(itrig).Pt()/Tmp_Jet_formatching.pt()<< std::endl;
+    
+    
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_40.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_40.at(itrig).Phi())) < 0.3 && candhlt_jetHT_40.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_40.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet40_ -> push_back(true);
+      }else{
+        isMatch_jet40_ -> push_back(false);
+      } 
+      
+     }
+     
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_60.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_60.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_60.at(itrig).Phi())) < 0.3 && candhlt_jetHT_60.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_60.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet60_ -> push_back(true);
+      }else{
+        isMatch_jet60_ -> push_back(false);
+      } 
+      
+     }  
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_80.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_80.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_80.at(itrig).Phi())) < 0.3 && candhlt_jetHT_80.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_80.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet80_ -> push_back(true);
+      }else{
+        isMatch_jet80_ -> push_back(false);
+      } 
+      
+     }
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_140.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_140.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_140.at(itrig).Phi())) < 0.3 && candhlt_jetHT_140.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_140.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet140_ -> push_back(true);
+      }else{
+        isMatch_jet140_ -> push_back(false);
+      } 
+      
+     }
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_200.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_200.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_200.at(itrig).Phi())) < 0.3 && candhlt_jetHT_200.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_200.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet200_ -> push_back(true);
+      }else{
+        isMatch_jet200_ -> push_back(false);
+      } 
+      
+     }
+     
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_260.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_260.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_260.at(itrig).Phi())) < 0.3 && candhlt_jetHT_260.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_260.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet260_ -> push_back(true);
+      }else{
+        isMatch_jet260_ -> push_back(false);
+      } 
+      
+     }
+     
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_320.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_320.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_320.at(itrig).Phi())) < 0.3 && candhlt_jetHT_320.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_320.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet320_ -> push_back(true);
+      }else{
+        isMatch_jet320_ -> push_back(false);
+      } 
+      
+     }
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_400.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_400.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_400.at(itrig).Phi())) < 0.3 && candhlt_jetHT_400.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_400.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet400_ -> push_back(true);
+      }else{
+        isMatch_jet400_ -> push_back(false);
+      } 
+      
+     }
+     for(size_t itrig = 0 ; itrig < candhlt_jetHT_450.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_450.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_450.at(itrig).Phi())) < 0.3 && candhlt_jetHT_450.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_450.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet450_ -> push_back(true);
+      }else{
+        isMatch_jet450_ -> push_back(false);
+      } 
+      
+     }
+      for(size_t itrig = 0 ; itrig < candhlt_jetHT_500.size(); ++itrig ){
+    if(std::hypot((Tmp_Jet_formatching.eta()-candhlt_jetHT_500.at(itrig).Eta()),(Tmp_Jet_formatching.phi()-candhlt_jetHT_500.at(itrig).Phi())) < 0.3 && candhlt_jetHT_500.at(itrig).Pt()/Tmp_Jet_formatching.pt() > 0.5 && candhlt_jetHT_500.at(itrig).Pt()/Tmp_Jet_formatching.pt() < 1.5) { 
+      isMatch_jet500_ -> push_back(true);
+      }else{
+        isMatch_jet500_ -> push_back(false);
+      } 
+      
+     }
+
+    }else{
+    
+       isMatch_jet40_ -> push_back(false);
+       isMatch_jet60_ -> push_back(false);
+       isMatch_jet80_ -> push_back(false);
+       isMatch_jet140_ -> push_back(false);
+       isMatch_jet200_ -> push_back(false);
+       isMatch_jet260_ -> push_back(false);
+       isMatch_jet320_ -> push_back(false);
+       isMatch_jet400_ -> push_back(false);
+       isMatch_jet450_ -> push_back(false);
+       isMatch_jet500_ -> push_back(false);
+       
+    
+    
+    }
+      
     }
 
   }// jet loop  
   htAK4_     = htAK4;
   
-}
+} // std::cout<<"end event"<<std::endl;
     
   //---- Fill Tree --- 
   if(isSelected)outTree_->Fill();     
@@ -2901,6 +3020,18 @@ void DijetTreeProducer::initialize()
   phoFull5x5E1x3Tokenphoton_           ->clear();
   phoWorstChargedIsolationTokenphoton_ ->clear();
   isPhotonMedium_EG_MVA_               ->clear();
+  
+  
+  isMatch_jet40_    ->clear() ;
+  isMatch_jet60_    ->clear() ;       
+  isMatch_jet80_    ->clear() ;  
+  isMatch_jet140_   ->clear() ;  
+  isMatch_jet200_   ->clear() ; 
+  isMatch_jet260_   ->clear() ;
+  isMatch_jet320_   ->clear() ;
+  isMatch_jet400_   ->clear() ; 
+  isMatch_jet450_   ->clear() ;  
+  isMatch_jet500_   ->clear() ;
   
  // ptphotonnofix_ ->clear();
   

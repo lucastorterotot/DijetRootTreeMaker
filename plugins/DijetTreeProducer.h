@@ -259,6 +259,10 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<int> *idLAK8_,*idTAK8_, *chHadMultAK8_, *chMultAK8_, *neHadMultAK8_, *neMultAK8_, *phoMultAK8_;
     std::vector<float> *hf_hfAK8_, *hf_emfAK8_, *hofAK8_;
     std::vector<float> *ptGenAK8_,*etaGenAK8_,*phiGenAK8_,*massGenAK8_,*energyGenAK8_;
+    
+    
+    std::vector<bool>  *isMatch_jet40_,*isMatch_jet60_,*isMatch_jet80_,*isMatch_jet140_,*isMatch_jet200_,*isMatch_jet260_,*isMatch_jet320_,*isMatch_jet400_,*isMatch_jet450_,*isMatch_jet500_;
+ //   std::vector<bool>  *DR_jet40_,*DR_jet60_,*DR_jet80_,*DR_jet140_,*DR_jet200_,*DR_jet260_,*DR_jet320_,*DR_jet400_,*DR_jet450_,*DR_jet500_;
 
     //---- MC variables ---------------
     std::vector<float> *npu_; 
