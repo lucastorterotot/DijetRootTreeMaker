@@ -226,40 +226,42 @@ else:
            )
 #process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
 
-if not runOnData:
-     ##Photon Energy smearer------------------------------------------
-      process.load('Configuration.StandardSequences.Services_cff')
-      process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+# -- EGM post-reco sequence
+from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 
-                                                       calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
-                                                                                                                 engineName = cms.untracked.string('TRandom3'),
-                                                                                           ),
-                                                       
-                                                       calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
-                                                                                                                 engineName = cms.untracked.string('TRandom3'),
-                                                                                           ),
-                                                       )  
+setupEgammaPostRecoSeq(process,
+                       applyEnergyCorrections=True,
+                       applyVIDOnCorrectedEgamma=True,
+                       isMiniAOD=True,
+era='2016-Legacy')
+
+
+#if not runOnData:
+     ##Photon Energy smearer------------------------------------------
+#      process.load('Configuration.StandardSequences.Services_cff')
+#      process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+#
+#                                                       calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+#                                                                                                                 engineName = cms.untracked.string('TRandom3'),
+#                                                                                           ),
+#                                                       
+#                                                       calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+#                                                                                                                 engineName = cms.untracked.string('TRandom3'),
+#                                                                                           ),
+#                                                       )  
 
 
 # Add map producer for photon identification 
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+#process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+#from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
-dataFormat = DataFormat.MiniAOD
-switchOnVIDPhotonIdProducer(process, dataFormat)
-my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
-for idmod in my_id_modules:
-         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
+#dataFormat = DataFormat.MiniAOD
+#switchOnVIDPhotonIdProducer(process, dataFormat)
+#my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
+#for idmod in my_id_modules:
+#         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
 
 
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
-from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
-process = regressionWeights(process)
-
-from EgammaAnalysis.ElectronTools.calibrationTablesRun2 import files
-
-process.load('EgammaAnalysis.ElectronTools.regressionApplication_cff')
-process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
 
 if not runOnLegacy:
       process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
@@ -268,28 +270,28 @@ if not runOnLegacy:
       else:
             process.calibratedPatPhotons80X.isMC = cms.bool(True)       
 
-if runOnData: 
-      process.calibratedPatPhotons.isMC = cms.bool(False)
-else: 
-      process.calibratedPatPhotons.isMC = cms.bool(True)
+#if runOnData: 
+#      process.calibratedPatPhotons.isMC = cms.bool(False)
+#else: 
+#      process.calibratedPatPhotons.isMC = cms.bool(True)
     #  process.calibratedPatPhotons.correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele")
 
 
-if runOnLegacy:
-        process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-              src = cms.InputTag('slimmedPhotons'),
-              cut = cms.string('pt>5 && abs(eta)'))
-else:
-        process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-              src = cms.InputTag('calibratedPatPhotons80X'),
-              cut = cms.string('pt>5 && abs(eta)'))
+#if runOnLegacy:
+#        process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+#              src = cms.InputTag('calibratedPatPhotons'),
+#              cut = cms.string('pt>5 && abs(eta)'))
+#else:
+#        process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+#              src = cms.InputTag('calibratedPatPhotons80X'),
+#              cut = cms.string('pt>5 && abs(eta)'))
               
-srcViD = "selectedPhotons"
-process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(srcViD)
-process.egmPhotonIsolation.srcToIsolate = cms.InputTag(srcViD)
-process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
-process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
-process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+#srcViD = "selectedPhotons"
+#process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(srcViD)
+#process.egmPhotonIsolation.srcToIsolate = cms.InputTag(srcViD)
+#process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+#process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
+#process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
 
 
 
@@ -441,14 +443,14 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('selectedPhotons'),
+  Photon                    = cms.InputTag('calibratedPatPhotons'),
   Photonsmeared             = cms.InputTag('calibratedPatPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons80X'),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
   phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
   phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
   phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
-  PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons') if runOnLegacy else cms.InputTag('selectedPhotons'),
+  PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
   
@@ -538,18 +540,14 @@ process.p +=                      process.chs
 if not runOnData:
        process.p +=                     process.prunedGenParticlesDijet
        process.p +=                     process.slimmedGenJetsAK8
-if not runOnData and not runOnLegacy:
-       process.p +=                     process.mucorMET
-       process.p +=                     process.fullPatMetSequence
 
-process.p +=                      process.regressionApplication
-if runOnLegacy: 
-   process.p +=                      process.calibratedPatPhotons
-else:
-   process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X*process.calibratedPatPhotonsbeforeGS
-process.p +=                      process.selectedPhotons
-process.p +=                      process.egmPhotonIDSequence
-if not runOnLegacy and runOnData:
-       process.p +=                      process.fullPatMetSequence  # If you are re-correctign the default MET
-       process.p +=                      process.egcorrMET
-process.p +=                      process.dijets
+
+#if runOnLegacy: 
+#   process.p +=                      process.calibratedPatPhotons
+#else:
+#   process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X*process.calibratedPatPhotonsbeforeGS
+#process.p +=                      process.selectedPhotons
+#process.p +=                      process.egammaPostRecoSeq
+#process.p +=                      process.egmPhotonIDSequence
+
+process.p +=                      process.egammaPostRecoSeq*process.dijets

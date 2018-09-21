@@ -7,7 +7,7 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_29/src/CMSDIJET/DijetRootTreeMaker/prod/Config_RunonMiniaod.py'
+config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/production_GJet/NewEGcorr/CMSSW_8_0_31/src/CMSDIJET/DijetRootTreeMaker/prod/Config_RunonMiniaod.py'
 config.JobType.pyCfgParams = ['isRunonData=True']
 
 config.Data.inputDataset = '/SinglePhoton/Run2016B-03Feb2017_ver2-v2/MINIAOD'
