@@ -7,7 +7,8 @@ config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_8_0_29/src/CMSDIJET/DijetRootTreeMaker/prod/localtest_flat-MC-cfg_miniAOD.py'
+config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/production_GJet/CMSSW_9_4_0/src/CMSDIJET/DijetRootTreeMaker/prod/localtest_flat-dataA2017-cfg_miniAOD.py'
+config.JobType.sendExternalFolder = True
 
 config.Data.inputDataset = '/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM'
 config.Data.splitting = 'EventAwareLumiBased'
