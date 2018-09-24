@@ -172,7 +172,7 @@ process.out = cms.OutputModule('PoolOutputModule',
                                )
 
 
-# Added 'vertexRef().isNonnull() &&' check for 80X data compatibility. Juska
+
 process.chs = cms.EDFilter('CandPtrSelector', src = cms.InputTag('packedPFCandidates'), cut = cms.string(' fromPV'))
 
 from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
@@ -207,8 +207,6 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 
 
-# Note: for grid running it does not matter what's here, as input data is
-# handled separately there.
 
 
 if runOnData:
@@ -224,7 +222,7 @@ else:
        process.source = cms.Source("PoolSource",
            fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")
            )
-#process.source.eventsToProcess = cms.untracked.VEventRange("281613:11018807")#,"283884:939706570","283884:870499187","283885:16020018","274316:389398083")
+
 
 # -- EGM post-reco sequence
 from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
@@ -236,69 +234,12 @@ setupEgammaPostRecoSeq(process,
 era='2016-Legacy')
 
 
-#if not runOnData:
-     ##Photon Energy smearer------------------------------------------
-#      process.load('Configuration.StandardSequences.Services_cff')
-#      process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-#
-#                                                       calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
-#                                                                                                                 engineName = cms.untracked.string('TRandom3'),
-#                                                                                           ),
-#                                                       
-#                                                       calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
-#                                                                                                                 engineName = cms.untracked.string('TRandom3'),
-#                                                                                           ),
-#                                                       )  
-
-
-# Add map producer for photon identification 
-#process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
-#from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-
-#dataFormat = DataFormat.MiniAOD
-#switchOnVIDPhotonIdProducer(process, dataFormat)
-#my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff']
-#for idmod in my_id_modules:
-#         setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection) 
-
-
-
 if not runOnLegacy:
       process.load('EgammaAnalysis.ElectronTools.calibratedPatbeforeGXPhotonsRun2_cfi')
       if runOnData: 
             process.calibratedPatPhotons80X.isMC = cms.bool(False)
       else:
             process.calibratedPatPhotons80X.isMC = cms.bool(True)       
-
-#if runOnData: 
-#      process.calibratedPatPhotons.isMC = cms.bool(False)
-#else: 
-#      process.calibratedPatPhotons.isMC = cms.bool(True)
-    #  process.calibratedPatPhotons.correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele")
-
-
-#if runOnLegacy:
-#        process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-#              src = cms.InputTag('calibratedPatPhotons'),
-#              cut = cms.string('pt>5 && abs(eta)'))
-#else:
-#        process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
-#              src = cms.InputTag('calibratedPatPhotons80X'),
-#              cut = cms.string('pt>5 && abs(eta)'))
-              
-#srcViD = "selectedPhotons"
-#process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(srcViD)
-#process.egmPhotonIsolation.srcToIsolate = cms.InputTag(srcViD)
-#process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
-#process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
-#process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(srcViD)
-
-
-
-
-
-
-
 
 
 #---------------Met ReminiAOD recipe ---------------------
@@ -387,7 +328,6 @@ if not runOnLegacy and not runOnData:
          process.mucorMET = cms.Sequence(                     
                  process.badGlobalMuonTaggerMAOD *
                  process.cloneGlobalMuonTaggerMAOD *
-               #process.badMuons * # If you are using cleaning mode "all", uncomment this line
                  process.cleanMuonsPFCandidates *
                  process.fullPatMetSequenceMuClean
                  )
@@ -402,14 +342,6 @@ if not runOnLegacy and not runOnData:
 process.load('RecoJets.JetProducers.QGTagger_cfi')
 process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
 process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
-
-
-
-# Recluster the ak4 jets or not
-
-#if runOnReclusteredJets:
-   
-
 
 
 
@@ -540,14 +472,4 @@ process.p +=                      process.chs
 if not runOnData:
        process.p +=                     process.prunedGenParticlesDijet
        process.p +=                     process.slimmedGenJetsAK8
-
-
-#if runOnLegacy: 
-#   process.p +=                      process.calibratedPatPhotons
-#else:
-#   process.p +=                      process.calibratedPatPhotons*process.calibratedPatPhotons80X*process.calibratedPatPhotonsbeforeGS
-#process.p +=                      process.selectedPhotons
-#process.p +=                      process.egammaPostRecoSeq
-#process.p +=                      process.egmPhotonIDSequence
-
 process.p +=                      process.egammaPostRecoSeq*process.dijets
