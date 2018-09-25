@@ -9,7 +9,9 @@ https://github.com/lattaud/DijetRootTreeMaker/blob/master/instructions/GammaJetT
 This framework has 3 modules that have to be run in this order :
 
 1- DijetRootTreeMaker which produce the Ntuples                                                            : https://github.com/lattaud/DijetRootTreeMaker.git 
+
 2- DijetRootTreeAnalyzer which reduce the Ntuple by applying the selection and allow to run JEC on the fly : https://github.com/lattaud/DijetRootTreeAnalyzer.git
+
 3- NewGammaJet which is the plotting step                                                                  : https://github.com/lattaud/NewGammaJet.git
 
 Instruction can be found in each step repository.
