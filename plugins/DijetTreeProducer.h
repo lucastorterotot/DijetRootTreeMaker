@@ -216,7 +216,8 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<double> *Ecorrbump_;
     
     std::vector<bool>  *isMatch30_,*isMatch50_,*isMatch75_,*isMatch90_,*isMatch120_,*isMatch165_, *isGenMatch_;
-    
+    std::vector<float> *photon_scaleUNC_gainup_,*photon_scaleUNC_gaindown_,*photon_scaleUNC_systup_,*photon_scaleUNC_systdown_,*photon_scaleUNC_statup_,*photon_scaleUNC_statdown_,*photon_scaleUNC_ETup_,*photon_scaleUNC_ETdown_,*photon_smearUNC_phiup_,*photon_smearUNC_rhodown_,*photon_smearUNC_rhoup_,*photon_smear_central_,*photon_scale_central_;
+     
    //std::vector<float> *ptphotonnofix_;
     //  std::vector<float> *PFpx, *PFpy, *PFpz, 
     

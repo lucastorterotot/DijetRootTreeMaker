@@ -488,6 +488,39 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("isPhotonTight"                                 ,"vector<bool>"   ,&isPhotonTight_);
   
   
+  
+  
+  //--------------Photon scale ---------------
+  
+ photon_scaleUNC_gainup_= new std::vector<float>;
+ photon_scaleUNC_gaindown_= new std::vector<float>; 
+ photon_scaleUNC_systup_= new std::vector<float>; 
+ photon_scaleUNC_systdown_= new std::vector<float>; 
+ photon_scaleUNC_statup_= new std::vector<float>; 
+ photon_scaleUNC_statdown_= new std::vector<float>; 
+ photon_scaleUNC_ETup_= new std::vector<float>; 
+ photon_scaleUNC_ETdown_= new std::vector<float>; 
+ photon_smearUNC_phiup_= new std::vector<float>; 
+ photon_smearUNC_rhodown_= new std::vector<float>; 
+ photon_smearUNC_rhoup_= new std::vector<float>; 
+ photon_smear_central_= new std::vector<float>; 
+ photon_scale_central_= new std::vector<float>; 
+     
+  outTree_->Branch("Photon_scaleUNC_gainup"         ,"vector<float>"   ,&photon_scaleUNC_gainup_);
+  outTree_->Branch("Photon_scaleUNC_gaindown"         ,"vector<float>"   ,&photon_scaleUNC_gaindown_);
+  outTree_->Branch("Photon_scaleUNC_systup"         ,"vector<float>"   ,&photon_scaleUNC_systup_);
+  outTree_->Branch("Photon_scaleUNC_systdown"         ,"vector<float>"   ,&photon_scaleUNC_systdown_);
+  outTree_->Branch("Photon_scaleUNC_statup"         ,"vector<float>"   ,&photon_scaleUNC_statup_);
+  outTree_->Branch("Photon_scaleUNC_statdown"         ,"vector<float>"   ,&photon_scaleUNC_statdown_);
+  outTree_->Branch("Photon_scaleUNC_ETup"         ,"vector<float>"   ,&photon_scaleUNC_ETup_);
+  outTree_->Branch("Photon_scaleUNC_ETdown"         ,"vector<float>"   ,&photon_scaleUNC_ETdown_);
+  outTree_->Branch("Photon_smearUNC_phiup"         ,"vector<float>"   ,&photon_smearUNC_phiup_);
+  outTree_->Branch("Photon_smearUNC_rhodown"         ,"vector<float>"   ,&photon_smearUNC_rhodown_);
+  outTree_->Branch("Photon_smearUNC_rhoup"         ,"vector<float>"   ,&photon_smearUNC_rhoup_);
+  
+  outTree_->Branch("photon_scale_central"         ,"vector<float>"   ,&photon_scale_central_);
+  outTree_->Branch("photon_smear_central"         ,"vector<float>"   ,&photon_smear_central_);
+  
   //---------------Electrons----------------------------------
   
   
@@ -1017,6 +1050,20 @@ void DijetTreeProducer::endJob()
  delete isMatch165_    ;
  delete isGenMatch_    ;
  
+ delete photon_scaleUNC_gainup_;
+ delete photon_scaleUNC_gaindown_; 
+ delete photon_scaleUNC_systup_; 
+ delete photon_scaleUNC_systdown_; 
+ delete photon_scaleUNC_statup_; 
+ delete photon_scaleUNC_statdown_; 
+ delete photon_scaleUNC_ETup_; 
+ delete photon_scaleUNC_ETdown_; 
+ delete photon_smearUNC_phiup_; 
+ delete photon_smearUNC_rhodown_; 
+ delete photon_smearUNC_rhoup_ ; 
+ delete photon_smear_central_ ; 
+ delete photon_scale_central_;
+ 
  
 // delete ptphotonnofix_;
   
@@ -1425,11 +1472,11 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
                   ptphoton_             ->push_back( iphoton->pt()         );
 		  ptphotonSC_           ->push_back( iphoton->superCluster()->rawEnergy()/ cosh(iphoton->superCluster()->eta()));
                   phiphoton_            ->push_back( iphoton->phi()        );
-		  phiphotonSC_          ->push_back( iphoton->superCluster()->eta());
+		  phiphotonSC_          ->push_back( iphoton->superCluster()->phi());
 
 
                   etaphoton_            ->push_back( iphoton->eta()        );
-		  etaphotonSC_          ->push_back( iphoton->superCluster()->phi());
+		  etaphotonSC_          ->push_back( iphoton->superCluster()->eta());
 
                   energyphoton_         ->push_back( iphoton->energy() );
 		  energyphotonSC_       ->push_back( iphoton->superCluster()->rawEnergy() );
@@ -1448,8 +1495,28 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
 		  phismearedphoton_     ->push_back( iphotonsmear->phi()   );		  
 		  ptsmearedphoton_      ->push_back( iphotonsmear->pt()    );		  
 		  etasmearedphoton_     ->push_back( iphotonsmear->eta()   );		  
-		  energysmearedphoton_  ->push_back( iphotonsmear->energy());		  
+		  energysmearedphoton_  ->push_back( iphotonsmear->energy());
+		  
+		  photon_scaleUNC_gainup_->push_back(iphoton-> userFloat("energyScaleGainUp") );
+                  photon_scaleUNC_gaindown_->push_back(iphoton-> userFloat("energyScaleGainDown") );
+                  photon_scaleUNC_systup_->push_back(iphoton-> userFloat("energyScaleSystUp") );
+                  photon_scaleUNC_systdown_->push_back(iphoton-> userFloat("energyScaleSystDown") ); 
+                  photon_scaleUNC_statup_->push_back(iphoton-> userFloat("energyScaleStatUp") ); 
+                  photon_scaleUNC_statdown_->push_back(iphoton-> userFloat("energyScaleStatDown") ); 
+                  photon_scaleUNC_ETup_->push_back(iphoton-> userFloat("energyScaleEtUp") ); 
+                  photon_scaleUNC_ETdown_->push_back(iphoton-> userFloat("energyScaleEtDown") ); 
+                  photon_scale_central_->push_back(iphoton-> userFloat("energyScaleValue") );
+		  
+		  
+		  		  
 		  if (!iEvent.isRealData() ) {
+		  
+		  
+		        /*photon_smearUNC_phiup_->push_back(iphoton-> userFloat("energySigmaPhiUp") ); 
+                        photon_smearUNC_rhodown_->push_back(iphoton-> userFloat("energySigmaRhoDown") );
+                        photon_smearUNC_rhoup_ ->push_back(iphoton-> userFloat("energySigmaRhoUp") ); 
+                        photon_smear_central_ ->push_back(iphoton->userFloat("energySigmaValue") );
+                        */
 		  	if(iphoton->genPhoton()){
 		  		ptGenphoton_     ->push_back( iphoton->genPhoton()->pt() );
                   		phiGenphoton_    ->push_back( iphoton->genPhoton()->phi() );
@@ -2865,6 +2932,21 @@ void DijetTreeProducer::initialize()
   isGenMatch_   ->clear() ;
       
   Ecorrbump_   ->clear();
+  
+  
+  photon_scaleUNC_gainup_->clear();
+  photon_scaleUNC_gaindown_->clear();
+  photon_scaleUNC_systup_->clear();
+  photon_scaleUNC_systdown_->clear(); 
+  photon_scaleUNC_statup_->clear(); 
+  photon_scaleUNC_statdown_->clear(); 
+  photon_scaleUNC_ETup_->clear(); 
+  photon_scaleUNC_ETdown_->clear(); 
+  photon_smearUNC_phiup_->clear(); 
+  photon_smearUNC_rhodown_->clear();
+  photon_smearUNC_rhoup_ ->clear(); 
+  photon_smear_central_ ->clear();
+  photon_scale_central_->clear();
   
 }
 //////////////////////////////////////////////////////////////////////////////////////////
