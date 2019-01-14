@@ -1,13 +1,13 @@
-from CRABClient.UserUtilities import config
+from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 
 config = config()
 
-config.General.requestName = 'GJet-Feb03-Run2016B'
+config.General.requestName = 'TMP-TEST'
 config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '/afs/cern.ch/work/h/hlattaud/private/production_GJet/NewEGcorr/test_release/CMSSW_9_4_10/src/CMSDIJET/DijetRootTreeMaker/prod/Config_RunonMiniaod.py'
+config.JobType.psetName = '/afs/cern.ch/work/l/ltortero/JEC-task/CMSSW_10_2_5/src/CMSDIJET/DijetRootTreeMaker/prod/Config_RunonMiniaod.py'
 config.JobType.pyCfgParams = ['isRunonData=True']
 
 config.Data.inputDataset = '/SinglePhoton/Run2016B-03Feb2017_ver2-v2/MINIAOD'
@@ -15,7 +15,7 @@ config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Coll
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 250
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/phys_jetmet/hlattaud/GammaJet/'
+config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 
-config.Site.storageSite = 'T2_CH_CERN'
+config.Site.storageSite = 'T3_FR_IPNL'
 
