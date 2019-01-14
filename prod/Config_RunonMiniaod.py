@@ -75,11 +75,11 @@ else:
 if len(options.globalTag) == 0:
     if runOnData:
         if runOnLegacy:
-            options.globalTag = '80X_dataRun2_2016LegacyRepro_v4'
+            options.globalTag = '94X_dataRun2_v10'
         else:
             options.globalTag = '80X_dataRun2_2016SeptRepro_v7'
     else:
-        options.globalTag = '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
+        options.globalTag = '94X_mcRun2_asymptotic_v3'
     
     print 'WARNING: No global tag provided. Will use the default one: {}.'.format(
         options.globalTag
@@ -126,12 +126,12 @@ QGPoolDBESSource = cms.ESSource("PoolDBESSource",
       connect = cms.string('frontier://FrontierProd/CMS_COND_PAT_000'),
 )
 
-for type in ['AK4PFchs','AK4PFchs_antib']:
-  QGPoolDBESSource.toGet.extend(cms.VPSet(cms.PSet(
-    record = cms.string('QGLikelihoodRcd'),
-    tag    = cms.string('QGLikelihoodObject_'+qgDatabaseVersion+'_'+type),
-    label  = cms.untracked.string('QGL_'+type)
-  )))
+#for type in ['AK4PFchs','AK4PFchs_antib']:
+#  QGPoolDBESSource.toGet.extend(cms.VPSet(cms.PSet(
+#    record = cms.string('QGLikelihoodRcd'),
+#    tag    = cms.string('QGLikelihoodObject_'+qgDatabaseVersion+'_'+type),
+#    label  = cms.untracked.string('QGL_'+type)
+#  )))
 
 ## This local test conf is updated to match the grid production version
 ## 13 June 2016 by Juska.
@@ -140,8 +140,8 @@ for type in ['AK4PFchs','AK4PFchs_antib']:
 
 ## ----------------- Global Tag ------------------
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, options.globalTag)
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag, options.globalTag,'')
 #--------------------- Report and output ---------------------------
 # Note: in grid runs this parameter is not used.
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEvents))
@@ -223,14 +223,19 @@ else:
            fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")
            )
 
-
+process.load("Configuration.Geometry.GeometryRecoDB_cff")
+process.load("Configuration.StandardSequences.Services_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("Geometry.CaloEventSetup.CaloTowerConstituents_cfi")
 # -- EGM post-reco sequence
 from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 
 setupEgammaPostRecoSeq(process,
+                       runVID=True,
                        applyEnergyCorrections=True,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
+                       phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff'],
 era='2016-Legacy')
 
 
@@ -339,9 +344,9 @@ if not runOnLegacy and not runOnData:
 
 
 
-process.load('RecoJets.JetProducers.QGTagger_cfi')
-process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
-process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
+#process.load('RecoJets.JetProducers.QGTagger_cfi')
+#process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
+#process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
 
 
@@ -375,14 +380,14 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   
   ## PHOTONS ########################################
   ptMinPhoton               = cms.double(10),
-  Photon                    = cms.InputTag('calibratedPatPhotons'),
-  Photonsmeared             = cms.InputTag('calibratedPatPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons80X'),
+  Photon                    = cms.InputTag('slimmedPhotons'),
+  Photonsmeared             = cms.InputTag('slimmedPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons80X'),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
-  full5x5SigmaIEtaIEtaMap   = cms.InputTag('photonIDValueMapProducer:phoFull5x5SigmaIEtaIEta'),
-  phoChargedIsolation       = cms.InputTag('photonIDValueMapProducer:phoChargedIsolation'),
-  phoNeutralHadronIsolation = cms.InputTag('photonIDValueMapProducer:phoNeutralHadronIsolation'),
-  phoPhotonIsolation        = cms.InputTag('photonIDValueMapProducer:phoPhotonIsolation'),
-  PhotonUncorr              = cms.InputTag('calibratedPatbeforegxPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons'),
+  full5x5SigmaIEtaIEtaMap   = cms.InputTag('egmPhotonIDs:phoFull5x5SigmaIEtaIEta'),
+  #phoChargedIsolation       = cms.InputTag('egmPhotonIDs:phoChargedIsolation'),
+  #phoNeutralHadronIsolation = cms.InputTag('egmPhotonIDs:phoNeutralHadronIsolation'),
+  #phoPhotonIsolation        = cms.InputTag('egmPhotonIDs:phoPhotonIsolation'),
+  PhotonUncorr              = cms.InputTag('slimmedPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
   
@@ -472,4 +477,5 @@ process.p +=                      process.chs
 if not runOnData:
        process.p +=                     process.prunedGenParticlesDijet
        process.p +=                     process.slimmedGenJetsAK8
-process.p +=                      process.egammaPostRecoSeq*process.dijets
+process.p +=                      process.egammaPostRecoSeq
+process.p +=                      process.dijets
