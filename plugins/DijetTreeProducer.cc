@@ -2413,7 +2413,8 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 
 //--------------------------Photon ID and selection--------------------------
 
-
+// Barrel photon here, end cap further down
+// see https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2
 bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, const edm::Event& event, double generatorWeight)
 {
     bool isValid = true;
@@ -2422,11 +2423,11 @@ bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, cons
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.0597;
+    isValid &= photonRef->hadronicOverEm() < 0.04596;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.01031; //Official    
+    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.0106; //Official    
     if (! isValid)
     return false;
     
@@ -2440,9 +2441,9 @@ bool DijetTreeProducer::isValidPhotonLoose(const pat::PhotonRef& photonRef, cons
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     */
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoChargedIsolation"), rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)< 1.295;
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoNeutralHadronIsolation"), rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (10.910 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoPhotonIsolation"), rho, photonRef->eta(), IsolationType::PHOTONS) < (3.630 + 0.0047*photonRef->pt());
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoChargedIsolation"), rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)< 1.694;
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoNeutralHadronIsolation"), rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (24.032 + 0.01512*photonRef->pt()+0.00002259*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoPhotonIsolation"), rho, photonRef->eta(), IsolationType::PHOTONS) < (2.876 + 0.004017*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2462,11 +2463,11 @@ bool DijetTreeProducer::isValidPhotonMedium(const pat::PhotonRef& photonRef, con
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.0396;
+    isValid &= photonRef->hadronicOverEm() < 0.02197;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= photonRef->full5x5_sigmaIetaIeta()< 0.01022; //Official    
+    isValid &= photonRef->full5x5_sigmaIetaIeta()< 0.01015; //Official    
     if (! isValid)
     return false;
     
@@ -2480,9 +2481,9 @@ bool DijetTreeProducer::isValidPhotonMedium(const pat::PhotonRef& photonRef, con
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);*/
     
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoChargedIsolation"), rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.441;
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoNeutralHadronIsolation"), rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (2.725 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoPhotonIsolation"), rho, photonRef->eta(), IsolationType::PHOTONS) < (2.71 + 0.0047*photonRef->pt());
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoChargedIsolation"), rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 1.141;
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoNeutralHadronIsolation"), rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (1.189 + 0.01512*photonRef->pt()+0.00002259*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoPhotonIsolation"), rho, photonRef->eta(), IsolationType::PHOTONS) < (2.08 + 0.004017*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2501,11 +2502,11 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     //if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.0269;
+    isValid &= photonRef->hadronicOverEm() < 0.02148;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.00994; //Official    
+    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.00996; //Official    
     if (! isValid)
     return false;
     
@@ -2519,9 +2520,9 @@ bool DijetTreeProducer::isValidPhotonTight(const pat::PhotonRef& photonRef, cons
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);*/
     
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoChargedIsolation"), rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.202;
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoNeutralHadronIsolation"), rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (0.264 + 0.0148*photonRef->pt()+0.000017*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoPhotonIsolation"), rho, photonRef->eta(), IsolationType::PHOTONS) < (2.362+0.0047*photonRef->pt());
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoChargedIsolation"), rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.65;
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoNeutralHadronIsolation"), rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (0.317 + 0.01512*photonRef->pt()+0.00002259*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation(photonRef->userFloat("phoPhotonIsolation"), rho, photonRef->eta(), IsolationType::PHOTONS) < (2.044+0.004017*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2542,11 +2543,11 @@ bool DijetTreeProducer::isValidEndcapPhotonLoose(const pat::PhotonRef& photonRef
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.0481;
+    isValid &= photonRef->hadronicOverEm() < 0.0590;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= photonRef->full5x5_sigmaIetaIeta()< 0.03013; //Official    
+    isValid &= photonRef->full5x5_sigmaIetaIeta()< 0.0272; //Official    
     if (! isValid)
     return false;
     
@@ -2560,9 +2561,9 @@ bool DijetTreeProducer::isValidEndcapPhotonLoose(const pat::PhotonRef& photonRef
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)< 1.011;
-    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (5.931 + 0.0163*photonRef->pt()+0.000014*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (6.641 + 0.0034*photonRef->pt());
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS)< 2.089;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (19.722 + 0.0117*photonRef->pt()+0.000023*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (4.162 + 0.0037*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2582,11 +2583,11 @@ bool DijetTreeProducer::isValidEndcapPhotonMedium(const pat::PhotonRef& photonRe
    // if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.0219;
+    isValid &= photonRef->hadronicOverEm() < 0.0326;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.03001; //Official    
+    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.0272; //Official    
     if (! isValid)
     return false;
     
@@ -2600,9 +2601,9 @@ bool DijetTreeProducer::isValidEndcapPhotonMedium(const pat::PhotonRef& photonRe
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.442;
-    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (1.715 + 0.0163*photonRef->pt()+0.000014*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (3.863 + 0.0034*photonRef->pt());
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 1.051;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (2.718 + 0.0117*photonRef->pt()+0.000023*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (3.867 + 0.0037*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
@@ -2621,11 +2622,11 @@ bool DijetTreeProducer::isValidEndcapPhotonTight(const pat::PhotonRef& photonRef
     //if (!isData_ && !photonRef->genPhoton())   
    // return false;
    // #1: H/E
-    isValid &= photonRef->hadronicOverEm() < 0.0213;
+    isValid &= photonRef->hadronicOverEm() < 0.0321;
     if (! isValid)
     return false;
     //#2: sigma ietaieta
-    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.03000; //Official    
+    isValid &= photonRef->full5x5_sigmaIetaIeta() < 0.0271; //Official    
     if (! isValid)
     return false;
     
@@ -2639,9 +2640,9 @@ bool DijetTreeProducer::isValidEndcapPhotonTight(const pat::PhotonRef& photonRef
     edm::Handle<edm::ValueMap<float> > phoPhotonIsolationMap;
     event.getByToken(phoPhotonIsolationToken_, phoPhotonIsolationMap);
     
-    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.034;
-    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (0.585 + 0.0163*photonRef->pt()+0.000014*(photonRef->pt()*photonRef->pt() ) );
-    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (2.617+0.0034*photonRef->pt());
+    isValid &= getCorrectedPFIsolation((*phoChargedIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::CHARGED_HADRONS) < 0.517;
+    isValid &= getCorrectedPFIsolation((*phoNeutralHadronIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::NEUTRAL_HADRONS) < (2.716 + 0.0117*photonRef->pt()+0.000023*(photonRef->pt()*photonRef->pt() ) );
+    isValid &= getCorrectedPFIsolation((*phoPhotonIsolationMap)[photonRef], rho, photonRef->eta(), IsolationType::PHOTONS) < (3.032+0.0037*photonRef->pt());
     isValid &= photonRef->passElectronVeto();
     if (! isValid)
     return false;
