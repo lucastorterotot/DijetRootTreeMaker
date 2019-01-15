@@ -263,54 +263,54 @@ float getEffectiveArea(float eta, IsolationType type) {
   switch (type) {
   case IsolationType::CHARGED_HADRONS:
     if (eta < 1.0)
-      return 0.0360;
+      return 0.0112;
     else if (eta < 1.479)
-      return 0.0377;
+      return 0.0108;
     else if (eta < 2.0)
-      return 0.0306;
+      return 0.0106;
     else if (eta < 2.2)
-      return 0.0283;
+      return 0.01002;
     else if (eta < 2.3)
-      return 0.0254;
+      return 0.0098;
     else if (eta < 2.4)
-      return 0.0217;
+      return 0.0089;
     else
-      return 0.0167;
+      return 0.0087;
     break;
     
   case IsolationType::NEUTRAL_HADRONS:
     if (eta < 1.0)
-      return 0.0597;
+      return 0.0668;
     else if (eta < 1.479)
-      return 0.0807;
+      return 0.1054;
     else if (eta < 2.0)
-      return 0.0629;
+      return 0.0786;
     else if (eta < 2.2)
-      return 0.0197;
+      return 0.0233;
     else if (eta < 2.3)
-      return 0.0184;
+      return 0.0078;
     else if (eta < 2.4)
-      return 0.0284;
+      return 0.0028;
     else
-      return 0.0591;
+      return 0.0137;
     break;
 
     //Official  
   case IsolationType::PHOTONS:
     if (eta < 1.0)
-      return 0.1210;
+      return 0.1113;
     else if (eta < 1.479)
-      return 0.1107;
+      return 0.0953;
     else if (eta < 2.0)
-      return 0.0699;
+      return 0.0619;
     else if (eta < 2.2)
-      return 0.1056;
+      return 0.0837;
     else if (eta < 2.3)
-      return 0.1457;
+      return 0.1070;
     else if (eta < 2.4)
-      return 0.1719;
+      return 0.1212;
     else
-      return 0.1998;
+      return 0.1466;
     break;
   }
   
