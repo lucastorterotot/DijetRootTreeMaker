@@ -1,20 +1,21 @@
 # Instructions for producing Gamma + jet step 1 root file 
 
 **Target** CMS Gamma + Jet  - JEC calculation
+
 **Authors** Hugues Lattaud and Lucas Torterotot
+
 **Last update** 22 Jan 2019
 
 ## Installation recipe
 More informations on [this twiki](https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2)
 ### CMSSW release
-You may want to isntall this in your work space, for example
+You may want to install this in your work space, for example
 ```
 cd /afs/cern.ch/work/${USER:0:1}/$USER/
 mkdir -p JEC && cd JEC
 ```
 #### For 2016
-* If you run on 2016 legacy datasets : 
-⋅⋅All the step needed to set up an environment with calibrated photon are sumarize in [this twiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/Egamma2016DataRecommendations#Running_the_legacy_scale_and_sme).
+* If you run on 2016 legacy datasets, all the step needed to set up an environment with calibrated photon are sumarize in [this twiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/Egamma2016DataRecommendations#Running_the_legacy_scale_and_sme).
 Following this twikis you should have a CMSSW environment ready for Egamma tuple production.
 #### For 2017
 
@@ -31,8 +32,7 @@ git cms-merge-topic cms-egamma:EgammaPostRecoTools #just adds in an extra file t
 scram b -j 8
 ```
 
-Check if one has a good compiler version in use:
-```echo $SCRAM_ARCH```
+Check if one has a good compiler version in use `echo $SCRAM_ARCH`.
 `slc6_amd64_gcc491` seems to be incompatible with CMSSW 8.0.26.patch1, onemay update update with
 ```
 export SCRAM_ARCH=slc6_amd64_gcc530
