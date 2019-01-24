@@ -1387,7 +1387,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
     elecID     &= ielectron->et() > 30.;
     elecID     &= fabs(ielectron->eta()) < 2.5 && (ielectron->superCluster()->eta() > 1.4442 && ielectron->superCluster()->eta() < 1.5660);
     elecID     &= ielectron->dB() < 0.02;
-    elecID     &= ((int) ielectron->electronID("cutBasedElectronID-Summer16-80X-V1-loose") & 0x1);
+    elecID     &= ((int) ielectron->electronID("cutBasedElectronID-Fall17-94X-V2-loose") & 0x1);
     
     elecID_           ->push_back(elecID);
     elecIDsmeared_    ->push_back(elecID);

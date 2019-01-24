@@ -75,7 +75,7 @@ else:
 if len(options.globalTag) == 0:
     if runOnData:
         if runOnLegacy:
-            options.globalTag = '94X_dataRun2_v10'
+            options.globalTag = '94X_dataRun2_ReReco_EOY17_v2'
         else:
             options.globalTag = '80X_dataRun2_2016SeptRepro_v7'
     else:
@@ -150,7 +150,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEv
 
 
 process.TFileService=cms.Service("TFileService",
-                                 fileName=cms.string('mylocaltest_Run2016B_10.root'),
+                                 fileName=cms.string('mylocaltest_Run2017B_10.root'),
                                  #fileName=cms.string(THISROOTFILE),
                                  closeFileFast = cms.untracked.bool(True)
                                  )
@@ -212,15 +212,15 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 if runOnData:
         if runOnLegacy: 
            process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
+           fileNames = cms.untracked.vstring("/store/data/Run2017F/SinglePhoton/MINIAOD/17Nov2017-v1/50000/004425E2-EBDE-E711-8F80-008CFAF5543A.root")
            )
         else:
              process.source = cms.Source("PoolSource",
-             fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root")
+             fileNames = cms.untracked.vstring("/store/data/Run2017F/SinglePhoton/MINIAOD/17Nov2017-v1/50000/004425E2-EBDE-E711-8F80-008CFAF5543A.root")
              )
 else:
        process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/mc/RunIISummer16MiniAODv2/GJet_Pt-15To6000_TuneCUETP8M1-Flat_13TeV_pythia8_20M/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/08AC6DB1-19B7-E611-A8F8-001E67E71E20.root")
+           fileNames = cms.untracked.vstring("/store/mc/RunIIFall17MiniAOD/GJet_Pt-15To6000_TuneCP5-Flat_13TeV_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/40000/2C41D5C8-5DDA-E711-876C-1866DA87C2CD.root")
            )
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
@@ -235,8 +235,8 @@ setupEgammaPostRecoSeq(process,
                        applyEnergyCorrections=True,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
-                       phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff'],
-era='2016-Legacy')
+                       phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+era='2017-Nov17ReReco')
 
 
 if not runOnLegacy:
@@ -412,17 +412,18 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ##### For 0T data  #####
   #triggerAlias     = cms.vstring('L1Jet68','L1Jet36','L1Jet16','L1EG20','L1EG5'),
   ##### For JetHT PD ##### 
-  triggerAlias     = cms.vstring('HLTPhoton30','HLTPhoton50','HLTPhoton75','HLTPhoton90','HLTPhoton120','HLTPhoton165'),                                
+  triggerAlias     = cms.vstring('HLTPhoton33','HLTPhoton50','HLTPhoton75','HLTPhoton90','HLTPhoton120','HLTPhoton165','HLTPhoton200'),                                
   triggerSelection = cms.vstring(
 
      
      ###for SinglePhotons
-     'HLT_Photon30_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon33_v*',
      'HLT_Photon50_R9Id90_HE10_IsoM_v*',
      'HLT_Photon75_R9Id90_HE10_IsoM_v*',
      'HLT_Photon90_R9Id90_HE10_IsoM_v*',
      'HLT_Photon120_R9Id90_HE10_IsoM_v*',
      'HLT_Photon165_R9Id90_HE10_IsoM_v*',
+     'HLT_Photon200_v*'
      
   ),
   
@@ -441,7 +442,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
   triggerObjects = cms.InputTag('selectedPatTrigger'),
   filters = cms.vstring(
-        'hltEG30R9Id90HE10IsoMHcalIsoFilter','hltEG50R9Id90HE10IsoMHcalIsoFilter', 'hltEG75R9Id90HE10IsoMHcalIsoFilter','hltEG90R9Id90HE10IsoMHcalIsoFilter','hltEG120R9Id90HE10IsoMTrackIsoFilter','hltEG165R9Id90HE10IsoMTrackIsoFilter'),
+        'hltEG33L1EG26HEFilter','hltEG50R9Id90HE10IsoMTrackIsoFilter', 'hltEG75R9Id90HE10IsoMTrackIsoFilter','hltEG90R9Id90HE10IsoMTrackIsoFilter','hltEG120R9Id90HE10IsoMTrackIsoFilter','hltEG165R9Id90HE10IsoMTrackIsoFilter','hltEG200HEFilter'),
   ## JECs ################
   redoJECs  = cms.bool(True),
 
