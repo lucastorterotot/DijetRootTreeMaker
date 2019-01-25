@@ -79,7 +79,7 @@ if len(options.globalTag) == 0:
         else:
             options.globalTag = '80X_dataRun2_2016SeptRepro_v7' #TODO: update for 2018
     else:
-        options.globalTag = '100X_upgrade2018_realistic_v10'
+        options.globalTag = '94X_mcRun2_asymptotic_v3' # '100X_upgrade2018_realistic_v10'
     
     print 'WARNING: No global tag provided. Will use the default one: {}.'.format(
         options.globalTag
@@ -90,9 +90,9 @@ if len(options.globalTag) == 0:
 
 if len(options.JECData) == 0:
     if runOnLegacy:
-            options.JECData = 'Fall17_09May2018F_V3_DATA'
+            options.JECData = 'Summer16_07Aug2017BCD_V1_DATA' # 'Fall17_09May2018F_V3_DATA'
     else:
-            options.JECData = 'Fall17_09May2018F_V3_DATA'
+            options.JECData = 'Summer16_03Feb2017BCD_V3' # 'Fall17_09May2018F_V3_DATA'
     
     
     print 'WARNING: No data JEC provided. Will use the default one: {}.'.format(
@@ -101,9 +101,9 @@ if len(options.JECData) == 0:
 
 if len(options.JECMC) == 0:
     if runOnLegacy:
-            options.JECMC = 'Fall18_17Sep2018_V1_MC'
+            options.JECMC = 'Summer16_07Aug2017_V1_MC' # 'Fall18_17Sep2018_V1_MC'
     else:
-            options.JECMC = 'Fall18_17Sep2018_V1_MC'
+            options.JECMC = 'Summer16_03Feb2017_V1_MC' # 'Fall18_17Sep2018_V1_MC'
     
     
     print 'WARNING: No MC JEC provided. Will use the default one: {}.'.format(
@@ -206,12 +206,12 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 ##-------------------- Define the source  ----------------------------
 
 if runOnData:
-   # if runOnLegacy: 
-   #    process.source = cms.Source("PoolSource",
-   #    fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
-   #    )
-   # else:
-   process.source = cms.Source("PoolSource",
+   if runOnLegacy: 
+      process.source = cms.Source("PoolSource",
+      fileNames = cms.untracked.vstring("/store/data/Run2016C/SinglePhoton/MINIAOD/07Aug17-v1/50000/0825D2D7-C89E-E711-A061-008CFAC94258.root")
+      )
+   else:
+      process.source = cms.Source("PoolSource",
                                fileNames = cms.untracked.vstring("/store/data/Run2016H/SinglePhoton/MINIAOD/03Feb2017_ver2-v1/100000/0027C019-EFEA-E611-8E79-7845C4FC35E1.root")
                                )
 else:
@@ -231,7 +231,7 @@ setupEgammaPostRecoSeq(process,
                        applyEnergyCorrections=True,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
-                       phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                       phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff'], #['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
 era='2016-Legacy')
 
 
