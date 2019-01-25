@@ -77,7 +77,7 @@ if len(options.globalTag) == 0:
         if runOnLegacy:
             options.globalTag = '94X_dataRun2_ReReco_EOY17_v2'
         else:
-            options.globalTag = '80X_dataRun2_2016SeptRepro_v7'
+            options.globalTag = '94X_dataRun2_ReReco_EOY17_v2' # '80X_dataRun2_2016SeptRepro_v7'
     else:
         options.globalTag = '94X_mcRun2_asymptotic_v3'
     
@@ -92,7 +92,7 @@ if len(options.JECData) == 0:
     if runOnLegacy:
             options.JECData = 'Summer16_07Aug2017BCD_V1_DATA'
     else:
-            options.JECData = 'Summer16_03Feb2017BCD_V3'
+            options.JECData = 'Summer16_07Aug2017BCD_V1_DATA' # 'Summer16_03Feb2017BCD_V3'
     
     
     print 'WARNING: No data JEC provided. Will use the default one: {}.'.format(
@@ -103,7 +103,7 @@ if len(options.JECMC) == 0:
     if runOnLegacy:
             options.JECMC = 'Summer16_07Aug2017_V1_MC'
     else:
-            options.JECMC = 'Summer16_03Feb2017_V1_MC'
+            options.JECMC = 'Summer16_07Aug2017_V1_MC' # 'Summer16_03Feb2017_V1_MC'
     
     
     print 'WARNING: No MC JEC provided. Will use the default one: {}.'.format(
@@ -442,7 +442,14 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
 
   triggerObjects = cms.InputTag('selectedPatTrigger'),
   filters = cms.vstring(
-        'hltEG33L1EG26HEFilter','hltEG50R9Id90HE10IsoMTrackIsoFilter', 'hltEG75R9Id90HE10IsoMTrackIsoFilter','hltEG90R9Id90HE10IsoMTrackIsoFilter','hltEG120R9Id90HE10IsoMTrackIsoFilter','hltEG165R9Id90HE10IsoMTrackIsoFilter','hltEG200HEFilter'),
+      'hltEG33L1EG26HEFilter',
+      'hltEG50R9Id90HE10IsoMTrackIsoFilter',
+      'hltEG75R9Id90HE10IsoMTrackIsoFilter',
+      'hltEG90R9Id90HE10IsoMTrackIsoFilter',
+      'hltEG120R9Id90HE10IsoMTrackIsoFilter',
+      'hltEG165R9Id90HE10IsoMTrackIsoFilter',
+      'hltEG200HEFilter',
+      ),
   ## JECs ################
   redoJECs  = cms.bool(True),
 
