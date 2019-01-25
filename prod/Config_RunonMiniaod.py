@@ -414,8 +414,6 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   ##### For JetHT PD ##### 
   triggerAlias     = cms.vstring('HLTPhoton33','HLTPhoton50','HLTPhoton75','HLTPhoton90','HLTPhoton120','HLTPhoton165','HLTPhoton200'),                                
   triggerSelection = cms.vstring(
-
-     
      ###for SinglePhotons
      'HLT_Photon33_v*',
      'HLT_Photon50_R9Id90_HE10_IsoM_v*',
@@ -424,8 +422,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
      'HLT_Photon120_R9Id90_HE10_IsoM_v*',
      'HLT_Photon165_R9Id90_HE10_IsoM_v*',
      'HLT_Photon200_v*'
-     
-  ),
+     ),
   
   prescalesTag          = cms.InputTag("patTrigger"),
   triggerResultsTag = cms.InputTag("TriggerResults", "", "HLT"),
@@ -440,7 +437,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
     throw                 = cms.bool(False)
   ),
 
-  triggerObjects = cms.InputTag('selectedPatTrigger'),
+  triggerObjects = cms.InputTag('slimmedPatTrigger'),
   filters = cms.vstring(
       'hltEG33L1EG26HEFilter',
       'hltEG50R9Id90HE10IsoMTrackIsoFilter',
@@ -448,7 +445,7 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
       'hltEG90R9Id90HE10IsoMTrackIsoFilter',
       'hltEG120R9Id90HE10IsoMTrackIsoFilter',
       'hltEG165R9Id90HE10IsoMTrackIsoFilter',
-      'hltEG200HEFilter',
+      'hltEG200HEFilter'
       ),
   ## JECs ################
   redoJECs  = cms.bool(True),
