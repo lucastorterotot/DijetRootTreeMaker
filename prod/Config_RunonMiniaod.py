@@ -232,7 +232,7 @@ setupEgammaPostRecoSeq(process,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
                        phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
-era='2018')
+era='2016-Legacy')
 
 
 if not runOnLegacy:
@@ -380,9 +380,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   Photonsmeared             = cms.InputTag('slimmedPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons80X'),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('egmPhotonIDs:phoFull5x5SigmaIEtaIEta'),
-  #phoChargedIsolation       = cms.InputTag('egmPhotonIDs:phoChargedIsolation'),
-  #phoNeutralHadronIsolation = cms.InputTag('egmPhotonIDs:phoNeutralHadronIsolation'),
-  #phoPhotonIsolation        = cms.InputTag('egmPhotonIDs:phoPhotonIsolation'),
+  phoChargedIsolation       = cms.InputTag('egmPhotonIDs:phoChargedIsolation'),
+  phoNeutralHadronIsolation = cms.InputTag('egmPhotonIDs:phoNeutralHadronIsolation'),
+  phoPhotonIsolation        = cms.InputTag('egmPhotonIDs:phoPhotonIsolation'),
   PhotonUncorr              = cms.InputTag('slimmedPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
