@@ -150,7 +150,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEv
 
 
 process.TFileService=cms.Service("TFileService",
-                                 fileName=cms.string('mylocaltest_Run2017B_10.root'),
+                                 fileName=cms.string('TMP-TEST.root'),
                                  #fileName=cms.string(THISROOTFILE),
                                  closeFileFast = cms.untracked.bool(True)
                                  )
@@ -212,11 +212,11 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 if runOnData:
         if runOnLegacy: 
            process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/data/Run2017F/SinglePhoton/MINIAOD/17Nov2017-v1/50000/004425E2-EBDE-E711-8F80-008CFAF5543A.root")
+           fileNames = cms.untracked.vstring("/store/data/Run2017D/SinglePhoton/MINIAOD/17Nov2017-v1/710000/48C05C67-16D9-E711-BC16-4C79BA320401.root")
            )
         else:
              process.source = cms.Source("PoolSource",
-             fileNames = cms.untracked.vstring("/store/data/Run2017F/SinglePhoton/MINIAOD/17Nov2017-v1/50000/004425E2-EBDE-E711-8F80-008CFAF5543A.root")
+             fileNames = cms.untracked.vstring("/store/data/Run2017D/SinglePhoton/MINIAOD/17Nov2017-v1/710000/48C05C67-16D9-E711-BC16-4C79BA320401.root")
              )
 else:
        process.source = cms.Source("PoolSource",
