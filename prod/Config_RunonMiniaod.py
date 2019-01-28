@@ -150,7 +150,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEv
 
 
 process.TFileService=cms.Service("TFileService",
-                                 fileName=cms.string('TMP-TEST.root'),
+                                 fileName=cms.string('TMP-TEST_2018_samples.root'),
                                  #fileName=cms.string(THISROOTFILE),
                                  closeFileFast = cms.untracked.bool(True)
                                  )
@@ -380,9 +380,9 @@ process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
   Photonsmeared             = cms.InputTag('slimmedPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons80X'),
   GenPhoton                 = cms.InputTag('slimmedGenPhotons'),
   full5x5SigmaIEtaIEtaMap   = cms.InputTag('egmPhotonIDs:phoFull5x5SigmaIEtaIEta'),
-  phoChargedIsolation       = cms.InputTag('egmPhotonIDs:phoChargedIsolation'),
-  phoNeutralHadronIsolation = cms.InputTag('egmPhotonIDs:phoNeutralHadronIsolation'),
-  phoPhotonIsolation        = cms.InputTag('egmPhotonIDs:phoPhotonIsolation'),
+  #phoChargedIsolation       = cms.InputTag('egmPhotonIDs:phoChargedIsolation'),
+  #phoNeutralHadronIsolation = cms.InputTag('egmPhotonIDs:phoNeutralHadronIsolation'),
+  #phoPhotonIsolation        = cms.InputTag('egmPhotonIDs:phoPhotonIsolation'),
   PhotonUncorr              = cms.InputTag('slimmedPhotons') if runOnLegacy else cms.InputTag('calibratedPatPhotons'),
   eb               = cms.InputTag('reducedEgamma:reducedEBRecHits'),
   ee               = cms.InputTag('reducedEgamma:reducedEERecHits'),
