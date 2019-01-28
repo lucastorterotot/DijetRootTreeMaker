@@ -1270,6 +1270,7 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
   Handle<edm::TriggerResults> Trigger_result;
   iEvent.getByToken(srcTriggerResults_,Trigger_result);
   
+  const edm::TriggerResults Static_trig = (*Trigger_result.product());
   Handle<pat::PackedTriggerPrescales> Trigger_prescale;
   iEvent.getByToken(srcTriggerPrescale_,Trigger_prescale);
   
@@ -1334,36 +1335,38 @@ void DijetTreeProducer::analyze(edm::Event const& iEvent, edm::EventSetup const&
    std::vector<TLorentzVector> candhlt120;
    std::vector<TLorentzVector> candhlt165;
    
-   for (auto const &obj: *triggerObjects)
+   for (auto /*const*/ &obj: *triggerObjects)
     {
         TLorentzVector cand;
-        cand.SetPtEtaPhiE(obj.pt(),obj.eta(),obj.phi(),obj.energy());                
-        if(obj.hasFilterLabel(filters_name.at(0)))
+        cand.SetPtEtaPhiE(obj.pt(),obj.eta(),obj.phi(),obj.energy());
+        pat::TriggerObjectStandAlone To_unpack= obj ;        
+        To_unpack.unpackFilterLabels(iEvent,Static_trig);
+        if(To_unpack.hasFilterLabel(filters_name.at(0)))
         {
         	candhlt30.push_back(cand);
-
         }
         
-        if(obj.hasFilterLabel(filters_name.at(1)))
+        if(To_unpack.hasFilterLabel(filters_name.at(1)))
         {
         	candhlt50.push_back(cand);
         }
-        if(obj.hasFilterLabel(filters_name.at(2)))
+        if(To_unpack.hasFilterLabel(filters_name.at(2)))
         {
         	candhlt75.push_back(cand);
         }
-        if(obj.hasFilterLabel(filters_name.at(3)))
+        if(To_unpack.hasFilterLabel(filters_name.at(3)))
         {
         	candhlt90.push_back(cand);
         }
-        if(obj.hasFilterLabel(filters_name.at(4)))
+        if(To_unpack.hasFilterLabel(filters_name.at(4)))
         {
         	candhlt120.push_back(cand);
         }
-        if(obj.hasFilterLabel(filters_name.at(5)))
+        if(To_unpack.hasFilterLabel(filters_name.at(5)))
         {
         	candhlt165.push_back(cand);
-        }  
+        }
+     
 }
   
   
@@ -1932,6 +1935,8 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     jetotresp ++;
     if (jetotresp == 1 ){
     firstJet = (*ijet);}
+    
+    std::cout << "Here: " << std::endl;
     
     edm::View<pat::Jet>::const_iterator ijetview = (jetsview->begin() + *i);
     double chf = ijet->chargedHadronEnergyFraction();
