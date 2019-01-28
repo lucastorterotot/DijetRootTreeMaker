@@ -1878,7 +1878,6 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
   std::vector<double> jecFactorsAK4;
   std::vector<unsigned> sortedAK4JetIdx;
 
-
   uint32_t indexjet = 0;
   if(redoJECs_)
     {
@@ -1938,6 +1937,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     
     edm::View<pat::Jet>::const_iterator ijetview = (jetsview->begin() + *i);
     double chf = ijet->chargedHadronEnergyFraction();
+    
     double nhf = ijet->neutralHadronEnergyFraction(); 
     double phf = ijet->photonEnergy()/(ijet->jecFactor(0) * ijet->energy());
     double elf = ijet->electronEnergy()/(ijet->jecFactor(0) * ijet->energy());
@@ -1960,7 +1960,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     double nemf = ijet->neutralEmEnergyFraction();
     double cemf = ijet->chargedEmEnergyFraction();
     int NumConst = npr;
-
+    
     float eta  = ijet->eta(); 
     float pt   = ijet->correctedJet("Uncorrected").pt()*jecFactorsAK4.at(*i);   
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
@@ -2064,7 +2064,6 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 // PUPPI
 
 
-
   std::vector<double> jecFactorsPUPPI;
   std::vector<unsigned> sortedPUPPIJetIdx;
 
@@ -2112,7 +2111,6 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
 	}
     }
     
-
   nJetsPUPPI_ = 0;
   vector<TLorentzVector> vP4PUPPI;
   for(std::vector<unsigned>::const_iterator i = sortedPUPPIJetIdx.begin(); i != sortedPUPPIJetIdx.end(); ++i, indexjetpuppi++) {
@@ -2238,7 +2236,6 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     }
 
   }// jet loop  
-
   // AK8
   std::vector<double> jecFactorsAK8;
   std::vector<unsigned> sortedAK8JetIdx;
@@ -2285,7 +2282,7 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
   float htAK8(0.0);
   vector<TLorentzVector> vP4AK8;
   for(std::vector<unsigned>::const_iterator i = sortedAK8JetIdx.begin(); i != sortedAK8JetIdx.end(); ++i) {
-
+    break;
     
 
     pat::JetCollection::const_iterator ijet = (jetsAK8->begin() + *i);
