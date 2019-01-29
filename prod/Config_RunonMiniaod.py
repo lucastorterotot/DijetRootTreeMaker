@@ -210,16 +210,10 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 
 if runOnData:
-        if runOnLegacy: 
-           process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/data/Run2017F/SinglePhoton/MINIAOD/17Nov2017-v1/50000/004425E2-EBDE-E711-8F80-008CFAF5543A.root"),
+   process.source = cms.Source("PoolSource",
+           fileNames = cms.untracked.vstring("/store/data/Run2017C/SinglePhoton/MINIAOD/17Nov2017-v1/510000/C2C54EBD-FCDF-E711-B0F7-FA163EE7CC9A.root"),
                                        inputCommands =  cms.untracked.vstring("keep *","drop  *_isolatedTracks__*")
            )
-        else:
-             process.source = cms.Source("PoolSource",
-             fileNames = cms.untracked.vstring("/store/data/Run2017F/SinglePhoton/MINIAOD/17Nov2017-v1/50000/004425E2-EBDE-E711-8F80-008CFAF5543A.root"),
-                                       inputCommands =  cms.untracked.vstring("keep *","drop  *_isolatedTracks__*")
-             )
 else:
        process.source = cms.Source("PoolSource",
            fileNames = cms.untracked.vstring("/store/mc/RunIIFall17MiniAOD/GJet_Pt-15To6000_TuneCP5-Flat_13TeV_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/40000/2C41D5C8-5DDA-E711-876C-1866DA87C2CD.root"),
