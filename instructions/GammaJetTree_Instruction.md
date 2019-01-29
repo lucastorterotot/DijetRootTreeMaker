@@ -4,7 +4,7 @@
 
 **Authors** Hugues Lattaud and Lucas Torterotot
 
-**Last update** 22 Jan 2019
+**Last update** 29 Jan 2019
 
 ## Installation recipe
 More informations on [this twiki](https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2)
@@ -14,10 +14,39 @@ You may want to install this in your work space, for example
 cd /afs/cern.ch/work/${USER:0:1}/$USER/
 mkdir -p JEC && cd JEC
 ```
+
+Check if one has a good compiler version in use `echo $SCRAM_ARCH`.
+`slc6_amd64_gcc491` seems to be incompatible with CMSSW 8.0.26.patch1, onemay update update with
+```
+export SCRAM_ARCH=slc6_amd64_gcc530
+```
+
 #### For 2016
-* If you run on 2016 legacy datasets, all the step needed to set up an environment with calibrated photon are sumarize in [this twiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/Egamma2016DataRecommendations#Running_the_legacy_scale_and_sme).
+If you run on 2016 legacy datasets, all the step needed to set up an environment with calibrated photon are sumarize in [this twiki](https://twiki.cern.ch/twiki/bin/viewauth/CMS/Egamma2016DataRecommendations#Running_the_legacy_scale_and_sme).
 Following this twikis you should have a CMSSW environment ready for Egamma tuple production.
+```
+cmsrel CMSSW_8_0_31
+cd CMSSW_8_0_31/src
+cmsenv
+git cms-init
+git cms-merge-topic ikrav:egm_id_80X_v3_photons
+git cms-merge-topic cms-egamma:EGScaleAndSmearLeg_8026 #a backport of the 94X code for 80X
+git cms-addpkg EgammaAnalysis/ElectronTools
+rm EgammaAnalysis/ElectronTools/data/ -rf  #removes the data directory so can replace with the cms-data repo for this package
+git clone https://github.com/cms-data/EgammaAnalysis-ElectronTools.git EgammaAnalysis/ElectronTools/data/
+scram b -j 8
+```
+
 #### For 2017
+```
+cmsrel CMSSW_9_4_10
+cd CMSSW_9_4_10/src
+cmsenv
+git cms-init
+git cms-merge-topic cms-egamma:EgammaID_949 #if you want the FallV2 IDs, otherwise skip
+git cms-merge-topic cms-egamma:EgammaPostRecoTools_940 #just adds in an extra file to have a setup function to make things easier
+scram b -j 8
+```
 
 #### For 2018
 ```
@@ -32,27 +61,15 @@ git cms-merge-topic cms-egamma:EgammaPostRecoTools #just adds in an extra file t
 scram b -j 8
 ```
 
-Check if one has a good compiler version in use `echo $SCRAM_ARCH`.
-`slc6_amd64_gcc491` seems to be incompatible with CMSSW 8.0.26.patch1, onemay update update with
-```
-export SCRAM_ARCH=slc6_amd64_gcc530
-```
-
-### PhotonID and EGamma regression smearer etc
-```
-git cms-merge-topic ikrav:egm_id_80X_v3_photons
-git cms-merge-topic cms-egamma:EGScaleAndSmearLeg_8026 #a backport of the 94X code for 80X
-git cms-addpkg EgammaAnalysis/ElectronTools
-rm EgammaAnalysis/ElectronTools/data/ -rf  #removes the data directory so can replace with the cms-data repo for this package
-git clone https://github.com/cms-data/EgammaAnalysis-ElectronTools.git EgammaAnalysis/ElectronTools/data/
-scram b -j 8
-```
-
 ### SetUp the Gamma + Jet frame work
 ```
 cd $CMSSW_BASE/src
 git clone git@github.com:lucastorterotot/DijetRootTreeMaker.git CMSDIJET/DijetRootTreeMaker/
-
+```
+- To run on 2016 data, switch to `JEC_JER_2016_master` branch.
+- To run on 2017 data, switch to `JEC_JER_2017_CMSSW_9_4_10_master` branch.
+- To run on 2017 data, switch to `JEC_JER_2018_CMSSW_10_2_5_master` branch.
+```
 scram b -j 8
 ```
 

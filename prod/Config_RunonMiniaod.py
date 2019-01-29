@@ -150,7 +150,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEv
 
 
 process.TFileService=cms.Service("TFileService",
-                                 fileName=cms.string('TMP-TEST.root'),
+                                 fileName=cms.string('TMP-TEST_DATA.root'),
                                  #fileName=cms.string(THISROOTFILE),
                                  closeFileFast = cms.untracked.bool(True)
                                  )

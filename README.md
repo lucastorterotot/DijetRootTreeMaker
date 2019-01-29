@@ -7,11 +7,6 @@ This framework has 3 modules that have to be run in this order :
 
 Instruction can be found in each step repository.
 
-This module is the first step of the gamma + jet analysis.
-- To run on 2016 data, switch to `JEC_JER_2016_master` branch.
-- To run on 2017 data, switch to `JEC_JER_2017_CMSSW_9_4_10_master` branch.
-- To run on 2017 data, switch to `JEC_JER_2018_CMSSW_10_2_5_master` branch.
-
-Pick up your branch and then check instruction [here](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/master/instructions/GammaJetTree_Instruction.md)
+This module is the first step of the gamma + jet analysis. Instructions can be found [here](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/master/instructions/GammaJetTree_Instruction.md)
 and for more information on the original framework
 see instruction [here](https://twiki.cern.ch/twiki/bin/viewauth/CMS/ExoDijet13TeV#Instructions_to_Create_RootTuple).
