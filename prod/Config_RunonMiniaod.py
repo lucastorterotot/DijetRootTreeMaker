@@ -196,11 +196,11 @@ process.out.outputCommands.append("keep *_slimmedGenJetsAK8_*_*")
 
 if runOnData:
    process.source = cms.Source("PoolSource",
-                               fileNames = cms.untracked.vstring("/store/data/Run2018E/EGamma/MINIAOD/PromptReco-v1/000/325/520/00000/2F6163F4-934A-AD4D-B9FE-9B2EDBBE99FE.root")
+                               fileNames = cms.untracked.vstring("/store/data/Run2018C/EGamma/MINIAOD/17Sep2018-v1/00000/5EC0BA8C-44BA-BD45-B725-A54E37CEE913.root")
                                )
 else:
    process.source = cms.Source("PoolSource",
-                               fileNames = cms.untracked.vstring("/store/mc/RunIIFall17MiniAOD/GJet_Pt-15To6000_TuneCP5-Flat_13TeV_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/40000/2C41D5C8-5DDA-E711-876C-1866DA87C2CD.root")
+                               fileNames = cms.untracked.vstring("/store/mc/RunIIAutumn18MiniAOD/GJet_Pt-15To6000_TuneCP5-Flat_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/693CF654-89E1-9C40-946C-773AA30B96A1.root")
                                )
 
 process.load("Configuration.Geometry.GeometryRecoDB_cff")
