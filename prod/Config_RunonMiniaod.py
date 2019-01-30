@@ -76,7 +76,7 @@ if len(options.globalTag) == 0:
     if runOnData:
        options.globalTag = '94X_dataRun2_v10' #TODO: update for 2018
     else:
-       options.globalTag = '100X_upgrade2018_realistic_v10'
+       options.globalTag = '102X_upgrade2018_realistic_v15'
         
     print 'WARNING: No global tag provided. Will use the default one: {}.'.format(
        options.globalTag
