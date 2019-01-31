@@ -6,7 +6,17 @@
   },
   {
     "name": "Run2018C-17Sep2018-v1",
-    "dataset": "/Egamma/Run2018C-17Sep2018-v1/MINIAOD",
+    "dataset": "/EGamma/Run2018C-17Sep2018-v1/MINIAOD",
     "Data.unitsPerJob": 250
-  }  
+  },
+  {
+    "name": "Run2018D-PromptReco-v2",
+    "dataset": "/EGamma/Run2018D-PromptReco-v2/MINIAOD",
+    "Data.unitsPerJob": 250
+  },
+  {
+    "name": "Run2018E-PromptReco-v1",
+    "dataset": "/EGamma/Run2018E-PromptReco-v1/MINIAOD",
+    "Data.unitsPerJob": 250
+  }
 ]
