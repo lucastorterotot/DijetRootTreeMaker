@@ -68,7 +68,7 @@ git clone git@github.com:lucastorterotot/DijetRootTreeMaker.git CMSDIJET/DijetRo
 ```
 - To run on 2016 data, switch to `JEC_JER_2016_master` branch.
 - To run on 2017 data, switch to `JEC_JER_2017_CMSSW_9_4_10_master` branch.
-- To run on 2017 data, switch to `JEC_JER_2018_CMSSW_10_2_5_master` branch.
+- To run on 2018 data, switch to `JEC_JER_2018_CMSSW_10_2_5_master` branch.
 ```
 scram b -j 8
 ```
