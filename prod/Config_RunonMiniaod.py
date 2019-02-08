@@ -147,10 +147,12 @@ process.GlobalTag = GlobalTag(process.GlobalTag, options.globalTag,'')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEvents))
 
 
-
+outputsuffix = '_MC'
+if runOnData:
+   outputsuffix = '_DATA'
 
 process.TFileService=cms.Service("TFileService",
-                                 fileName=cms.string('TMP-TEST_DATA.root'),
+                                 fileName=cms.string('2017_'+outputsuffix+'.root'),
                                  #fileName=cms.string(THISROOTFILE),
                                  closeFileFast = cms.untracked.bool(True)
                                  )
