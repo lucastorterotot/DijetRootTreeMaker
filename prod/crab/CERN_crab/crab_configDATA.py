@@ -17,5 +17,9 @@ config.Data.unitsPerJob = 250
 config.Data.publication = False
 config.Data.outLFNDirBase = '/store/user/%s/' % (getUsernameFromSiteDB())
 
+config.section_("Debug")
+config.Debug.extraJDL = ['+CMS_ALLOW_OVERFLOW=False']
+
 config.Site.storageSite = 'T3_FR_IPNL'
+config.Site.whitelist = ['T2_CH_CERN', 'T3_FR_IPNL']
 
