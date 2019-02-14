@@ -136,12 +136,12 @@ process.GlobalTag = GlobalTag(process.GlobalTag, options.globalTag,'')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.maxEvents))
 
 
-outputsuffix = '_MC'
+outputsuffix = 'MC'
 if runOnData:
-   outputsuffix = '_DATA'
+   outputsuffix = 'DATA'
 
 process.TFileService=cms.Service("TFileService",
-                                 fileName=cms.string('2018_'+outputsuffix+'.root'),
+                                 fileName=cms.string('DijetRootTreeMaker_2018_'+outputsuffix+'.root'),
                                  #fileName=cms.string(THISROOTFILE),
                                  closeFileFast = cms.untracked.bool(True)
                                  )
