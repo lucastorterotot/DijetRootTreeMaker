@@ -1,1 +1,2 @@
-../Autumn18_V2_MC/Autumn18_V2_MC_L1RC_AK4PFchs.txt
+{1 JetEta 3 Rho JetPt JetA 1 Correction L1FastJet}
+-5.191     5.191         6           0         200          10        3000           0          10
