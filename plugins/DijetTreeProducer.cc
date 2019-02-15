@@ -1810,27 +1810,28 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
     // https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID
     int idL = -999 ; 
     int idT = -999 ; 
-    
-    if(fabs(eta) < 3.0)
-    {
-      idL = ( nemf>0.01 && nhf<0.98 && neMult > 2);
-      if(fabs(eta) <= 2.7){
-      
-         idL =(nhf<0.99 && nemf<0.99 && NumConst>1);
-         if(fabs(eta) <= 2.4){
-         
-            idL = ( chf>0. && chMult>0 && cemf<0.99 && nhf<0.99 && nemf<0.99 && NumConst>1 );
-         
-         }
-      
+
+    if(fabs(eta) > 3.0)
+      {
+        idL = ( nemf<0.90 && neMult>10 ) ;
+        idT = ( nemf<0.90 && nhf>0.2 && neMult>10 ) ;
+      }else{
+      if(fabs(eta) > 2.7)
+        {
+          idL = ( nemf>0.01 && nhf<0.98 && neMult > 2 );
+          idT = ( nemf>0.02 && nemf<0.99 && neMult>2);
+        }else{
+        if(fabs(eta)>2.6)
+          {
+            idL = ( nemf>0.01 && nhf<0.98 && neMult > 2 );
+            idT = ( cemf<0.8 && chm>0 && nemf<0.99 && muf <0.8 && nhf < 0.9 ) ;
+          }else{
+          idL = ( nemf>0.01 && nhf<0.98 && neMult > 2 ) ;
+          idT = ( cemf<0.8 && chm>0 && chf>0 && NumConst>1 && nemf<0.9 && muf <0.8 && nhf < 0.9 ) ;
+        }
       }
-    
-    }else{
-       idL = ( nemf<0.90 && neMult>10)   ;
-       
-       
-       idT = (nhf<0.90 && nemf<0.90 && NumConst>1 && muf<0.8) && ((fabs(eta)<=2.4 && chf>0 && chMult>0 && cemf<0.90) || fabs(eta)>2.4)      ;
-    }  
+    }
+  
     edm::RefToBase<pat::Jet> jetReftmp(edm::Ref<edm::View<pat::Jet> >(jetsview, ijetview - jetsview->begin()));
 
        
