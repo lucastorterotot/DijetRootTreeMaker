@@ -86,14 +86,14 @@ if len(options.globalTag) == 0:
 
 
 if len(options.JECData) == 0:
-   options.JECData = 'Autumn18_V2_DATA'
+   options.JECData = 'Autumn18_V3_DATA'
     
    print 'WARNING: No data JEC provided. Will use the default one: {}.'.format(
       options.JECData
 )
 
 if len(options.JECMC) == 0:
-   options.JECMC = 'Autumn18_V2_MC'
+   options.JECMC = 'Autumn18_V3_MC'
     
    print 'WARNING: No MC JEC provided. Will use the default one: {}.'.format(
       options.JECMC
