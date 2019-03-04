@@ -2,26 +2,21 @@
   {
     "name": "Run2018A-17Sep2018-v2",
     "dataset": "/EGamma/Run2018A-17Sep2018-v2/MINIAOD",
-    "Data.unitsPerJob": 250
+    "Data.unitsPerJob": 10
   },
   {
-    "name": "Run2018B-26Sep2018-v1",
+    "name": "Run2018B-17Sep2018-v1",
     "dataset": "/EGamma/Run2018B-26Sep2018-v1/MINIAOD",
-    "Data.unitsPerJob": 250
+    "Data.unitsPerJob": 10
   },
   {
     "name": "Run2018C-17Sep2018-v1",
     "dataset": "/EGamma/Run2018C-17Sep2018-v1/MINIAOD",
-    "Data.unitsPerJob": 250
+    "Data.unitsPerJob": 10
   },
   {
     "name": "Run2018D-PromptReco-v2",
     "dataset": "/EGamma/Run2018D-PromptReco-v2/MINIAOD",
-    "Data.unitsPerJob": 250
-  },
-  {
-    "name": "Run2018E-PromptReco-v1",
-    "dataset": "/EGamma/Run2018E-PromptReco-v1/MINIAOD",
-    "Data.unitsPerJob": 250
+    "Data.unitsPerJob": 15
   }
 ]
