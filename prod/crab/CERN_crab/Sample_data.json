@@ -6,7 +6,7 @@
   },
   {
     "name": "Run2018B-17Sep2018-v1",
-    "dataset": "/EGamma/Run2018B-26Sep2018-v1/MINIAOD",
+    "dataset": "/EGamma/Run2018B-17Sep2018-v1/MINIAOD",
     "Data.unitsPerJob": 10
   },
   {
