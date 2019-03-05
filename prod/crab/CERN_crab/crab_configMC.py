@@ -12,7 +12,7 @@ config.JobType.priority = 6
 
 config.Data.inputDataset = '/GJet_Pt-15To6000_TuneCP5-Flat_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM'
 config.Data.splitting = 'EventAwareLumiBased'
-config.Data.unitsPerJob = 500000
+config.Data.unitsPerJob = 50000
 config.Data.publication = False
 config.Data.outLFNDirBase =  '/store/user/%s/' % (getUsernameFromSiteDB())
 
