@@ -12,7 +12,7 @@ config.JobType.pyCfgParams = ['isRunonData=True']
 config.JobType.priority = 5
 
 config.Data.inputDataset = '/EGamma/Run2018B-26Sep2018-v1/MINIAOD'
-config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 10
 config.Data.publication = False
