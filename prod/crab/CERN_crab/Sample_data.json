@@ -1,27 +1,27 @@
 [
   {
-    "name": "Run2017B-17Nov2017-v1_V3",
-    "dataset": "/SinglePhoton/Run2017B-17Nov2017-v1/MINIAOD",
+    "name": "Run2017B-09Aug2019_UL2017-v1",
+    "dataset": "/SinglePhoton/Run2017B-09Aug2019_UL2017-v1/MINIAOD",
     "Data.unitsPerJob": 250
   },
   {
-    "name": "Run2017C-17Nov2017-v1_V3",
-    "dataset": "/SinglePhoton/Run2017C-17Nov2017-v1/MINIAOD",
+    "name": "Run2017C-09Aug2019_UL2017-v1",
+    "dataset": "/SinglePhoton/Run2017C-09Aug2019_UL2017-v1/MINIAOD",
     "Data.unitsPerJob": 250
   },
   {
-    "name": "Run2017D-17Nov2017-v1_V3",
-    "dataset": "/SinglePhoton/Run2017D-17Nov2017-v1/MINIAOD",
+    "name": "Run2017D-09Aug2019_UL2017-v1",
+    "dataset": "/SinglePhoton/Run2017D-09Aug2019_UL2017-v1/MINIAOD",
     "Data.unitsPerJob": 250
   },
   {
-    "name": "Run2017E-17Nov2017-v1_V3",
-    "dataset": "/SinglePhoton/Run2017E-17Nov2017-v1/MINIAOD",
+    "name": "Run2017E-09Aug2019_UL2017-v1",
+    "dataset": "/SinglePhoton/Run2017E-09Aug2019_UL2017-v1/MINIAOD",
     "Data.unitsPerJob": 250
   },
   {
-    "name": "Run2017F-09May2018-v1",
-    "dataset": "/SinglePhoton/Run2017F-09May2018-v1/MINIAOD",
+    "name": "Run2017F-09Aug2019_UL2017-v1",
+    "dataset": "/SinglePhoton/Run2017F-09Aug2019_UL2017-v1/MINIAOD",
     "Data.unitsPerJob": 250
   }  
 ]
