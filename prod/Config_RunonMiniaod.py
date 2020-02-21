@@ -232,7 +232,9 @@ setupEgammaPostRecoSeq(process,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
                        phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
-era='2017-UL')
+                       era='2017-UL', # auto adjusting runEnergyCorrections to False as they are not yet availible for 2017-UL, set autoAdjustParams = False to force them to run
+                       #autoAdjustParams = False, # in postRecoEgammaTools, era 2017-UL does not yet have energy corrections, please contact the e/gamma pog for more information
+)
 
 
 if not runOnLegacy:
