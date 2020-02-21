@@ -235,7 +235,7 @@ setupEgammaPostRecoSeq(process,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
                        phoIDModules= ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
-era='2017-Nov17ReReco')
+era='2017-UL')
 
 
 if not runOnLegacy:
