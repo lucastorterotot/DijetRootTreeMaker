@@ -218,7 +218,7 @@ if runOnData:
            )
 else:
        process.source = cms.Source("PoolSource",
-           fileNames = cms.untracked.vstring("/store/mc/RunIIAutumn18MiniAOD/GJet_Pt-15To6000_TuneCP5-Flat_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/E7BFD678-5718-1C4A-94E1-3B27D86F031E.root"),
+           fileNames = cms.untracked.vstring("/store/mc/RunIISummer19UL17MiniAOD/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/280000/FE4908D3-EC8E-5845-9C52-48A0E6F038F6.root"),
                                        inputCommands =  cms.untracked.vstring("keep *","drop  *_isolatedTracks__*")
            )
 
