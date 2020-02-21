@@ -74,12 +74,9 @@ else:
 # [1] https://twiki.cern.ch/twiki/bin/viewauth/CMS/JECDataMC?rev=125
 if len(options.globalTag) == 0:
     if runOnData:
-        if runOnLegacy:
-            options.globalTag = '94X_dataRun2_ReReco_EOY17_v2'
-        else:
-            options.globalTag = '94X_dataRun2_ReReco_EOY17_v2' # '80X_dataRun2_2016SeptRepro_v7'
+       options.globalTag = '106X_dataRun2_v20'
     else:
-        options.globalTag = '94X_mcRun2_asymptotic_v3'
+       options.globalTag = '106X_mc2017_realistic_v6'
     
     print 'WARNING: No global tag provided. Will use the default one: {}.'.format(
         options.globalTag
