@@ -228,6 +228,7 @@ from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
 
 setupEgammaPostRecoSeq(process,
                        runVID=True,
+                       runEnergyCorrections=True,
                        applyEnergyCorrections=True,
                        applyVIDOnCorrectedEgamma=True,
                        isMiniAOD=True,
