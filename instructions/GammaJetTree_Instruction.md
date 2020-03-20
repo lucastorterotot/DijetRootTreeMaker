@@ -4,7 +4,7 @@
 
 **Authors** Hugues Lattaud and Lucas Torterotot
 
-**Last update** 20 Mar 20120
+**Last update** 20 Mar 2020
 
 ## Installation recipe for era 2017 UL
 More informations on [this twiki](https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2)
