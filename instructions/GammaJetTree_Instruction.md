@@ -19,7 +19,7 @@ Now, you have to follow different instructions based on the era you want to work
 - 2016: switch to [`JEC_JER_2016_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2016_master/instructions/GammaJetTree_Instruction.md);
 - 2017: switch to [`JEC_JER_2017_CMSSW_9_4_10_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2017_CMSSW_9_4_10_master/instructions/GammaJetTree_Instruction.md);
 - 2017UL: switch to [`JEC_JER_2017UL_CMSSW_10_6_3_master`
-branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2017UL_CMSSW_10_6_3_master,/instructions/GammaJetTree_Instruction.md);
+branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2017UL_CMSSW_10_6_3_master/instructions/GammaJetTree_Instruction.md);
 - 2018: switch to [`JEC_JER_2018_CMSSW_10_2_5_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2018_CMSSW_10_2_5_master/instructions/GammaJetTree_Instruction.md).
 
 ## Test run
