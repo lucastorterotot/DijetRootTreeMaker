@@ -7,20 +7,23 @@
 **Last update** 20 Mar 2020
 
 ## Installation recipe
-More informations on [this twiki](https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2)
-### CMSSW release
-You may want to install this in your work space, for example
-```
-cd /afs/cern.ch/work/${USER:0:1}/$USER/
-mkdir -p JEC && cd JEC
-```
 
-Now, you have to follow different instructions based on the era you want to work on:
+You have to follow different instructions based on the era you want to work on:
 - 2016: switch to [`JEC_JER_2016_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2016_master/instructions/GammaJetTree_Instruction.md);
 - 2017: switch to [`JEC_JER_2017_CMSSW_9_4_10_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2017_CMSSW_9_4_10_master/instructions/GammaJetTree_Instruction.md);
 - 2017UL: switch to [`JEC_JER_2017UL_CMSSW_10_6_3_master`
 branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2017UL_CMSSW_10_6_3_master/instructions/GammaJetTree_Instruction.md);
 - 2018: switch to [`JEC_JER_2018_CMSSW_10_2_5_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2018_CMSSW_10_2_5_master/instructions/GammaJetTree_Instruction.md).
+
+Once the installation is done, you can proceed the following steps that are the same for all the eras.
+
+### Get the JEC and JER databases
+```
+cd $CMSSW_BASE/..
+git clone git@github.com:cms-jet/JECDatabase.git JECDatabase
+git clone git@github.com:cms-jet/JRDatabase.git JRDatabase
+```
+This allows to run local test if you past the JERC text file you want to use in the `data` directory.
 
 ## Test run
 You'll find the CMSSW config file `Config_RunonMiniaod.py` in the `prod` repository.
