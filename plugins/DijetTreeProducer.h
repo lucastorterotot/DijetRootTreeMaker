@@ -237,6 +237,7 @@ class DijetTreeProducer : public edm::EDAnalyzer
     std::vector<int> *idLAK4_,*idTAK4_, *chHadMultAK4_, *chMultAK4_, *neHadMultAK4_, *neMultAK4_, *phoMultAK4_,*pdgIDGenAK4_, *hadronflavour_;
     std::vector<float> *hf_hfAK4_, *hf_emfAK4_, *hofAK4_;
     std::vector<float> *ptGenAK4_,*etaGenAK4_,*phiGenAK4_,*massGenAK4_,*energyGenAK4_;
+    std::vector<float> *Jet_btagDeepB_,*Jet_btagDeepC_,*Jet_qgl_,*Jet_btagDeepFlavB_,*Jet_btagDeepFlavC_;
     
     std::vector<float> *ptPUPPI_,*jecPUPPI_,*etaPUPPI_,*phiPUPPI_,*massPUPPI_,*energyPUPPI_,*areaPUPPI_,*csvPUPPI_,*qgdPUPPI_,*chfPUPPI_,*nhfPUPPI_,*phfPUPPI_,*elfPUPPI_,*mufPUPPI_,*nemfPUPPI_,*cemfPUPPI_;
     std::vector<float> *ptPUPPIraw_,*etaPUPPIraw_,*phiPUPPIraw_,*massPUPPIraw_,*energyPUPPIraw_;

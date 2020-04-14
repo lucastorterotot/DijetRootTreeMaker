@@ -170,7 +170,7 @@ process.out = cms.OutputModule('PoolOutputModule',
                                                                        ])                                                                                           
                                )
 
-
+process.out.outputCommands.append('keep *_pfDeepCSVTagInfos*_*_*')
 
 process.chs = cms.EDFilter('CandPtrSelector', src = cms.InputTag('packedPFCandidates'), cut = cms.string(' fromPV'))
 
@@ -343,10 +343,9 @@ if not runOnLegacy and not runOnData:
 
 
 
-#process.load('RecoJets.JetProducers.QGTagger_cfi')
-#process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
-#process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')        # Other options: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
-
+process.load('RecoJets.JetProducers.QGTagger_cfi')
+process.QGTagger.srcJets          = cms.InputTag("slimmedJets")       # Could be reco::PFJetCollection or pat::JetCollection (both AOD and miniAOD)
+process.out.outputCommands += ['keep *_QGTagger_*_*']
 
 
 

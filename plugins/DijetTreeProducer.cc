@@ -567,7 +567,12 @@ void DijetTreeProducer::beginJob()
   neMultAK4_         = new std::vector<int>;
   phoMultAK4_        = new std::vector<int>;
   hadronflavour_ = new std::vector<int>;  
-
+  // jet flavour tags
+  Jet_btagDeepB_ = new std::vector<float>;
+  Jet_btagDeepC_ = new std::vector<float>;
+  Jet_qgl_ = new std::vector<float>;
+  Jet_btagDeepFlavB_ = new std::vector<float>;
+  Jet_btagDeepFlavC_ = new std::vector<float>;
 
   outTree_->Branch("jetPtAK4"                ,"vector<float>"     ,&ptAK4_);
   outTree_->Branch("jetJecAK4"               ,"vector<float>"     ,&jecAK4_);
@@ -601,6 +606,11 @@ void DijetTreeProducer::beginJob()
   outTree_->Branch("neMultAK4"              ,"vector<int>"      ,&neMultAK4_);   
   outTree_->Branch("phoMultAK4"             ,"vector<int>"      ,&phoMultAK4_);   
   outTree_->Branch("hadronflavour"          ,"vector<int>"      ,&hadronflavour_);   
+  outTree_->Branch("Jet_btagDeepB"          ,"vector<float>"      ,&Jet_btagDeepB_);
+  outTree_->Branch("Jet_btagDeepC"          ,"vector<float>"      ,&Jet_btagDeepC_);
+  outTree_->Branch("Jet_qgl"          ,"vector<float>"      ,&Jet_qgl_);
+  outTree_->Branch("Jet_btagDeepFlavB"          ,"vector<float>"      ,&Jet_btagDeepFlavB_);
+  outTree_->Branch("Jet_btagDeepFlavC"          ,"vector<float>"      ,&Jet_btagDeepFlavC_);
   
   //-------Jet PUPPI-----------------
   ptPUPPI_             = new std::vector<float>;
@@ -804,6 +814,11 @@ void DijetTreeProducer::endJob()
   delete neMultAK4_    ;
   delete phoMultAK4_   ;
   delete hadronflavour_;
+  delete Jet_btagDeepB_;
+  delete Jet_btagDeepC_;
+  delete Jet_qgl_;
+  delete Jet_btagDeepFlavB_;
+  delete Jet_btagDeepFlavC_;
 
  delete ptPUPPI_;
  delete jecPUPPI_;
@@ -1899,6 +1914,12 @@ rawMet74.setP4(reco::Candidate::LorentzVector(FootprintMEx74, FootprintMEy74, 0.
       neMultAK4_        ->push_back(neMult);
       phoMultAK4_       ->push_back(phoMult); 
       hadronflavour_    ->push_back(ijet->hadronFlavour());
+      // see https://github.com/cms-sw/cmssw/blob/0e04d5621fce2ed3686f899b9bd3254e1c384914/PhysicsTools/NanoAOD/python/jets_cff.py#L216-L224
+      Jet_btagDeepB_->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probb")+ijet->bDiscriminator("pfDeepCSVJetTags:probbb"));
+      Jet_btagDeepC_->push_back(ijet->bDiscriminator("pfDeepCSVJetTags:probc"));
+      Jet_qgl_->push_back(ijet->userFloat("QGTagger:qgLikelihood"));
+      Jet_btagDeepFlavB_->push_back(ijet->bDiscriminator("pfDeepFlavourJetTags:probb")+ijet->bDiscriminator("pfDeepFlavourJetTags:probbb")+ijet->bDiscriminator("pfDeepFlavourJetTags:problepb"));
+      Jet_btagDeepFlavC_->push_back(ijet->bDiscriminator("pfDeepFlavourJetTags:probc"));
     }
 
   }// jet loop  
@@ -2413,6 +2434,11 @@ void DijetTreeProducer::initialize()
   neMultAK4_        ->clear();
   phoMultAK4_        ->clear();
   hadronflavour_     ->clear();
+  Jet_btagDeepB_->clear();
+  Jet_btagDeepC_->clear();
+  Jet_qgl_->clear();
+  Jet_btagDeepFlavB_->clear();
+  Jet_btagDeepFlavC_->clear();
  
   nJetsPUPPI_ = -999;
  
