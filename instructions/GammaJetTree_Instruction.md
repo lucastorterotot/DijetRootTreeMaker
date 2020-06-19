@@ -14,6 +14,7 @@ You have to follow different instructions based on the era you want to work on:
 - 2017UL: switch to [`JEC_JER_2017UL_CMSSW_10_6_3_master`
 branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2017UL_CMSSW_10_6_3_master/instructions/GammaJetTree_Instruction.md);
 - 2018: switch to [`JEC_JER_2018_CMSSW_10_2_5_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2018_CMSSW_10_2_5_master/instructions/GammaJetTree_Instruction.md).
+- 2018UL: switch to [`JEC_JER_2018UL_CMSSW_10_6_3_master` branch](https://github.com/lucastorterotot/DijetRootTreeMaker/blob/JEC_JER_2018UL_CMSSW_10_6_3_master/instructions/GammaJetTree_Instruction.md).
 
 Once the installation is done, you can proceed the following steps that are the same for all the eras.
 
